@@ -1,11 +1,18 @@
 // @flow
 import React, { Component } from 'react';
 
+import MailProvider from '../MailProvider';
+import Sidebar from '../Sidebar';
+
 type Props = {};
 
 class App extends Component<Props> {
   render() {
-    return 'Hello World';
+    return (
+      <MailProvider>
+        <Sidebar />
+      </MailProvider>
+    );
   }
 }
 
