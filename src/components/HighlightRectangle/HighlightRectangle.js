@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 
+import { COLORS } from '../../constants';
+
 type Props = {
   height: number,
   offset: number,
@@ -44,9 +46,11 @@ const Rectangle = styled.div`
   position: absolute;
   z-index: 0;
   top: 0;
+  right: -1px;
   height: ${props => props.height}px;
-  width: 100%;
+  left: 10px;
   background: ${props => props.color};
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
   /* border-bottom: 2px solid rgba(0, 0, 0, 0.2); */
   transform: translateY(${props => props.offset}px);
   transition: transform ${props => props.distance * 1.35}ms ease-out;
