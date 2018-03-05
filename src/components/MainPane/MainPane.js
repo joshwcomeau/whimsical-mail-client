@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 
 import Header from '../Header';
-import Letter from '../Letter';
-import { MailConsumer } from '../MailProvider';
+import Email from '../Email';
+import { EmailConsumer } from '../EmailProvider';
 
 class MainPane extends Component {
   render() {
@@ -13,13 +13,13 @@ class MainPane extends Component {
       <Wrapper>
         <Header height={headerHeight} />
 
-        <MailConsumer>
-          {({ selectedLetter }) => (
-            <LetterWrapper>
-              <Letter letter={selectedLetter} />
-            </LetterWrapper>
+        <EmailConsumer>
+          {({ selectedEmail }) => (
+            <EmailWrapper>
+              <Email data={selectedEmail} />
+            </EmailWrapper>
           )}
-        </MailConsumer>
+        </EmailConsumer>
       </Wrapper>
     );
   }
@@ -27,7 +27,7 @@ class MainPane extends Component {
 
 const Wrapper = styled.div``;
 
-const LetterWrapper = styled.div`
+const EmailWrapper = styled.div`
   max-width: 840px;
   margin: 0 auto;
   padding: 0 20px;

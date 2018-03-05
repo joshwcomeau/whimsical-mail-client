@@ -3,10 +3,8 @@ import styled from 'styled-components';
 
 import { COLORS } from '../../constants';
 
-import { MailConsumer } from '../MailProvider';
-import MailListItem from '../MailListItem';
-import HighlightRectangle from '../HighlightRectangle';
 import SidebarHeader from '../SidebarHeader';
+import EmailList from '../EmailList';
 
 class Sidebar extends Component {
   static defaultProps = {
@@ -20,38 +18,12 @@ class Sidebar extends Component {
 
     return (
       <Wrapper width={width}>
-        <SidebarHeaderWrapper>
+        <Foreground>
           <SidebarHeader height={headerHeight} />
-        </SidebarHeaderWrapper>
+          <EmailList itemHeight={itemHeight} />
+        </Foreground>
 
         <Background />
-
-        <MailConsumer>
-          {({
-            mailArray,
-            selectedLetterId,
-            selectedLetterIndex,
-            selectLetter,
-          }) => (
-            <Fragment>
-              <MailList>
-                {mailArray.map(letter => (
-                  <MailListItem
-                    key={letter.id}
-                    height={itemHeight}
-                    letter={letter}
-                    isSelected={letter.id === selectedLetterId}
-                    handleClick={() => selectLetter(letter.id)}
-                  />
-                ))}
-              </MailList>
-              <HighlightRectangle
-                height={itemHeight}
-                offset={itemHeight * selectedLetterIndex + headerHeight}
-              />
-            </Fragment>
-          )}
-        </MailConsumer>
       </Wrapper>
     );
   }
@@ -64,7 +36,7 @@ const Wrapper = styled.div`
   border-right: 1px solid rgba(0, 0, 0, 0.1);
 `;
 
-const SidebarHeaderWrapper = styled.div`
+const Foreground = styled.div`
   position: relative;
   z-index: 2;
 `;

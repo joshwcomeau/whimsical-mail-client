@@ -1,4 +1,4 @@
-export type LetterData = {
+export type EmailData = {
   id: number,
   from: {
     name: string,

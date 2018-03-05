@@ -21,7 +21,7 @@ import avatar14 from '../../assets/avatars/avatar-14.jpg';
 import avatar15 from '../../assets/avatars/avatar-15.jpg';
 import avatar16 from '../../assets/avatars/avatar-16.jpg';
 
-import type { LetterData } from '../../types';
+import type { EmailData } from '../../types';
 
 const avatarSrcs = [
   avatar1,
@@ -58,7 +58,7 @@ const previews = [
   'so most chain letters are nonsense but this one is the REAL DEAL. FORWARD or BAD FIRE will happen to your HOME.',
 ];
 
-const LetterFactory = {
+const EmailFactory = {
   id: generators.sequence(),
   from: {
     name: generators.name().first(),
@@ -68,10 +68,10 @@ const LetterFactory = {
   body: generators.lorem().paragraphs(6),
 };
 
-export const generateData = (num: number): Map<string, LetterData> => {
+export const generateData = (num: number): Map<string, EmailData> => {
   let time = new Date();
 
-  const dataArray = createMany(LetterFactory, num).map((data, i) => {
+  const data = createMany(EmailFactory, num).map((data, i) => {
     const subject = subjects[i % subjects.length];
     const preview = previews[i % previews.length];
     const avatarSrc = avatarSrcs[i % avatarSrcs.length];
@@ -91,5 +91,8 @@ export const generateData = (num: number): Map<string, LetterData> => {
     };
   });
 
-  return new Map(dataArray.map(item => [item.id, item]));
+  // Sharkhorse's factories return an array, but I'd like to keep my data in a
+  // map, to simulate a database. Map constructors take an array of tuples,
+  // with the ID and the item: [ [1, email1], [2, email2], ...]
+  return new Map(data.map(item => [item.id, item]));
 };

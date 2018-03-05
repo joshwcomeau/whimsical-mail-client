@@ -6,27 +6,27 @@ import format from 'date-fns/format';
 import Avatar from '../Avatar';
 import Spacer from '../Spacer';
 
-import type { LetterData } from '../../types';
+import type { EmailData } from '../../types';
 
 type Props = {
-  letter: LetterData,
+  data: EmailData,
   height: number,
   isSelected: boolean,
   handleClick: () => void,
 };
-const MailListItem = ({ letter, height, isSelected, handleClick }: Props) => {
+const EmailPreview = ({ data, height, isSelected, handleClick }: Props) => {
   return (
     <Wrapper height={height} isSelected={isSelected} onClick={handleClick}>
-      <Avatar size={50} src={letter.from.avatarSrc} />
+      <Avatar size={50} src={data.from.avatarSrc} />
       <Spacer size={10} />
       <Summary>
         <Header>
-          <From>{letter.from.name}</From>
-          <At>{format(letter.timestamp, 'H:mm a')}</At>
+          <From>{data.from.name}</From>
+          <At>{format(data.timestamp, 'H:mm a')}</At>
         </Header>
 
-        <Subject>{letter.subject}</Subject>
-        <Preview>{letter.preview}</Preview>
+        <Subject>{data.subject}</Subject>
+        <Preview>{data.preview}</Preview>
       </Summary>
     </Wrapper>
   );
@@ -83,4 +83,4 @@ const Preview = styled.p`
   color: #666;
 `;
 
-export default MailListItem;
+export default EmailPreview;

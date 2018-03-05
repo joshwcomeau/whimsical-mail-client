@@ -5,15 +5,15 @@ import distanceInWords from 'date-fns/distance_in_words';
 
 import { COLORS } from '../../constants';
 
-import type { LetterData } from '../../types';
+import type { EmailData } from '../../types';
 
 type Props = {
-  letter: LetterData,
+  data: EmailData,
 };
 
-class Letter extends Component<Props> {
+class Email extends Component<Props> {
   render() {
-    const { subject, from, timestamp, body } = this.props.letter;
+    const { subject, from, timestamp, body } = this.props.data;
 
     return (
       <Wrapper>
@@ -51,4 +51,4 @@ const Timestamp = styled.div`
   font-size: 14px;
 `;
 
-export default Letter;
+export default Email;
