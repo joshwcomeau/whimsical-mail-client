@@ -5,7 +5,7 @@ import styled from 'styled-components';
 type Props = {
   height: number,
 };
-class Header extends Component {
+class Header extends Component<Props> {
   render() {
     const { height } = this.props;
 

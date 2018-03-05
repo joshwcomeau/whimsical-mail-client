@@ -1,17 +1,29 @@
+// @flow
 import React, { Component, Fragment } from 'react';
 import produce from 'immer';
 
 import { generateData } from './MailProvider.data';
 
+import type { LetterData } from '../../types';
+
+// $FlowFixMe
 const MailContext = React.createContext('mail');
 
-class MailProvider extends Component {
+type Props = {
+  children: React$Node,
+};
+type State = {
+  mail: Map<string, LetterData>,
+  selectedLetterId: string,
+};
+
+class MailProvider extends Component<Props, State> {
   state = {
     mail: generateData(10),
-    selectedLetterId: 'a',
+    selectedLetterId: 1,
   };
 
-  selectLetter = id => {
+  selectLetter = (id: string) => {
     const nextState = produce(this.state, draftState => {
       draftState.selectedLetterId = id;
 
@@ -41,6 +53,7 @@ class MailProvider extends Component {
           mailArray,
           selectedLetterId,
           selectedLetterIndex,
+          selectedLetter: mail.get(selectedLetterId),
           selectLetter: this.selectLetter,
         }}
       >

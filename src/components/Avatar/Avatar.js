@@ -1,9 +1,14 @@
+// @flow
 import React from 'react';
 import styled from 'styled-components';
 
 import { COLORS } from '../../constants';
 
-const Avatar = ({ src, size }) => {
+type Props = {
+  src: string,
+  size: number,
+};
+const Avatar = ({ src, size }: Props) => {
   return (
     <Wrapper size={size}>
       <AvatarImg src={src} />

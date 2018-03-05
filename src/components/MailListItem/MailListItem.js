@@ -6,7 +6,15 @@ import format from 'date-fns/format';
 import Avatar from '../Avatar';
 import Spacer from '../Spacer';
 
-const MailListItem = ({ letter, height, isSelected, handleClick }) => {
+import type { LetterData } from '../../types';
+
+type Props = {
+  letter: LetterData,
+  height: number,
+  isSelected: boolean,
+  handleClick: () => void,
+};
+const MailListItem = ({ letter, height, isSelected, handleClick }: Props) => {
   return (
     <Wrapper height={height} isSelected={isSelected} onClick={handleClick}>
       <Avatar size={50} src={letter.from.avatarSrc} />

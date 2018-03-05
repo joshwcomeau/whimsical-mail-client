@@ -21,6 +21,8 @@ import avatar14 from '../../assets/avatars/avatar-14.jpg';
 import avatar15 from '../../assets/avatars/avatar-15.jpg';
 import avatar16 from '../../assets/avatars/avatar-16.jpg';
 
+import type { LetterData } from '../../types';
+
 const avatarSrcs = [
   avatar1,
   avatar2,
@@ -66,11 +68,15 @@ const LetterFactory = {
   body: generators.lorem().paragraphs(6),
 };
 
-export const generateData = (num: number): Array<Letter> => {
+export const generateData = (num: number): Map<string, LetterData> => {
+  let time = new Date();
+
   const dataArray = createMany(LetterFactory, num).map((data, i) => {
     const subject = subjects[i % subjects.length];
     const preview = previews[i % previews.length];
     const avatarSrc = avatarSrcs[i % avatarSrcs.length];
+
+    time -= Math.random() * 10000000;
 
     return {
       id: data.id,
@@ -78,7 +84,7 @@ export const generateData = (num: number): Array<Letter> => {
         ...data.from,
         avatarSrc,
       },
-      timestamp: new Date() - 100000,
+      timestamp: time,
       subject,
       preview,
       body: data.body,

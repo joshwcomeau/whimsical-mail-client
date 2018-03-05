@@ -4,7 +4,11 @@ import styled from 'styled-components';
 
 import { COLORS } from '../../constants';
 
-class SidebarHeader extends Component {
+type Props = {
+  height: number,
+};
+
+class SidebarHeader extends Component<Props> {
   render() {
     const { height } = this.props;
 
