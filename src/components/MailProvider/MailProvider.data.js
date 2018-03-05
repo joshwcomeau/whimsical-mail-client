@@ -85,11 +85,5 @@ export const generateData = (num: number): Array<Letter> => {
     };
   });
 
-  return dataArray.reduce(
-    (acc, item) => ({
-      ...acc,
-      [item.id]: item,
-    }),
-    {}
-  );
+  return new Map(dataArray.map(item => [item.id, item]));
 };

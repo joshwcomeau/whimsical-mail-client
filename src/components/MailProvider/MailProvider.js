@@ -16,7 +16,10 @@ class MailProvider extends Component {
       draftState.selectedLetterId = id;
 
       // Selecting a letter automatically marks it as read.
-      draftState.mail[id].read = true;
+      draftState.mail.set(id, {
+        ...draftState.mail.get(id),
+        read: true,
+      });
     });
 
     this.setState(nextState);
@@ -24,7 +27,9 @@ class MailProvider extends Component {
 
   render() {
     const { mail, selectedLetterId } = this.state;
-    const mailArray = Object.values(mail);
+
+    const mailArray = Array.from(mail.values());
+
     const selectedLetterIndex = mailArray.findIndex(
       letter => letter.id === selectedLetterId
     );
