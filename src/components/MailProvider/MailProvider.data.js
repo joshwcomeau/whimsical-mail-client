@@ -67,7 +67,7 @@ const LetterFactory = {
 };
 
 export const generateData = (num: number): Array<Letter> => {
-  return createMany(LetterFactory, num).map((data, i) => {
+  const dataArray = createMany(LetterFactory, num).map((data, i) => {
     const subject = subjects[i % subjects.length];
     const preview = previews[i % previews.length];
     const avatarSrc = avatarSrcs[i % avatarSrcs.length];
@@ -84,4 +84,12 @@ export const generateData = (num: number): Array<Letter> => {
       body: data.body,
     };
   });
+
+  return dataArray.reduce(
+    (acc, item) => ({
+      ...acc,
+      [item.id]: item,
+    }),
+    {}
+  );
 };

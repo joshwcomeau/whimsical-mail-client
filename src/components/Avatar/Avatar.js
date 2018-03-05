@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { COLORS } from '../../constants';
 
 const Avatar = ({ src, size }) => {
-  console.log(size);
   return (
     <Wrapper size={size}>
       <AvatarImg src={src} />
