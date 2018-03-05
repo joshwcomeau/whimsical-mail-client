@@ -10,17 +10,18 @@ import SidebarHeader from '../SidebarHeader';
 
 class Sidebar extends Component {
   static defaultProps = {
+    width: 400,
     itemHeight: 100,
     headerHeight: 50,
   };
 
   render() {
-    const { itemHeight, headerHeight } = this.props;
+    const { width, itemHeight, headerHeight } = this.props;
 
     return (
-      <Wrapper style={{ height: window.innerHeight }}>
+      <Wrapper width={width}>
         <SidebarHeaderWrapper>
-          <SidebarHeader height={50} />
+          <SidebarHeader height={headerHeight} />
         </SidebarHeaderWrapper>
 
         <Background />
@@ -58,8 +59,9 @@ class Sidebar extends Component {
 
 const Wrapper = styled.div`
   position: relative;
-  width: 300px;
+  width: ${props => props.width}px;
   height: 100%;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
 `;
 
 const SidebarHeaderWrapper = styled.div`
@@ -73,7 +75,7 @@ const Background = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: ${COLORS.gray[200]};
+  background: ${COLORS.gray[100]};
 `;
 
 const MailList = styled.div`

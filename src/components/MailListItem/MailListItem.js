@@ -25,7 +25,7 @@ const MailListItem = ({ letter, height, isSelected, handleClick }) => {
 };
 
 const Wrapper = styled.div`
-  padding: 16px 16px;
+  padding: 18px 24px;
   height: ${props => props.height + 'px'};
   display: flex;
   align-items: center;
@@ -41,7 +41,7 @@ const Summary = styled.div`
   height: 100%;
   flex-direction: column;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   /** CSS HACK: 
    * min-width is necessary for the children's overflow ellipsis to work.
    * See: https://css-tricks.com/flexbox-truncated-text/
