@@ -1,6 +1,8 @@
 // @flow
 import React, { Component } from 'react';
 
+import type { NewEmailAnimationId } from '../../types';
+
 // $FlowFixMe
 const NewEmailAnimationsContext = React.createContext('animations');
 
@@ -8,7 +10,7 @@ type Props = {
   children: React$Node,
 };
 type State = {
-  currentAnimation: 'open' | 'save' | 'delete' | 'send' | null,
+  currentAnimation: NewEmailAnimationId,
 };
 
 type RefMap = { [key: string]: HTMLElement };
@@ -24,6 +26,10 @@ class NewEmailAnimationsProvider extends Component<Props, State> {
     this.setState({ currentAnimation: 'open' });
   };
 
+  markAnimationAsCompleted = () => {
+    this.setState({ currentAnimation: null });
+  };
+
   captureRef = (id: string, elem: HTMLElement) => (this.elementRefs[id] = elem);
 
   render() {
@@ -37,6 +43,7 @@ class NewEmailAnimationsProvider extends Component<Props, State> {
 
           // Actions
           startComposingEmail: this.startComposingEmail,
+          markAnimationAsCompleted: this.markAnimationAsCompleted,
 
           // Misc
           captureRef: this.captureRef,

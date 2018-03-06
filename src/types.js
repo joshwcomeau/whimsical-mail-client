@@ -10,3 +10,5 @@ export type EmailData = {
   preview: string,
   body: React$Node,
 };
+
+export type NewEmailAnimationId = 'open' | 'save' | 'delete' | 'send' | null;
