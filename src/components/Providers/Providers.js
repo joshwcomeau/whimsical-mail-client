@@ -2,7 +2,7 @@
 import React from 'react';
 
 import EmailProvider from '../EmailProvider';
-import NewEmailAnimationsProvider from '../NewEmailAnimationsProvider';
+import ModalProvider from '../ModalProvider';
 
 type Props = { children: React$Node };
 
@@ -10,9 +10,9 @@ const Providers = ({ children }: Props) => {
   // prettier-ignore
   return (
     <EmailProvider>
-      <NewEmailAnimationsProvider>
+      <ModalProvider>
         {children}
-      </NewEmailAnimationsProvider>
+      </ModalProvider>
     </EmailProvider>
   );
 };

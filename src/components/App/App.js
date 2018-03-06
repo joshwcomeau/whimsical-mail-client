@@ -3,8 +3,10 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 
 import Providers from '../Providers';
+import { ModalConsumer } from '../ModalProvider';
 import Sidebar from '../Sidebar';
 import MainPane from '../MainPane';
+import ComposeEmailModal from '../ComposeEmailModal';
 
 type Props = {};
 
@@ -22,6 +24,15 @@ class App extends Component<Props> {
             <MainPane headerHeight={HEADER_HEIGHT} />
           </MainPaneWrapper>
         </Wrapper>
+
+        <ModalConsumer>
+          {({ currentModal, closeModal }) => (
+            <ComposeEmailModal
+              handleClose={closeModal}
+              isOpen={currentModal === 'compose'}
+            />
+          )}
+        </ModalConsumer>
       </Providers>
     );
   }

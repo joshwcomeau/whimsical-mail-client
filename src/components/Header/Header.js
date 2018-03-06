@@ -9,7 +9,6 @@ import DeleteIcon from 'react-icons/lib/md/delete';
 import { COLORS } from '../../constants';
 
 import Button from '../Button';
-import { NewEmailAnimationsConsumer } from '../NewEmailAnimationsProvider';
 
 type Props = {
   height: number,
@@ -20,40 +19,36 @@ class Header extends Component<Props> {
     const { height } = this.props;
 
     return (
-      <NewEmailAnimationsConsumer>
-        {({ captureRef, startComposingEmail }) => (
-          <Wrapper height={height}>
-            <Side>
-              <ButtonGroup>
-                <Button secondary>
-                  <ReplyIcon />
-                </Button>
-                <Button secondary>
-                  <ReplyAllIcon />
-                </Button>
-                <Button secondary>
-                  <ForwardIcon />
-                </Button>
-              </ButtonGroup>
-              <Separator height={height} />
-              <ButtonGroup>
-                <Button secondary>
-                  <DeleteIcon />
-                </Button>
-              </ButtonGroup>
-            </Side>
+      <Wrapper height={height}>
+        <Side>
+          <ButtonGroup>
+            <Button secondary>
+              <ReplyIcon />
+            </Button>
+            <Button secondary>
+              <ReplyAllIcon />
+            </Button>
+            <Button secondary>
+              <ForwardIcon />
+            </Button>
+          </ButtonGroup>
+          <Separator height={height} />
+          <ButtonGroup>
+            <Button secondary>
+              <DeleteIcon />
+            </Button>
+          </ButtonGroup>
+        </Side>
 
-            <Side>
-              <Button
-                innerRef={elem => captureRef('compose-button', elem)}
-                onClick={startComposingEmail}
-              >
-                Compose
-              </Button>
-            </Side>
-          </Wrapper>
-        )}
-      </NewEmailAnimationsConsumer>
+        <Side>
+          <Button
+            innerRef={elem => elem}
+            onClick={null /* startComposingEmail */}
+          >
+            Compose
+          </Button>
+        </Side>
+      </Wrapper>
     );
   }
 }

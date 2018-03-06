@@ -11,4 +11,4 @@ export type EmailData = {
   body: React$Node,
 };
 
-export type NewEmailAnimationId = 'open' | 'save' | 'delete' | 'send' | null;
+export type ModalId = 'compose';

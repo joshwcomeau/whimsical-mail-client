@@ -1,5 +1,5 @@
 // @flow
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import produce from 'immer';
 
 import { generateData } from './EmailProvider.data';
