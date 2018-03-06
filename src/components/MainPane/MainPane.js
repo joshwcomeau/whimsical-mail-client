@@ -15,7 +15,7 @@ class MainPane extends Component {
 
         <EmailConsumer>
           {({ selectedEmail }) => (
-            <EmailWrapper>
+            <EmailWrapper headerHeight={headerHeight}>
               <Email data={selectedEmail} />
             </EmailWrapper>
           )}
@@ -25,12 +25,15 @@ class MainPane extends Component {
   }
 }
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
 
 const EmailWrapper = styled.div`
-  max-width: 840px;
-  margin: 0 auto;
-  padding: 0 20px;
+  height: calc(100% - ${({ headerHeight }) => headerHeight}px);
+  overflow-y: auto;
 `;
 
 export default MainPane;

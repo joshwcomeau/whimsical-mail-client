@@ -61,7 +61,8 @@ const previews = [
 const EmailFactory = {
   id: generators.sequence(),
   from: {
-    name: generators.name().first(),
+    firstName: generators.name().first(),
+    lastName: generators.name().last(),
     email: generators.email(),
   },
 
@@ -81,7 +82,8 @@ export const generateData = (num: number): Map<string, EmailData> => {
     return {
       id: data.id,
       from: {
-        ...data.from,
+        email: data.from.email,
+        name: `${data.from.firstName} ${data.from.lastName}`,
         avatarSrc,
       },
       timestamp: time,

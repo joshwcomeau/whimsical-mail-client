@@ -20,7 +20,9 @@ class Sidebar extends Component {
       <Wrapper width={width}>
         <Foreground>
           <SidebarHeader height={headerHeight} />
-          <EmailList itemHeight={itemHeight} />
+          <EmailListWrapper headerHeight={headerHeight}>
+            <EmailList itemHeight={itemHeight} />
+          </EmailListWrapper>
         </Foreground>
 
         <Background />
@@ -39,6 +41,7 @@ const Wrapper = styled.div`
 const Foreground = styled.div`
   position: relative;
   z-index: 2;
+  height: 100%;
 `;
 
 const Background = styled.div`
@@ -50,21 +53,9 @@ const Background = styled.div`
   background: ${COLORS.gray[100]};
 `;
 
-const MailList = styled.div`
-  position: relative;
-  z-index: 1;
-`;
-
-const MailListActiveBackground = styled.div`
-  position: absolute;
-  z-index: 0;
-  top: 0;
-  height: ${props => props.height}px;
-  width: 100%;
-  background: white;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
-  transform: translateY(${props => props.height * props.position}px);
-  transition: transform ${props => props.position * 200 + 200}ms;
+const EmailListWrapper = styled.div`
+  height: calc(100% - ${({ headerHeight }) => headerHeight}px);
+  overflow: scroll;
 `;
 
 export default Sidebar;

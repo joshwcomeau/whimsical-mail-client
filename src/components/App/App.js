@@ -34,11 +34,13 @@ const Wrapper = styled.div`
 
 const SidebarWrapper = styled.div`
   position: relative;
+  height: 100%;
   z-index: 1;
 `;
 
 const MainPaneWrapper = styled.div`
   position: relative;
+  height: 100%;
   background: white;
   flex: 1;
   z-index: 2;

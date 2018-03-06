@@ -14,7 +14,7 @@ type Props = {
 };
 type State = {
   emails: Map<string, EmailData>,
-  selectedEmailId: string,
+  selectedEmailId: number,
 };
 
 class EmailProvider extends Component<Props, State> {
@@ -23,7 +23,7 @@ class EmailProvider extends Component<Props, State> {
     selectedEmailId: 1,
   };
 
-  viewEmail = (id: string) => {
+  viewEmail = (id: number) => {
     const nextState = produce(this.state, draftState => {
       draftState.selectedEmailId = id;
 
