@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 
-import EmailProvider from '../EmailProvider';
+import Providers from '../Providers';
 import Sidebar from '../Sidebar';
 import MainPane from '../MainPane';
 
@@ -13,7 +13,7 @@ class App extends Component<Props> {
     const HEADER_HEIGHT = 60;
 
     return (
-      <EmailProvider>
+      <Providers>
         <Wrapper>
           <SidebarWrapper>
             <Sidebar headerHeight={HEADER_HEIGHT} />
@@ -22,7 +22,7 @@ class App extends Component<Props> {
             <MainPane headerHeight={HEADER_HEIGHT} />
           </MainPaneWrapper>
         </Wrapper>
-      </EmailProvider>
+      </Providers>
     );
   }
 }

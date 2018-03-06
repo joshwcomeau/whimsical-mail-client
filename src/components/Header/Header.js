@@ -9,6 +9,7 @@ import DeleteIcon from 'react-icons/lib/md/delete';
 import { COLORS } from '../../constants';
 
 import Button from '../Button';
+import { NewEmailAnimationsConsumer } from '../NewEmailAnimationsProvider';
 
 type Props = {
   height: number,
@@ -19,31 +20,40 @@ class Header extends Component<Props> {
     const { height } = this.props;
 
     return (
-      <Wrapper height={height}>
-        <Side>
-          <ButtonGroup>
-            <Button secondary>
-              <ReplyIcon />
-            </Button>
-            <Button secondary>
-              <ReplyAllIcon />
-            </Button>
-            <Button secondary>
-              <ForwardIcon />
-            </Button>
-          </ButtonGroup>
-          <Separator height={height} />
-          <ButtonGroup>
-            <Button secondary>
-              <DeleteIcon />
-            </Button>
-          </ButtonGroup>
-        </Side>
+      <NewEmailAnimationsConsumer>
+        {({ captureRef, startComposingEmail }) => (
+          <Wrapper height={height}>
+            <Side>
+              <ButtonGroup>
+                <Button secondary>
+                  <ReplyIcon />
+                </Button>
+                <Button secondary>
+                  <ReplyAllIcon />
+                </Button>
+                <Button secondary>
+                  <ForwardIcon />
+                </Button>
+              </ButtonGroup>
+              <Separator height={height} />
+              <ButtonGroup>
+                <Button secondary>
+                  <DeleteIcon />
+                </Button>
+              </ButtonGroup>
+            </Side>
 
-        <Side>
-          <Button>Compose</Button>
-        </Side>
-      </Wrapper>
+            <Side>
+              <Button
+                innerRef={elem => captureRef('compose-button', elem)}
+                onClick={startComposingEmail}
+              >
+                Compose
+              </Button>
+            </Side>
+          </Wrapper>
+        )}
+      </NewEmailAnimationsConsumer>
     );
   }
 }
