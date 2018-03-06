@@ -69,7 +69,7 @@ const EmailFactory = {
   body: generators.lorem().paragraphs(6),
 };
 
-export const generateData = (num: number): Map<string, EmailData> => {
+export const generateData = (num: number): Map<number, EmailData> => {
   let time = new Date();
 
   const data = createMany(EmailFactory, num).map((data, i) => {

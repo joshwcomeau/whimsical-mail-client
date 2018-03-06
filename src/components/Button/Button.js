@@ -4,7 +4,11 @@ import styled from 'styled-components';
 
 import { COLORS } from '../../constants';
 
-const Button = ({ primary, secondary, ...delegated }) => {
+type Props = {
+  primary: boolean,
+  secondary: boolean,
+};
+const Button = ({ primary, secondary, ...delegated }: Props) => {
   if (secondary) {
     return <SecondaryButton {...delegated} />;
   }

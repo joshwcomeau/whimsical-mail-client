@@ -13,7 +13,7 @@ type Props = {
   children: React$Node,
 };
 type State = {
-  emails: Map<string, EmailData>,
+  emails: Map<number, EmailData>,
   selectedEmailId: number,
 };
 
