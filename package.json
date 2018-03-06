@@ -7,6 +7,7 @@
     "immer": "^1.1.1",
     "react": "^16.4.0-alpha.0911da3",
     "react-dom": "^16.4.0-alpha.0911da3",
+    "react-icons": "^2.2.7",
     "react-scripts": "1.1.1",
     "sharkhorse": "^4.0.0",
     "styled-components": "^3.1.6"

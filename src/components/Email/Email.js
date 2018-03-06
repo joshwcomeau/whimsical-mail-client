@@ -72,7 +72,7 @@ const Timestamp = styled.div`
 `;
 
 const Body = styled.div`
-  margin-top: 60px;
+  margin-top: 70px;
 `;
 
 const Paragraph = styled.p`

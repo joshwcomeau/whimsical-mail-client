@@ -34,14 +34,14 @@ const Wrapper = styled.div`
 const InnerWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  max-width: 300px;
+  max-width: 280px;
   padding-left: 24px;
   font-size: 24px;
 `;
 
 const SidebarHeaderLink = styled.h2`
   font-weight: 700;
-  opacity: ${props => (props.isSelected ? 1 : 0.5)};
+  opacity: ${props => (props.isSelected ? 1 : 0.35)};
   cursor: pointer;
 `;
 

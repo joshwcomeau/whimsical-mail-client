@@ -1,5 +1,8 @@
 // @flow
 export const COLORS = {
+  pink: {
+    '500': '#F50057',
+  },
   red: {
     '500': '#F44336',
   },
@@ -17,6 +20,9 @@ export const COLORS = {
   },
   violet: {
     '500': '#9C27B0',
+  },
+  purple: {
+    '500': '#651FFF',
   },
   gray: {
     '100': '#f2f2f2',
