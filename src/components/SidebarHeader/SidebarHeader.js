@@ -14,26 +14,29 @@ class SidebarHeader extends Component<Props> {
 
     return (
       <Wrapper height={height}>
-        <SidebarHeaderLink isSelected={true}>Inbox</SidebarHeaderLink>
-        <SidebarHeaderLink isSelected={false}>Outbox</SidebarHeaderLink>
-        <SidebarHeaderLink isSelected={false}>Drafts</SidebarHeaderLink>
+        <InnerWrapper>
+          <SidebarHeaderLink isSelected={true}>Inbox</SidebarHeaderLink>
+          <SidebarHeaderLink isSelected={false}>Outbox</SidebarHeaderLink>
+          <SidebarHeaderLink isSelected={false}>Drafts</SidebarHeaderLink>
+        </InnerWrapper>
       </Wrapper>
     );
   }
 }
 
 const Wrapper = styled.div`
-  display: flex;
-  justify-content: space-around;
   height: ${props => props.height}px;
   line-height: ${props => props.height}px;
-  font-size: 20px;
-  /* color: white;
-  background: ${COLORS.gray[800]}; */
-  color: ${COLORS.red[500]};
-  /* background: white; */
   border-bottom: 1px solid rgba(0, 0, 0, 0.075);
-  /* border-right: 1px solid rgba(0, 0, 0, 0.2); */
+  background: white;
+`;
+
+const InnerWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  max-width: 300px;
+  padding-left: 24px;
+  font-size: 24px;
 `;
 
 const SidebarHeaderLink = styled.h2`

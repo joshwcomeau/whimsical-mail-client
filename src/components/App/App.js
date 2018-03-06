@@ -10,7 +10,7 @@ type Props = {};
 
 class App extends Component<Props> {
   render() {
-    const HEADER_HEIGHT = 80;
+    const HEADER_HEIGHT = 60;
 
     return (
       <EmailProvider>
