@@ -8,6 +8,8 @@ type Props = {
   selectedNodeId: string,
   nodes: { [key: string]: HTMLElement },
   boundingBoxes: { [key: string]: ClientRect },
+  offsetX: number,
+  offsetY: number,
 };
 
 type State = {
@@ -26,6 +28,11 @@ type State = {
 };
 
 class Scoocher extends PureComponent<Props> {
+  static defaultProps = {
+    offsetX: 0,
+    offsetY: 0,
+  };
+
   node: HTMLElement;
 
   state = {};
@@ -35,7 +42,7 @@ class Scoocher extends PureComponent<Props> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const { selectedNodeId, boundingBoxes } = nextProps;
+    const { selectedNodeId, boundingBoxes, offsetX, offsetY } = nextProps;
 
     // Figure out the extremities of the supplied node refs.
     // Create the minimum rectangle that encompasses all of them.
@@ -62,8 +69,8 @@ class Scoocher extends PureComponent<Props> {
     });
 
     const containerDimensions = {
-      top,
-      left,
+      top: top + offsetY,
+      left: left + offsetX,
       width: right - left,
       height: bottom - top,
     };
@@ -92,8 +99,6 @@ class Scoocher extends PureComponent<Props> {
     const { containerDimensions, scoocherCoordinates } = this.state;
 
     const selectedNode = nodes[selectedNodeId];
-
-    console.log(this.state);
 
     if (!selectedNode || !containerDimensions || !scoocherCoordinates) {
       return null;

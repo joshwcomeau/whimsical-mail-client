@@ -59,8 +59,8 @@ const Wrapper = styled.header`
   justify-content: space-between;
   align-items: center;
   height: ${props => props.height}px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 `;
 
 const Side = styled.div`

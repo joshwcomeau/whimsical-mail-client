@@ -38,6 +38,12 @@ class SidebarHeader extends PureComponent<Props> {
           <NodeConsumer>
             {({ nodes, boundingBoxes }) => (
               <Scoocher
+                offsetY={
+                  // Our 60px header includes a 1px border.
+                  // We want our scoocher to sit just above the border, so we
+                  // adjust it up by 1px.
+                  -1
+                }
                 selectedNodeId={selectedBox}
                 nodes={pick(nodes, ['inbox', 'outbox', 'drafts'])}
                 boundingBoxes={pick(boundingBoxes, [
@@ -57,8 +63,8 @@ class SidebarHeader extends PureComponent<Props> {
 const Wrapper = styled.div`
   height: ${props => props.height}px;
   line-height: ${props => props.height}px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.075);
   background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.075);
 `;
 
 const InnerWrapper = styled.div`
