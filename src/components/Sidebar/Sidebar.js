@@ -1,3 +1,4 @@
+// @flow
 import React, { Component, Fragment } from 'react';
 import styled from 'styled-components';
 
@@ -6,20 +7,45 @@ import { COLORS } from '../../constants';
 import SidebarHeader from '../SidebarHeader';
 import EmailList from '../EmailList';
 
-class Sidebar extends Component {
+import type { Box } from '../../types';
+
+type Props = {
+  width: number,
+  itemHeight: number,
+  headerHeight: number,
+};
+
+type State = {
+  selectedBox: Box,
+};
+
+class Sidebar extends Component<Props, State> {
   static defaultProps = {
     width: 400,
     itemHeight: 100,
     headerHeight: 50,
   };
 
+  state = {
+    selectedBox: 'inbox',
+  };
+
+  handleSelectBox = (box: Box) => {
+    this.setState({ selectedBox: box });
+  };
+
   render() {
     const { width, itemHeight, headerHeight } = this.props;
+    const { selectedBox } = this.state;
 
     return (
       <Wrapper width={width}>
         <Foreground>
-          <SidebarHeader height={headerHeight} />
+          <SidebarHeader
+            height={headerHeight}
+            selectedBox={selectedBox}
+            handleSelectBox={this.handleSelectBox}
+          />
           <EmailListWrapper headerHeight={headerHeight}>
             <EmailList itemHeight={itemHeight} />
           </EmailListWrapper>

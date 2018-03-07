@@ -7,10 +7,32 @@
  */
 import React, { Component } from 'react';
 
-class NodeProvider extends Component {
+// $FlowFixMe
+const NodeContext = React.createContext('node');
+
+type Props = { children: React$Node };
+class NodeProvider extends Component<Props> {
+  refs: { [key: string]: HTMLElement } = {};
+
+  captureRef = (id: string, node: HTMLElement) => (this.refs[id] = node);
+
   render() {
-    return <div />;
+    return (
+      <NodeContext.Provider
+        value={{
+          // State
+          refs: this.refs,
+
+          // Actions
+          captureRef: this.captureRef,
+        }}
+      >
+        {this.props.children}
+      </NodeContext.Provider>
+    );
   }
 }
+
+export const NodeConsumer = NodeContext.Consumer;
 
 export default NodeProvider;

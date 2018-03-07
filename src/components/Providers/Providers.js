@@ -3,6 +3,7 @@ import React from 'react';
 
 import EmailProvider from '../EmailProvider';
 import ModalProvider from '../ModalProvider';
+import NodeProvider from '../NodeProvider';
 
 type Props = { children: React$Node };
 
@@ -11,7 +12,9 @@ const Providers = ({ children }: Props) => {
   return (
     <EmailProvider>
       <ModalProvider>
-        {children}
+        <NodeProvider>
+          {children}
+        </NodeProvider>
       </ModalProvider>
     </EmailProvider>
   );

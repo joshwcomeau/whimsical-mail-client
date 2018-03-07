@@ -123,6 +123,8 @@ export function setTimeoutPromise(duration) {
   return new Promise(resolve => window.setTimeout(resolve, duration));
 }
 
+export const capitalize = str => str[0].toUpperCase() + str.slice(1);
+
 export const deleteCookie = key => {
   document.cookie = `${encodeURIComponent(
     key

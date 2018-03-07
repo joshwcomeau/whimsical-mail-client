@@ -1,1 +1,1 @@
-export { default } from './NodeProvider';
+export { NodeConsumer, default } from './NodeProvider';
