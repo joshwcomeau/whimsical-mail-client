@@ -7,7 +7,7 @@ import { COLORS } from '../../constants';
 import SidebarHeader from '../SidebarHeader';
 import EmailList from '../EmailList';
 
-import type { Box } from '../../types';
+import type { BoxId } from '../../types';
 
 type Props = {
   width: number,
@@ -16,7 +16,7 @@ type Props = {
 };
 
 type State = {
-  selectedBox: Box,
+  selectedBox: BoxId,
 };
 
 class Sidebar extends Component<Props, State> {
@@ -30,7 +30,7 @@ class Sidebar extends Component<Props, State> {
     selectedBox: 'inbox',
   };
 
-  handleSelectBox = (box: Box) => {
+  handleSelectBox = (box: BoxId) => {
     this.setState({ selectedBox: box });
   };
 

@@ -28,8 +28,11 @@ const ButtonBase = styled.button`
 
 const PrimaryButton = styled(ButtonBase)`
   padding: 0 20px;
-  /* TODO: Reconcile this with the colors in constants.COLORS */
-  background: linear-gradient(-10deg, #8364f5, #f4108f);
+  background: linear-gradient(
+    -10deg,
+    ${COLORS.purple[500]},
+    ${COLORS.pink[500]}
+  );
   border-radius: 4px;
   color: white;
   font-size: 14px;

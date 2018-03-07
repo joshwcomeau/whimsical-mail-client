@@ -15,7 +15,7 @@ type State = {
 
 class ModalProvider extends Component {
   state = {
-    currentModal: 'compose',
+    currentModal: null,
   };
 
   openModal = (modalId: ModalId) => this.setState({ currentModal: modalId });

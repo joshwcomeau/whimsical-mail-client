@@ -77,6 +77,21 @@ export const debounce = (callback, wait, timeoutId = null) => (...args) => {
 
 export const isEmpty = obj => Object.keys(obj).length === 0;
 
+export const pick = (obj, keys) => {
+  var o = {};
+  var i = 0;
+  var key;
+
+  keys = Array.isArray(keys) ? keys : [keys];
+
+  while ((key = keys[i++])) {
+    if (typeof obj[key] !== 'undefined') {
+      o[key] = obj[key];
+    }
+  }
+  return o;
+};
+
 export const omit = function(obj, key) {
   var newObj = {};
 

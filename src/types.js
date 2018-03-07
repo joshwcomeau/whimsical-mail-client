@@ -13,4 +13,4 @@ export type EmailData = {
 
 export type ModalId = 'compose';
 
-export type Box = 'inbox' | 'outbox' | 'drafts';
+export type BoxId = 'inbox' | 'outbox' | 'drafts';

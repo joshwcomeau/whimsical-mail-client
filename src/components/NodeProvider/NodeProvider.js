@@ -11,20 +11,45 @@ import React, { Component } from 'react';
 const NodeContext = React.createContext('node');
 
 type Props = { children: React$Node };
-class NodeProvider extends Component<Props> {
-  refs: { [key: string]: HTMLElement } = {};
+type State = {
+  nodes: { [key: string]: HTMLElement },
+  boundingBoxes: { [key: string]: ClientRect },
+};
 
-  captureRef = (id: string, node: HTMLElement) => (this.refs[id] = node);
+class NodeProvider extends Component<Props, State> {
+  state = {
+    nodes: {},
+    boundingBoxes: {},
+  };
+
+  refCapturer = (id: string, node: HTMLElement) => {
+    console.log('CAPTURE REF', id, node);
+    if (!node) {
+      return;
+    }
+
+    if (this.state.nodes[id]) {
+      return;
+    }
+
+    this.setState({
+      nodes: {
+        ...this.state.nodes,
+        [id]: node,
+      },
+      boundingBoxes: {
+        ...this.state.boundingBoxes,
+        [id]: node.getBoundingClientRect(),
+      },
+    });
+  };
 
   render() {
     return (
       <NodeContext.Provider
         value={{
-          // State
-          refs: this.refs,
-
-          // Actions
-          captureRef: this.captureRef,
+          ...this.state,
+          refCapturer: this.refCapturer,
         }}
       >
         {this.props.children}
