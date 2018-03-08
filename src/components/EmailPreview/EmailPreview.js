@@ -33,7 +33,7 @@ const EmailPreview = ({ data, height, isSelected, handleClick }: Props) => {
 };
 
 const Wrapper = styled.div`
-  padding: 18px 24px;
+  padding: 18px 0;
   height: ${props => props.height + 'px'};
   display: flex;
   align-items: center;

@@ -5,7 +5,9 @@ import styled from 'styled-components';
 import { COLORS } from '../../constants';
 
 import SidebarHeader from '../SidebarHeader';
+import Search from '../Search';
 import EmailList from '../EmailList';
+import Spacer from '../Spacer';
 
 import type { BoxId } from '../../types';
 
@@ -47,6 +49,8 @@ class Sidebar extends Component<Props, State> {
             handleSelectBox={this.handleSelectBox}
           />
           <EmailListWrapper headerHeight={headerHeight}>
+            <Search />
+            <Spacer size={10} />
             <EmailList itemHeight={itemHeight} />
           </EmailListWrapper>
         </Foreground>
@@ -81,6 +85,7 @@ const Background = styled.div`
 
 const EmailListWrapper = styled.div`
   height: calc(100% - ${({ headerHeight }) => headerHeight}px);
+  padding: 24px;
   overflow: scroll;
 `;
 
