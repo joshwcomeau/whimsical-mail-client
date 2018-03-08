@@ -40,6 +40,7 @@ const SidebarHeaderBox = styled.button`
   font-weight: 500;
   font-size: 16px;
   opacity: ${props => (props.isSelected ? 1 : 0.35)};
+  transition: opacity 500ms;
   cursor: pointer;
   outline: none;
 `;

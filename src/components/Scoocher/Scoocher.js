@@ -1,12 +1,18 @@
 // @flow
 import React, { PureComponent } from 'react';
+import { Motion, spring } from 'react-motion';
 import styled from 'styled-components';
 
 import { COLORS } from '../../constants';
 
+import type { BoxId } from '../../types';
+
+const fastSpring = { stiffness: 120, damping: 11 };
+const slowSpring = { stiffness: 120, damping: 14 };
+
 type Props = {
   selectedNodeId: string,
-  nodes: { [key: string]: HTMLElement },
+  headerNodeIds: Array<BoxId>,
   boundingBoxes: { [key: string]: ClientRect },
   offsetX: number,
   offsetY: number,
@@ -37,12 +43,21 @@ class Scoocher extends PureComponent<Props> {
 
   state = {};
 
-  componentDidMount() {
-    console.log('MOUNT', this.props.nodes, this.props.boundingBoxes);
-  }
-
   componentWillReceiveProps(nextProps: Props) {
-    const { selectedNodeId, boundingBoxes, offsetX, offsetY } = nextProps;
+    const {
+      selectedNodeId,
+      headerNodeIds,
+      boundingBoxes,
+      offsetX,
+      offsetY,
+    } = nextProps;
+
+    if (
+      this.props.selectedNodeId === nextProps.selectedNodeId &&
+      this.props.boundingBoxes === nextProps.boundingBoxes
+    ) {
+      return;
+    }
 
     // Figure out the extremities of the supplied node refs.
     // Create the minimum rectangle that encompasses all of them.
@@ -51,8 +66,12 @@ class Scoocher extends PureComponent<Props> {
     let right = -Infinity;
     let bottom = -Infinity;
 
-    Object.keys(boundingBoxes).forEach(nodeId => {
+    headerNodeIds.forEach(nodeId => {
       const box = boundingBoxes[nodeId];
+
+      if (!box) {
+        return;
+      }
 
       if (box.top < top) {
         top = box.top;
@@ -88,25 +107,56 @@ class Scoocher extends PureComponent<Props> {
       y2: containerDimensions.top + containerDimensions.height,
     };
 
+    let direction;
+    if (this.state.scoocherCoordinates) {
+      direction =
+        this.state.scoocherCoordinates.x1 > scoocherCoordinates.x1
+          ? 'left'
+          : 'right';
+    } else {
+      direction = 'right';
+    }
+
     this.setState({
       containerDimensions,
       scoocherCoordinates,
+      direction,
     });
   }
 
   render() {
-    const { selectedNodeId, nodes } = this.props;
-    const { containerDimensions, scoocherCoordinates } = this.state;
+    const { selectedNodeId } = this.props;
+    const { containerDimensions, scoocherCoordinates, direction } = this.state;
 
-    const selectedNode = nodes[selectedNodeId];
-
-    if (!selectedNode || !containerDimensions || !scoocherCoordinates) {
+    if (!selectedNodeId || !containerDimensions || !scoocherCoordinates) {
       return null;
     }
 
     return (
       <ScoocherContainerSvg style={containerDimensions}>
-        <ScoochLine {...scoocherCoordinates} />
+        <Motion
+          defaultStyle={scoocherCoordinates}
+          style={{
+            x1: spring(
+              scoocherCoordinates.x1,
+              direction === 'left' ? fastSpring : slowSpring
+            ),
+            y1: spring(
+              scoocherCoordinates.y1,
+              direction === 'left' ? fastSpring : slowSpring
+            ),
+            x2: spring(
+              scoocherCoordinates.x2,
+              direction === 'left' ? slowSpring : fastSpring
+            ),
+            y2: spring(
+              scoocherCoordinates.y2,
+              direction === 'left' ? slowSpring : fastSpring
+            ),
+          }}
+        >
+          {adjustedCoords => <ScoochLine {...adjustedCoords} />}
+        </Motion>
       </ScoocherContainerSvg>
     );
   }
@@ -121,6 +171,7 @@ const ScoocherContainerSvg = styled.svg`
 const ScoochLine = styled.line`
   stroke-width: 5px;
   stroke: ${COLORS.pink[500]};
+  transition: 500ms;
 `;
 
 export default Scoocher;

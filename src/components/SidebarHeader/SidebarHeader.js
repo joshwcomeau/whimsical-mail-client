@@ -17,11 +17,11 @@ type Props = {
   handleSelectBox: (box: BoxId) => void,
 };
 
+const boxIds: Array<BoxId> = ['inbox', 'outbox', 'drafts'];
+
 class SidebarHeader extends PureComponent<Props> {
   render() {
     const { height, selectedBox, handleSelectBox } = this.props;
-
-    const boxIds: Array<BoxId> = ['inbox', 'outbox', 'drafts'];
 
     return (
       <Wrapper height={height}>
@@ -36,23 +36,21 @@ class SidebarHeader extends PureComponent<Props> {
             />
           ))}
           <NodeConsumer>
-            {({ nodes, boundingBoxes }) => (
-              <Scoocher
-                offsetY={
-                  // Our 60px header includes a 1px border.
-                  // We want our scoocher to sit just above the border, so we
-                  // adjust it up by 1px.
-                  -1
-                }
-                selectedNodeId={selectedBox}
-                nodes={pick(nodes, ['inbox', 'outbox', 'drafts'])}
-                boundingBoxes={pick(boundingBoxes, [
-                  'inbox',
-                  'outbox',
-                  'drafts',
-                ])}
-              />
-            )}
+            {({ nodes, boundingBoxes }) => {
+              return (
+                <Scoocher
+                  offsetY={
+                    // Our 60px header includes a 1px border.
+                    // We want our scoocher to sit just above the border, so we
+                    // adjust it up by 1px.
+                    -1
+                  }
+                  headerNodeIds={boxIds}
+                  selectedNodeId={selectedBox}
+                  boundingBoxes={boundingBoxes}
+                />
+              );
+            }}
           </NodeConsumer>
         </InnerWrapper>
       </Wrapper>

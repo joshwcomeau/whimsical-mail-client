@@ -23,7 +23,6 @@ class NodeProvider extends Component<Props, State> {
   };
 
   refCapturer = (id: string, node: HTMLElement) => {
-    console.log('CAPTURE REF', id, node);
     if (!node) {
       return;
     }
