@@ -26,10 +26,11 @@ class App extends Component<Props> {
         </Wrapper>
 
         <ModalConsumer>
-          {({ currentModal, closeModal }) => (
+          {({ currentModal, openFromNode, closeModal }) => (
             <ComposeEmailModal
               handleClose={closeModal}
               isOpen={currentModal === 'compose'}
+              openFromNode={openFromNode}
             />
           )}
         </ModalConsumer>

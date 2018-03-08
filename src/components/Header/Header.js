@@ -9,6 +9,7 @@ import DeleteIcon from 'react-icons/lib/md/delete';
 import { COLORS } from '../../constants';
 
 import Button from '../Button';
+import ComposeButton from '../ComposeButton';
 
 type Props = {
   height: number,
@@ -41,12 +42,7 @@ class Header extends Component<Props> {
         </Side>
 
         <Side>
-          <Button
-            innerRef={elem => elem}
-            onClick={null /* startComposingEmail */}
-          >
-            Compose
-          </Button>
+          <ComposeButton />
         </Side>
       </Wrapper>
     );

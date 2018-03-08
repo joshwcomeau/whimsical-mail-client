@@ -14,3 +14,5 @@ export type EmailData = {
 export type ModalId = 'compose';
 
 export type BoxId = 'inbox' | 'outbox' | 'drafts';
+
+export type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
