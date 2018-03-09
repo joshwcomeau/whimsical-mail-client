@@ -22,6 +22,7 @@ const ButtonBase = styled.button`
   align-items: center;
   height: 40px;
   border: none;
+  outline: none;
   cursor: pointer;
   -webkit-font-smoothing: antialiased;
 `;
@@ -31,7 +32,7 @@ const PrimaryButton = styled(ButtonBase)`
   background: linear-gradient(
     -10deg,
     ${COLORS.purple[500]},
-    ${COLORS.pink[500]}
+    ${COLORS.pink[500]} 85%
   );
   border-radius: 4px;
   color: white;
@@ -39,6 +40,14 @@ const PrimaryButton = styled(ButtonBase)`
   font-weight: bold;
   box-shadow: inset 0px -2px 0px rgba(0, 0, 0, 0.1);
   text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+
+  &:active {
+    background: linear-gradient(
+      -10deg,
+      ${COLORS.purple[700]},
+      ${COLORS.pink[500]}
+    );
+  }
 `;
 
 const SecondaryButton = styled(ButtonBase)`

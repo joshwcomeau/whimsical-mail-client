@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import Providers from '../Providers';
 import { ModalConsumer } from '../ModalProvider';
+import { NodeConsumer } from '../NodeProvider';
 import Sidebar from '../Sidebar';
 import MainPane from '../MainPane';
 import ComposeEmailModal from '../ComposeEmailModal';
@@ -25,15 +26,19 @@ class App extends Component<Props> {
           </MainPaneWrapper>
         </Wrapper>
 
-        <ModalConsumer>
-          {({ currentModal, openFromNode, closeModal }) => (
-            <ComposeEmailModal
-              handleClose={closeModal}
-              isOpen={currentModal === 'compose'}
-              openFromNode={openFromNode}
-            />
+        <NodeConsumer>
+          {({ boundingBoxes }) => (
+            <ModalConsumer>
+              {({ currentModal, openFromNode, closeModal }) => (
+                <ComposeEmailModal
+                  handleClose={closeModal}
+                  isOpen={currentModal === 'compose'}
+                  triggerBoundingBox={boundingBoxes['compose-button']}
+                />
+              )}
+            </ModalConsumer>
           )}
-        </ModalConsumer>
+        </NodeConsumer>
       </Providers>
     );
   }

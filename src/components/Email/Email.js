@@ -41,9 +41,9 @@ class Email extends Component<Props> {
 }
 
 const Wrapper = styled.div`
-  max-width: 840px;
+  max-width: 900px;
   margin: auto;
-  padding: 70px 20px;
+  padding: 70px 50px;
 `;
 
 const Header = styled.header`
