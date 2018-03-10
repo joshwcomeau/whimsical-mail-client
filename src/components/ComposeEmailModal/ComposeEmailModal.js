@@ -2,9 +2,11 @@
 import React, { PureComponent } from 'react';
 import { Motion, spring } from 'react-motion';
 import styled from 'styled-components';
+import SendIcon from 'react-icons/lib/md/send';
 
 import { COLORS } from '../../constants';
 
+import Button from '../Button';
 import ComposeEmailInput from '../ComposeEmailInput';
 
 type Props = {
@@ -33,31 +35,6 @@ class ComposeEmailModal extends PureComponent<Props, State> {
   };
 
   node: HTMLElement;
-
-  // componentWillReceiveProps(nextProps: Props) {
-  //   console.log('is opening', this.state.isOpening);
-
-  //   // Here we check if the modal is opening. If so, trigger the animation!
-  //   if (!this.props.isOpen && nextProps.isOpen && !this.state.isOpening) {
-  //     if (!nextProps.openFromNode) {
-  //       throw new Error(
-  //         'Tried to open a modal, but no `openFromNode` provided'
-  //       );
-  //     }
-
-  //     const triggerBoundingBox = nextProps.openFromNode.getBoundingClientRect();
-  //     const modalBoundingBox = this.node.getBoundingClientRect();
-
-  //     // TODO: Logic to determine the transform-origin based on its viewport
-  //     // position?
-
-  //     const rootX = triggerBoundingBox.left - modalBoundingBox.right;
-  //     const rootY = triggerBoundingBox.bottom - modalBoundingBox.top;
-
-  //     console.log('Setting state');
-  //     this.setState({ rootX, rootY, isOpening: true });
-  //   }
-  // }
 
   render() {
     const { isOpen, handleClose, triggerBoundingBox } = this.props;
@@ -111,9 +88,15 @@ class ComposeEmailModal extends PureComponent<Props, State> {
               </Header>
 
               <MainContent>
-                <Subject>Subject</Subject>
-                <Body />
+                <Subject placeholder="Subject" />
+                <Body placeholder="Write something..." />
               </MainContent>
+
+              <Footer>
+                <Button>
+                  <SendIcon />
+                </Button>
+              </Footer>
             </Modal>
           )}
         </Motion>
@@ -147,6 +130,8 @@ const Backdrop = styled.div`
 const Modal = styled.div`
   position: absolute;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
   bottom: 100px;
   min-width: 400px;
   width: 40%;
@@ -165,12 +150,37 @@ const Header = styled.div`
 `;
 
 const MainContent = styled.section`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 30px;
 `;
 
-const Subject = styled.h2`
-  font-size: 28px;
+const Footer = styled.div`
+  height: 60px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 10px;
+  border-top: 1px solid ${COLORS.gray[200]};
 `;
-const Body = styled.textarea``;
+
+const InvisibleTextarea = styled.textarea`
+  display: block;
+  width: 100%;
+  border: none;
+  resize: none;
+  outline: none;
+`;
+
+const Subject = styled(InvisibleTextarea)`
+  font-size: 28px;
+  padding: 15px 20px 20px;
+  text-align: center;
+`;
+const Body = styled(InvisibleTextarea)`
+  flex: 1;
+  font-size: 18px;
+`;
 
 export default ComposeEmailModal;
