@@ -1,4 +1,3 @@
-// @flow
 import React, { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
 import { Motion, spring } from 'react-motion';
@@ -6,6 +5,7 @@ import styled from 'styled-components';
 import SendIcon from 'react-icons/lib/md/send';
 
 import { COLORS } from '../../constants';
+import { setTimeoutPromise } from '../../utils';
 
 import Button from '../Button';
 import ComposeEmailInput from '../ComposeEmailInput';
@@ -43,6 +43,16 @@ class ComposeEmailModal extends PureComponent<Props, State> {
   };
 
   node: HTMLElement;
+  foldedNode: HTMLElement;
+
+  setStatePromise = state =>
+    new Promise(resolve => {
+      this.setState(state, resolve);
+    });
+
+  captureFoldedRef = (elem: HTMLElement) => {
+    this.foldedNode = elem;
+  };
 
   send = () => {
     const { height } = this.node.getBoundingClientRect();
@@ -52,6 +62,16 @@ class ComposeEmailModal extends PureComponent<Props, State> {
       foldId: 'send',
       foldableClone: this.node.cloneNode(true),
     });
+  };
+
+  handleFinishFolding = async () => {
+    const { foldId } = this.state;
+
+    switch (foldId) {
+      case 'send': {
+        await this.setStatePromise({ addStamp: true });
+      }
+    }
   };
 
   render() {
@@ -69,7 +89,10 @@ class ComposeEmailModal extends PureComponent<Props, State> {
 
     return (
       <Wrapper isOpen={isOpen}>
-        <Backdrop isOpen={isOpen} onClick={!isClosing && handleClose} />
+        <Backdrop
+          isOpen={isOpen}
+          onClick={isClosing ? undefined : handleClose}
+        />
         <Motion
           defaultStyle={{
             scaleX: 0,
@@ -125,7 +148,23 @@ class ComposeEmailModal extends PureComponent<Props, State> {
           )}
         </Motion>
 
-        {foldId && <Fold foldId={foldId} node={this.node} />}
+        {foldId && (
+          <Fold
+            key={
+              // Folds are meant to be "disposable".
+              // They mount, they do their thing, they invoke the callback,
+              // and then they unmount.
+              // By supplying a key, we ensure that subsequent compositions
+              // all animate correctly by building a new `Fold` instance.
+              // TODO: This might be totally unnecessary, look into it!
+              foldId
+            }
+            foldId={foldId}
+            node={this.node}
+            innerRef={this.captureFoldedRef}
+            onCompleteFolding={this.handleFinishFolding}
+          />
+        )}
       </Wrapper>
     );
   }
