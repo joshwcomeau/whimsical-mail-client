@@ -1,5 +1,6 @@
 // @flow
 import React, { PureComponent } from 'react';
+import ReactDOM from 'react-dom';
 import { Motion, spring } from 'react-motion';
 import styled from 'styled-components';
 import SendIcon from 'react-icons/lib/md/send';
@@ -35,6 +36,22 @@ class ComposeEmailModal extends PureComponent<Props, State> {
   };
 
   node: HTMLElement;
+
+  send = () => {
+    const nodeClone = this.node.cloneNode(true);
+
+    // Add a container to the DOM to hold our clone
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.zIndex = '10000';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.right = '0';
+    container.style.bottom = '0';
+
+    container.appendChild(nodeClone);
+    document.body.appendChild(container);
+  };
 
   render() {
     const { isOpen, handleClose, triggerBoundingBox } = this.props;
@@ -93,7 +110,7 @@ class ComposeEmailModal extends PureComponent<Props, State> {
               </MainContent>
 
               <Footer>
-                <Button>
+                <Button onClick={this.send}>
                   <SendIcon />
                 </Button>
               </Footer>
