@@ -38,7 +38,6 @@ const Wrapper = styled.div`
   display: flex;
   align-items: center;
   line-height: 1.6;
-  /* opacity: ${props => (props.isSelected ? 1 : 0.7)}; */
   transition: opacity 500ms;
   cursor: pointer;
 `;
