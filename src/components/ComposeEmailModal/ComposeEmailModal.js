@@ -9,6 +9,9 @@ import { COLORS } from '../../constants';
 
 import Button from '../Button';
 import ComposeEmailInput from '../ComposeEmailInput';
+import Fold from '../Fold';
+
+import type { FoldId } from '../../types';
 
 type Props = {
   isOpen: boolean,
@@ -21,6 +24,8 @@ type State = {
   isClosing: boolean,
   rootX: ?number,
   rootY: ?number,
+  foldId?: FoldId,
+  foldableClone?: HTMLElement,
 };
 
 class ComposeEmailModal extends PureComponent<Props, State> {
@@ -33,28 +38,25 @@ class ComposeEmailModal extends PureComponent<Props, State> {
     isClosing: false,
     rootX: null,
     rootY: null,
+    foldId: undefined,
+    foldableClone: undefined,
   };
 
   node: HTMLElement;
 
   send = () => {
-    const nodeClone = this.node.cloneNode(true);
+    const { height } = this.node.getBoundingClientRect();
 
-    // Add a container to the DOM to hold our clone
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.zIndex = '10000';
-    container.style.top = '0';
-    container.style.left = '0';
-    container.style.right = '0';
-    container.style.bottom = '0';
-
-    container.appendChild(nodeClone);
-    document.body.appendChild(container);
+    this.setState({
+      isClosing: true,
+      foldId: 'send',
+      foldableClone: this.node.cloneNode(true),
+    });
   };
 
   render() {
     const { isOpen, handleClose, triggerBoundingBox } = this.props;
+    const { isClosing, foldId, foldableClone } = this.state;
 
     // The very first render is a no-op, since we need the trigger node before
     // we can do anything
@@ -67,7 +69,7 @@ class ComposeEmailModal extends PureComponent<Props, State> {
 
     return (
       <Wrapper isOpen={isOpen}>
-        <Backdrop isOpen={isOpen} onClick={handleClose} />
+        <Backdrop isOpen={isOpen} onClick={!isClosing && handleClose} />
         <Motion
           defaultStyle={{
             scaleX: 0,
@@ -83,8 +85,7 @@ class ComposeEmailModal extends PureComponent<Props, State> {
           }}
         >
           {({ scaleX, scaleY, translateX, translateY }) => (
-            <Modal
-              innerRef={node => (this.node = node)}
+            <ModalPositioner
               style={{
                 top: triggerBoundingBox.bottom,
                 right: window.innerWidth - triggerBoundingBox.left,
@@ -93,30 +94,38 @@ class ComposeEmailModal extends PureComponent<Props, State> {
                   scale(${scaleX}, ${scaleY})
                 `,
                 transformOrigin: 'top right',
+                opacity: foldId ? 0 : 1,
               }}
             >
-              <Header>
-                <ComposeEmailInput
-                  disabled
-                  label="from"
-                  value="Josh Comeau <joshua@khanacademy.org>"
-                />
-                <ComposeEmailInput label="to" placeholder="jane@example.com" />
-              </Header>
+              <Modal innerRef={node => (this.node = node)}>
+                <Header>
+                  <ComposeEmailInput
+                    disabled
+                    label="from"
+                    value="Josh Comeau <joshua@khanacademy.org>"
+                  />
+                  <ComposeEmailInput
+                    label="to"
+                    placeholder="jane@example.com"
+                  />
+                </Header>
 
-              <MainContent>
-                <Subject placeholder="Subject" />
-                <Body placeholder="Write something..." />
-              </MainContent>
+                <MainContent>
+                  <Subject placeholder="Subject" />
+                  <Body placeholder="Write something..." />
+                </MainContent>
 
-              <Footer>
-                <Button onClick={this.send}>
-                  <SendIcon />
-                </Button>
-              </Footer>
-            </Modal>
+                <Footer>
+                  <Button onClick={this.send}>
+                    <SendIcon />
+                  </Button>
+                </Footer>
+              </Modal>
+            </ModalPositioner>
           )}
         </Motion>
+
+        {foldId && <Fold foldId={foldId} node={this.node} />}
       </Wrapper>
     );
   }
@@ -144,17 +153,23 @@ const Backdrop = styled.div`
   transition: opacity 500ms;
 `;
 
-const Modal = styled.div`
+const ModalPositioner = styled.div`
   position: absolute;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
   bottom: 100px;
+  z-index: 2;
   min-width: 400px;
   width: 40%;
-  background: white;
-  box-shadow: 0px 5px 60px rgba(0, 0, 0, 0.4);
   will-change: transform;
+`;
+
+const Modal = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(0, 0, 0, 0.4);
+  /* box-shadow: 0px 5px 60px rgba(0, 0, 0, 0.4); */
 `;
 
 const Header = styled.div`
