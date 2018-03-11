@@ -2,6 +2,15 @@
   "name": "mail-client",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test --env=jsdom",
+    "eject": "react-app-rewired eject",
+    "flow": "flow",
+    "storybook": "start-storybook -p 9009 -s public",
+    "build-storybook": "build-storybook -s public"
+  },
   "dependencies": {
     "date-fns": "^1.29.0",
     "immer": "^1.1.1",
@@ -14,14 +23,12 @@
     "sharkhorse": "^4.0.0",
     "styled-components": "^3.1.6"
   },
-  "scripts": {
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-app-rewired test --env=jsdom",
-    "eject": "react-app-rewired eject",
-    "flow": "flow"
-  },
   "devDependencies": {
-    "flow-bin": "^0.66.0"
+    "flow-bin": "^0.66.0",
+    "@storybook/react": "^3.3.15",
+    "@storybook/addon-actions": "^3.3.15",
+    "@storybook/addon-links": "^3.3.15",
+    "@storybook/addons": "^3.3.15",
+    "babel-core": "^6.26.0"
   }
 }
