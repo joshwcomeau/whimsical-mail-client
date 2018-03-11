@@ -10,10 +10,13 @@ import React, { Component } from 'react';
 // $FlowFixMe
 const NodeContext = React.createContext('node');
 
+export type Nodes = { [key: string]: HTMLElement };
+export type BoundingBoxes = { [key: string]: ClientRect };
+
 type Props = { children: React$Node };
 type State = {
-  nodes: { [key: string]: HTMLElement },
-  boundingBoxes: { [key: string]: ClientRect },
+  nodes: Nodes,
+  boundingBoxes: BoundingBoxes,
 };
 
 class NodeProvider extends Component<Props, State> {

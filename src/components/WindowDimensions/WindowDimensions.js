@@ -4,8 +4,8 @@ import React, { PureComponent } from 'react';
 import { debounce } from '../../utils';
 
 type State = {
-  width: number,
-  height: number,
+  windowWidth: number,
+  windowHeight: number,
 };
 
 type Props = {
@@ -14,8 +14,8 @@ type Props = {
 
 class WindowDimensions extends PureComponent<Props, State> {
   state = {
-    width: window.innerWidth,
-    height: window.innerHeight,
+    windowWidth: window.innerWidth,
+    windowHeight: window.innerHeight,
   };
 
   componentDidMount() {
@@ -28,8 +28,8 @@ class WindowDimensions extends PureComponent<Props, State> {
 
   updateWindowSize = debounce(() => {
     this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
     });
   }, 100);
 

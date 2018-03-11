@@ -48,10 +48,12 @@ class Fold extends PureComponent<Props> {
         </TopFold>
 
         <MiddleFold height={height}>
-          <MiddleFoldContents
-            height={height}
-            dangerouslySetInnerHTML={{ __html: middleFoldNode.outerHTML }}
-          />
+          <HideOverflow>
+            <MiddleFoldContents
+              height={height}
+              dangerouslySetInnerHTML={{ __html: middleFoldNode.outerHTML }}
+            />
+          </HideOverflow>
         </MiddleFold>
 
         <BottomFold speed={speed} height={height}>
@@ -61,6 +63,7 @@ class Fold extends PureComponent<Props> {
               dangerouslySetInnerHTML={{ __html: bottomFoldNode.outerHTML }}
             />
           </HideOverflow>
+          <BottomFoldBack id="tfb" />
         </BottomFold>
       </Wrapper>
     );
@@ -121,6 +124,7 @@ const BottomFold = styled(FoldBase)`
   top: ${props => Math.round(props.height * 0.7)}px;
   height: ${props => Math.round(props.height * 0.3)}px;
   animation: ${foldBottomUp} ${props => props.speed}ms forwards;
+  transform-style: preserve-3d;
 `;
 
 const HideOverflow = styled.div`
@@ -155,8 +159,19 @@ const TopFoldBack = styled.div`
   width: 100%;
   height: 100%;
   transform: rotateX(180deg);
-  /* background: rgba(255, 255, 255, 0.2); */
-  background: red;
+  background: rgba(255, 255, 255, 0.95);
+  backface-visibility: hidden;
+`;
+
+const BottomFoldBack = styled.div`
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotateX(180deg);
+  background: rgba(255, 255, 255, 0.95);
   backface-visibility: hidden;
 `;
 

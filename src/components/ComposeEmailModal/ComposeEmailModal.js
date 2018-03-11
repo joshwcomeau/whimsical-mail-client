@@ -1,3 +1,4 @@
+// @flow
 import React, { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
 import { Motion, spring } from 'react-motion';
@@ -6,6 +7,7 @@ import SendIcon from 'react-icons/lib/md/send';
 
 import { COLORS } from '../../constants';
 import { setTimeoutPromise } from '../../utils';
+import airMailSrc from '../../assets/air-mail.png';
 
 import Button from '../Button';
 import ComposeEmailInput from '../ComposeEmailInput';
@@ -15,7 +17,7 @@ import type { FoldId } from '../../types';
 
 type Props = {
   isOpen: boolean,
-  triggerBoundingBox: ?DOMRect,
+  triggerBoundingBox: ?ClientRect,
   handleClose: () => void,
 };
 
@@ -45,7 +47,7 @@ class ComposeEmailModal extends PureComponent<Props, State> {
   node: HTMLElement;
   foldedNode: HTMLElement;
 
-  setStatePromise = state =>
+  setStatePromise = (state: any): Promise<*> =>
     new Promise(resolve => {
       this.setState(state, resolve);
     });
@@ -121,28 +123,31 @@ class ComposeEmailModal extends PureComponent<Props, State> {
               }}
             >
               <Modal innerRef={node => (this.node = node)}>
-                <Header>
-                  <ComposeEmailInput
-                    disabled
-                    label="from"
-                    value="Josh Comeau <joshua@khanacademy.org>"
-                  />
-                  <ComposeEmailInput
-                    label="to"
-                    placeholder="jane@example.com"
-                  />
-                </Header>
+                <AirMailBorder />
+                <ModalContents>
+                  <Header>
+                    <ComposeEmailInput
+                      disabled
+                      label="from"
+                      value="Josh Comeau <joshua@khanacademy.org>"
+                    />
+                    <ComposeEmailInput
+                      label="to"
+                      placeholder="jane@example.com"
+                    />
+                  </Header>
 
-                <MainContent>
-                  <Subject placeholder="Subject" />
-                  <Body placeholder="Write something..." />
-                </MainContent>
+                  <MainContent>
+                    <Subject placeholder="Subject" />
+                    <Body placeholder="Write something..." />
+                  </MainContent>
 
-                <Footer>
-                  <Button onClick={this.send}>
-                    <SendIcon />
-                  </Button>
-                </Footer>
+                  <Footer>
+                    <Button onClick={this.send}>
+                      <SendIcon />
+                    </Button>
+                  </Footer>
+                </ModalContents>
               </Modal>
             </ModalPositioner>
           )}
@@ -188,7 +193,7 @@ const Backdrop = styled.div`
   right: 0;
   bottom: 0;
   background: black;
-  opacity: ${props => (props.isOpen ? 0.15 : 0)};
+  opacity: ${props => (props.isOpen ? 0.25 : 0)};
   transition: opacity 500ms;
 `;
 
@@ -202,13 +207,29 @@ const ModalPositioner = styled.div`
 `;
 
 const Modal = styled.div`
+  height: 100%;
+`;
+
+const ModalContents = styled.div`
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  margin: 8px;
   background: white;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.4);
-  border-right: 1px solid rgba(0, 0, 0, 0.4);
-  /* box-shadow: 0px 5px 60px rgba(0, 0, 0, 0.4); */
+`;
+
+const AirMailBorder = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  background: url(${airMailSrc});
+  background-size: 64px;
 `;
 
 const Header = styled.div`
