@@ -1,3 +1,4 @@
+// @flow
 import React, { Component, Fragment } from 'react';
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
@@ -5,18 +6,39 @@ import styled from 'styled-components';
 import ChildTraveller from './ChildTraveller';
 import WindowDimensions from '../WindowDimensions';
 
-class Wrapper extends Component {
+type Quadrant = 1 | 2 | 3 | 4;
+
+type Props = {
+  startingQuadrant: Quadrant,
+  fromQuadrants: Array<Quadrant>,
+  toQuadrants: Array<Quadrant>,
+};
+
+type State = {
+  direction: 'to' | 'from' | null,
+  target: ?ClientRect,
+};
+
+class Wrapper extends Component<Props, State> {
+  static defaultProps = {
+    startingQuadrant: 1,
+  };
+
   state = {
-    isVisible: false,
     direction: null,
     target: null,
   };
 
+  nodes: {
+    [Quadrant]: HTMLElement,
+  } = {};
+
   componentDidMount() {
+    const from = this.nodes[this.props.startingQuadrant];
+
     this.setState({
-      isVisible: true,
       direction: 'from',
-      target: this.from2.getBoundingClientRect(),
+      target: from.getBoundingClientRect(),
     });
   }
 
@@ -31,59 +53,73 @@ class Wrapper extends Component {
     });
   };
 
+  getPositionForQuadrant = quadrant => {
+    switch (quadrant) {
+      case 1:
+        return { top: 30, left: 40 };
+      case 2:
+        return { top: 30, right: 40 };
+      case 3:
+        return { bottom: 30, left: 40 };
+      case 4:
+        return { bottom: 30, right: 40 };
+      default:
+        throw new Error('Unrecognized quadrant');
+    }
+  };
+
   render() {
+    const { fromQuadrants, toQuadrants } = this.props;
+
     return (
       <WindowDimensions>
         {({ windowWidth, windowHeight }) => (
           <Fragment>
-            <Button
-              innerRef={node => (this.from1 = node)}
-              style={{ position: 'fixed', top: 30, left: 40 }}
-              onClick={() => this.goFrom(this.from1)}
-            >
-              From
-            </Button>
-
-            <Button
-              innerRef={node => (this.from2 = node)}
-              style={{ position: 'fixed', bottom: 100, right: 40 }}
-              onClick={() => this.goFrom(this.from2)}
-            >
-              From
-            </Button>
-
-            <Button
-              innerRef={node => (this.to1 = node)}
-              style={{ position: 'fixed', rop: 100, right: 40 }}
-              onClick={() => this.goTo(this.to1)}
-            >
-              To
-            </Button>
-
-            <Button
-              innerRef={node => (this.to2 = node)}
-              style={{ position: 'fixed', bottom: 100, left: 40 }}
-              onClick={() => this.goTo(this.to2)}
-            >
-              To
-            </Button>
-
-            {this.state.isVisible && (
-              <ChildTraveller
-                direction={this.state.direction}
-                target={this.state.target}
-                windowWidth={windowWidth}
-                windowHeight={windowHeight}
+            {fromQuadrants.map(quadrant => (
+              <Button
+                key={quadrant}
+                innerRef={node => (this.nodes[quadrant] = node)}
+                style={{
+                  position: 'fixed',
+                  ...this.getPositionForQuadrant(quadrant),
+                }}
+                onClick={() => this.goFrom(this.nodes[quadrant])}
               >
-                <div
-                  style={{
-                    width: 100,
-                    height: 100,
-                    background: 'red',
-                  }}
-                />
-              </ChildTraveller>
-            )}
+                From
+              </Button>
+            ))}
+
+            {toQuadrants.map(quadrant => (
+              <Button
+                key={quadrant}
+                innerRef={node => (this.nodes[quadrant] = node)}
+                style={{
+                  position: 'fixed',
+                  ...this.getPositionForQuadrant(quadrant),
+                }}
+                onClick={() => this.goTo(this.nodes[quadrant])}
+              >
+                To
+              </Button>
+            ))}
+
+            {this.state.direction &&
+              this.state.target && (
+                <ChildTraveller
+                  direction={this.state.direction}
+                  target={this.state.target}
+                  windowWidth={windowWidth}
+                  windowHeight={windowHeight}
+                >
+                  <div
+                    style={{
+                      width: 100,
+                      height: 100,
+                      background: 'red',
+                    }}
+                  />
+                </ChildTraveller>
+              )}
           </Fragment>
         )}
       </WindowDimensions>
@@ -97,5 +133,9 @@ const Button = styled.button`
 `;
 
 storiesOf('ChildTraveller', module)
-  .add('default', () => <Wrapper />)
-  .add('default (toggle between to restart)', () => <Wrapper />);
+  .add('default (top to bottom)', () => (
+    <Wrapper fromQuadrants={[1, 2]} toQuadrants={[3, 4]} />
+  ))
+  .add('corners', () => (
+    <Wrapper fromQuadrants={[1, 4]} toQuadrants={[2, 3]} />
+  ));
