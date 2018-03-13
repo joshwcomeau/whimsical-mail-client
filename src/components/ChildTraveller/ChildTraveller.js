@@ -7,6 +7,10 @@ import React, { Component } from 'react';
 import { Motion, spring } from 'react-motion';
 import styled from 'styled-components';
 
+// TODO: maybe it'd be better to have:
+// fromTarget, toTarget, isOpen
+// ?
+
 type Props = {
   children: React$Node,
   direction: 'from' | 'to',
@@ -18,27 +22,21 @@ type Props = {
 
 type State = {};
 
+type Quadrant = 1 | 2 | 3 | 4;
+
 const fastSpring = { stiffness: 150, damping: 20 };
 const slowSpring = { stiffness: 150, damping: 23 };
 
-const mapQuadrantToTransformOrigin = (quadrant: number) => {
-  switch (quadrant) {
-    case 1:
-      return 'top left';
-    case 2:
-      return 'top right';
-    case 3:
-      return 'bottom left';
-    case 4:
-      return 'bottom right';
-    default:
-      throw new Error(`Unrecognized quadrant: ${quadrant}`);
-  }
-};
-
 class ChildTraveller extends Component<Props, State> {
-  getTargetOffset() {
+  childWrapper: HTMLElement;
+
+  componentDidMount() {
+    this.forceUpdate();
+  }
+
+  getTargetQuadrant() {
     const { target, windowWidth, windowHeight } = this.props;
+
     // When expanding from something, we want to use its "opposite" corner.
     // Imagine we divide the screen into quadrants:
     //  _______
@@ -69,79 +67,143 @@ class ChildTraveller extends Component<Props, State> {
       y: windowHeight / 2,
     };
 
-    // Sorry for the double-ternary! Just a simple mapping to the 4 quadrants
-    // based on screen position.
-    const quadrant =
-      targetCenter.y < windowCenter.y
-        ? targetCenter.x < windowCenter.x ? 1 : 2
-        : targetCenter.x < windowCenter.x ? 3 : 4;
+    if (targetCenter.y < windowCenter.y) {
+      // top half, left or right
+      return targetCenter.x < windowCenter.x ? 1 : 2;
+    } else {
+      // bottom half, left or right
+      return targetCenter.x < windowCenter.x ? 3 : 4;
+    }
+  }
 
-    // Now that we have the quadrant, we need to derive associated data, like:
-    //  - the `transform-origin` for the children
-    //  - the translate coordinates for the children
-    const transformOrigin = mapQuadrantToTransformOrigin(quadrant);
+  getTargetTranslate(quadrant: Quadrant) {
+    const { target } = this.props;
 
-    return { transformOrigin };
+    const childBox = this.childWrapper.getBoundingClientRect();
+
+    // If we're going "to" the target, we want to disappear into its center.
+    if (this.props.direction === 'to') {
+      return {
+        translateX: target.left + target.width / 2 - childBox.width / 2,
+        translateY: target.top + target.height / 2 - childBox.height / 2,
+      };
+    }
+
+    // Otherwise, the translate values will be based on the quadrant.
+    console.log(childBox.width);
+    switch (quadrant) {
+      case 1:
+        return {
+          translateX: target.right,
+          translateY: target.bottom,
+        };
+      case 2:
+        return {
+          translateX: target.left - childBox.width,
+          translateY: target.bottom,
+        };
+      case 3:
+        return {
+          translateX: target.right,
+          translateY: target.top,
+        };
+      case 4:
+        return {
+          translateX: target.left,
+          translateY: target.top,
+        };
+      default:
+        throw new Error(`Unrecognized quadrant: ${quadrant}`);
+    }
+  }
+
+  getTargetTransformOrigin(quadrant: Quadrant) {
+    // If we're going "to" the target, we want to disappear into its center.
+    // For this reason, the transform-origin will always be the middle.
+    if (this.props.direction === 'to') {
+      return 'center center';
+    }
+
+    // If we're coming "from" the target, the transform-origin depends on the
+    // quadrant. We want to expand outward from the element, after all.
+    switch (quadrant) {
+      case 1:
+        return 'top left';
+      case 2:
+        return 'top right';
+      case 3:
+        return 'bottom left';
+      case 4:
+        return 'bottom right';
+      default:
+        throw new Error(`Unrecognized quadrant: ${quadrant}`);
+    }
   }
 
   render() {
     const { target, direction, children } = this.props;
 
-    let targetValues = {
-      scaleX: spring(direction === 'from' ? 1 : 0),
-      scaleY: spring(direction === 'from' ? 1 : 0),
-    };
+    const quadrant = this.getTargetQuadrant();
 
-    const { transformOrigin } = this.getTargetOffset();
+    const transformOrigin = this.getTargetTransformOrigin(quadrant);
 
-    if (direction === 'from') {
+    let targetValues;
+    if (this.childWrapper) {
+      const { translateX, translateY } = this.getTargetTranslate(quadrant);
+
       targetValues = {
-        scaleX: spring(1),
-        scaleY: spring(1),
-        translateX: spring(target.left),
-        translateY: spring(target.top),
+        scaleX: spring(direction === 'from' ? 1 : 0),
+        scaleY: spring(direction === 'from' ? 1 : 0),
+        translateX: direction === 'from' ? translateX : spring(translateX),
+        translateY: direction === 'from' ? translateY : spring(translateY),
       };
     } else {
       targetValues = {
-        scaleX: spring(0),
-        scaleY: spring(0),
-        translateX: spring(target.left),
-        translateY: spring(target.top),
+        scaleX: 0,
+        scaleY: 0,
       };
     }
 
     return (
       <Motion
         defaultStyle={{
-          scaleX: 0,
-          scaleY: 0,
+          scaleX: 1,
+          scaleY: 1,
           translateX: target.left,
           translateY: target.top,
         }}
         style={targetValues}
       >
         {({ scaleX, scaleY, translateX, translateY }) => (
-          <Wrapper
-            style={{
-              transform: `
-                translate(${translateX}px, ${translateY}px)
-                scale(${scaleX}, ${scaleY})
-              `,
-              transformOrigin,
-            }}
+          <OuterWrapper
+            innerRef={node => (this.childWrapper = node)}
+            style={{ display: 'inline-block' }}
           >
-            {children}
-          </Wrapper>
+            <Wrapper
+              style={{
+                transform: `
+                    translate(${translateX}px, ${translateY}px)
+                    scale(${scaleX}, ${scaleY})
+                  `,
+                transformOrigin,
+              }}
+            >
+              {children}
+            </Wrapper>
+          </OuterWrapper>
         )}
       </Motion>
     );
   }
 }
 
-const Wrapper = styled.div`
+const OuterWrapper = styled.div`
+  display: inline-block;
   position: absolute;
   top: 0;
   left: 0;
 `;
+
+const Wrapper = styled.div``;
 
 export default ChildTraveller;
