@@ -16,7 +16,7 @@ type Props = {
 
 type State = {
   direction: 'to' | 'from' | null,
-  target: ?ClientRect,
+  target: ?HTMLElement,
 };
 
 class Wrapper extends Component<Props, State> {
@@ -38,18 +38,18 @@ class Wrapper extends Component<Props, State> {
 
     this.setState({
       direction: 'from',
-      target: from.getBoundingClientRect(),
+      target: from,
     });
   }
 
   goTo = node => {
-    this.setState({ direction: 'to', target: node.getBoundingClientRect() });
+    this.setState({ direction: 'to', target: node });
   };
 
   goFrom = node => {
     this.setState({
       direction: 'from',
-      target: node.getBoundingClientRect(),
+      target: node,
     });
   };
 

@@ -11,19 +11,6 @@ import styled from 'styled-components';
 // fromTarget, toTarget, isOpen
 // ?
 
-type Props = {
-  children: React$Node,
-  direction: 'from' | 'to',
-  target: ClientRect,
-  windowWidth: number,
-  windowHeight: number,
-  handleFinishJourney?: () => void,
-};
-
-type State = {
-  cachedTarget?: ClientRect,
-};
-
 type Quadrant = 1 | 2 | 3 | 4;
 type Position = {
   top?: number,
@@ -32,35 +19,130 @@ type Position = {
   bottom?: number,
 };
 
+// `ClientRect`, the type returned by `getBoundingClientRect`, is helpful, but
+// it doesn't tell us everything we need. It's missing:
+// - The X/Y coordinates for the center of the node
+// - The distance from the right and bottom edges of the viewport.
+type AugmentedClientRect = {
+  // Standard ClientRect width/height in pixels
+  width: number,
+  height: number,
+
+  top: number,
+  left: number,
+  right: number,
+  bottom: number,
+
+  // Distance to the center of the node in pixels from the top/left
+  centerX: number,
+  centerY: number,
+
+  // This augmented property gives us information about the opposite viewport
+  // corner.
+  fromBottomRight: {
+    top: number,
+    left: number,
+    right: number,
+    bottom: number,
+    centerX: number,
+    centerY: number,
+  },
+};
+
 const fastSpring = { stiffness: 150, damping: 20 };
 const slowSpring = { stiffness: 150, damping: 23 };
 
+const createAugmentedClientRect = (
+  node: HTMLElement,
+  windowWidth: number,
+  windowHeight: number
+): AugmentedClientRect => {
+  const rect = node.getBoundingClientRect();
+
+  return {
+    width: rect.width,
+    height: rect.height,
+
+    top: rect.top,
+    left: rect.left,
+    right: rect.right,
+    bottom: rect.bottom,
+    centerX: rect.left + rect.width / 2,
+    centerY: rect.top + rect.height / 2,
+
+    fromBottomRight: {
+      top: windowHeight - rect.top,
+      left: windowWidth - rect.left,
+      right: windowWidth - rect.right,
+      bottom: windowHeight - rect.bottom,
+      centerX: windowWidth - rect.right + rect.width / 2,
+      centerY: windowHeight - rect.bottom + rect.height / 2,
+    },
+  };
+};
+
+type Props = {
+  children: React$Node,
+  direction: 'from' | 'to',
+  target: HTMLElement,
+  windowWidth: number,
+  windowHeight: number,
+  handleFinishJourney?: () => void,
+};
+
+type State = {
+  targetRect: ?AugmentedClientRect,
+  childRect: ?AugmentedClientRect,
+};
+
 class ChildTraveller extends Component<Props, State> {
   childWrapperNode: HTMLElement;
-  state = {};
+
+  state = {
+    targetRect: null,
+    childRect: null,
+  };
 
   componentDidMount() {
-    this.setState({
-      cachedTarget: this.childWrapperNode.getBoundingClientRect(),
-    });
+    const { targetRect, childRect } = this.getAugmentedClientRects();
+
+    this.setState({ targetRect, childRect });
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    this.setState({
-      cachedTarget: this.childWrapperNode.getBoundingClientRect(),
-    });
+    const { targetRect, childRect } = this.getAugmentedClientRects(nextProps);
+
+    this.setState({ targetRect, childRect });
   }
 
   componentDidUpdate(prevProps: Props) {
     const hasPositionChanged = this.props.target !== prevProps.target;
 
-    if (hasPositionChanged) {
-      const newChildLocation = this.childWrapperNode.getBoundingClientRect();
-    }
+    // if (hasPositionChanged) {
+    //   const newChildLocation = this.childWrapperNode.getBoundingClientRect();
+    // }
+  }
+
+  getAugmentedClientRects(props: Props = this.props) {
+    const { target, windowWidth, windowHeight } = props;
+
+    return {
+      targetRect: createAugmentedClientRect(target, windowWidth, windowHeight),
+      childRect: createAugmentedClientRect(
+        this.childWrapperNode,
+        windowWidth,
+        windowHeight
+      ),
+    };
   }
 
   getTargetQuadrant() {
     const { target, windowWidth, windowHeight } = this.props;
+    const { targetRect } = this.state;
+
+    if (!targetRect) {
+      return 1;
+    }
 
     // When expanding from something, we want to use its "opposite" corner.
     // Imagine we divide the screen into quadrants:
@@ -82,22 +164,17 @@ class ChildTraveller extends Component<Props, State> {
     //        ----------             |
     // ______________________________|
 
-    const targetCenter = {
-      x: target.left + target.width / 2,
-      y: target.top + target.height / 2,
-    };
-
     const windowCenter = {
       x: windowWidth / 2,
       y: windowHeight / 2,
     };
 
-    if (targetCenter.y < windowCenter.y) {
+    if (targetRect.centerY < windowCenter.y) {
       // top half, left or right
-      return targetCenter.x < windowCenter.x ? 1 : 2;
+      return targetRect.centerX < windowCenter.x ? 1 : 2;
     } else {
       // bottom half, left or right
-      return targetCenter.x < windowCenter.x ? 3 : 4;
+      return targetRect.centerX < windowCenter.x ? 3 : 4;
     }
   }
 
@@ -164,7 +241,7 @@ class ChildTraveller extends Component<Props, State> {
     }
   }
 
-  getChildPosition(quadrant: Quadrant): Position {
+  getChildPosition(quadrant: Quadrant): ?Position {
     /**
      * Get the top/left/right/bottom position for the child, relative to the
      * current target.
@@ -219,64 +296,59 @@ class ChildTraveller extends Component<Props, State> {
      *     shrinking it. We want it to disappear into the target, and so we
      *     position it right in the center.
      */
-    const { target, direction, windowWidth, windowHeight } = this.props;
+    const { direction, windowWidth, windowHeight } = this.props;
+    const { targetRect, childRect } = this.state;
 
-    const childBox = this.childWrapperNode.getBoundingClientRect();
-
-    const childBoxCenter = {
-      x: childBox.left + childBox.width / 2,
-      y: childBox.top + childBox.height / 2,
-    };
-
-    const targetCenter = {
-      x: target.left + target.width / 2,
-      y: target.top + target.height / 2,
-    };
+    // Shouldn't be possible, but Flow doesn't know that.
+    // TODO: Improve this.
+    if (!targetRect || !childRect) {
+      return null;
+    }
 
     switch (quadrant) {
       case 1:
         return {
           top:
             direction === 'from'
-              ? target.bottom
-              : targetCenter.y - childBox.height / 2,
+              ? targetRect.bottom
+              : targetRect.centerY - childRect.height / 2,
           left:
             direction === 'from'
-              ? target.right
-              : targetCenter.x - childBox.width / 2,
+              ? targetRect.right
+              : targetRect.centerX - childRect.width / 2,
         };
       case 2:
         return {
           top:
             direction === 'from'
-              ? target.bottom
-              : targetCenter.y - childBox.height / 2,
+              ? targetRect.bottom
+              : targetRect.centerY - childRect.height / 2,
           right:
             direction === 'from'
-              ? windowWidth - target.left
-              : windowWidth - targetCenter.x - childBox.width / 2,
+              ? targetRect.fromBottomRight.left
+              : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       case 3:
         return {
           bottom:
             direction === 'from'
-              ? windowHeight - target.top
-              : windowHeight - targetCenter.y - childBox.height / 2,
+              ? targetRect.fromBottomRight.top
+              : targetRect.fromBottomRight.centerY - childRect.height / 2,
           left:
             direction === 'from'
-              ? target.right
-              : targetCenter.x - childBox.width / 2,
+              ? targetRect.right
+              : targetRect.centerX - childRect.width / 2,
         };
       case 4:
         return {
           bottom:
             direction === 'from'
-              ? windowHeight - target.top
-              : windowHeight - targetCenter.y - childBox.height / 2,
+              ? targetRect.fromBottomRight.top
+              : targetRect.fromBottomRight.centerY - childRect.height / 2,
           right:
             direction === 'from'
-              ? windowWidth - target.left
-              : windowWidth - targetCenter.x - childBox.width / 2,
+              ? targetRect.fromBottomRight.left
+              : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       default:
         throw new Error(`Unrecognized quadrant: ${quadrant}`);
@@ -307,8 +379,6 @@ class ChildTraveller extends Component<Props, State> {
         scaleY: 0,
       };
     }
-
-    console.log(targetValues);
 
     return (
       <Motion
