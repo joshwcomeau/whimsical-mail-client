@@ -7,9 +7,11 @@ import React, { Component } from 'react';
 import { Motion, spring } from 'react-motion';
 import styled from 'styled-components';
 
-// TODO: maybe it'd be better to have:
-// fromTarget, toTarget, isOpen
-// ?
+import {
+  getPositionDelta,
+  applyStylesToDOMNode,
+} from './ChildTraveller.helpers';
+import type { AugmentedClientRect } from './ChildTraveller.types';
 
 type Quadrant = 1 | 2 | 3 | 4;
 type Position = {
@@ -17,36 +19,6 @@ type Position = {
   left?: number,
   right?: number,
   bottom?: number,
-};
-
-// `ClientRect`, the type returned by `getBoundingClientRect`, is helpful, but
-// it doesn't tell us everything we need. It's missing:
-// - The X/Y coordinates for the center of the node
-// - The distance from the right and bottom edges of the viewport.
-type AugmentedClientRect = {
-  // Standard ClientRect width/height in pixels
-  width: number,
-  height: number,
-
-  top: number,
-  left: number,
-  right: number,
-  bottom: number,
-
-  // Distance to the center of the node in pixels from the top/left
-  centerX: number,
-  centerY: number,
-
-  // This augmented property gives us information about the opposite viewport
-  // corner.
-  fromBottomRight: {
-    top: number,
-    left: number,
-    right: number,
-    bottom: number,
-    centerX: number,
-    centerY: number,
-  },
 };
 
 const fastSpring = { stiffness: 150, damping: 20 };
@@ -112,15 +84,47 @@ class ChildTraveller extends Component<Props, State> {
   componentWillReceiveProps(nextProps: Props) {
     const { targetRect, childRect } = this.getAugmentedClientRects(nextProps);
 
+    // When the component receives props, it can mean that our child is about
+    // to start moving. We need to record its current position, as that'll
+    // serve as the 'initial' position to animate from.
     this.setState({ targetRect, childRect });
   }
 
   componentDidUpdate(prevProps: Props) {
-    const hasPositionChanged = this.props.target !== prevProps.target;
+    const { windowWidth, windowHeight } = this.props;
+    const { childRect: oldChildRect } = this.state;
 
-    // if (hasPositionChanged) {
-    //   const newChildLocation = this.childWrapperNode.getBoundingClientRect();
-    // }
+    const hasTargetChanged = this.props.target !== prevProps.target;
+
+    if (oldChildRect && hasTargetChanged) {
+      window.requestAnimationFrame(() => {
+        const newChildRect = createAugmentedClientRect(
+          this.childWrapperNode,
+          windowWidth,
+          windowHeight
+        );
+
+        const [x, y] = getPositionDelta(oldChildRect, newChildRect);
+
+        // FLIP Animation Time!
+        // First: the position in this.state.childRect
+        // Last: the newChildRect we just captured.
+        // Invert: Let's calculate and apply the inverse translation.
+        const inverseTranslation = `translate(${x}px, ${y}px)`;
+
+        applyStylesToDOMNode(this.childWrapperNode, {
+          transform: inverseTranslation,
+          transition: 'transform 0ms',
+        });
+
+        window.requestAnimationFrame(() => {
+          applyStylesToDOMNode(this.childWrapperNode, {
+            transform: 'translate(0px, 0px)',
+            transition: 'transform 1500ms',
+          });
+        });
+      });
+    }
   }
 
   getAugmentedClientRects(props: Props = this.props) {
@@ -361,6 +365,8 @@ class ChildTraveller extends Component<Props, State> {
     const quadrant = this.getTargetQuadrant();
 
     const transformOrigin = this.getTargetTransformOrigin(quadrant);
+
+    console.log('RENDER', this.getChildPosition(quadrant));
 
     let targetValues;
     if (this.childWrapperNode) {

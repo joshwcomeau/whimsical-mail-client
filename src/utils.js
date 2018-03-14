@@ -153,3 +153,5 @@ export const convertHexToRGBA = (hex, alpha = 1) => {
 
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
+
+export const hyphenate = str => str.replace(/([A-Z])/g, '-$1').toLowerCase();
