@@ -53,18 +53,22 @@ const createAugmentedClientRect = (
   };
 };
 
+type Status = 'idle' | 'inverted' | 'playing';
+
 type Props = {
   children: React$Node,
   direction: 'from' | 'to',
   target: HTMLElement,
   windowWidth: number,
   windowHeight: number,
-  handleFinishJourney?: () => void,
 };
 
 type State = {
   targetRect: ?AugmentedClientRect,
   childRect: ?AugmentedClientRect,
+  status: Status,
+  translateX: ?number,
+  translateY: ?number,
 };
 
 class ChildTraveller extends Component<Props, State> {
@@ -73,6 +77,9 @@ class ChildTraveller extends Component<Props, State> {
   state = {
     targetRect: null,
     childRect: null,
+    status: 'idle',
+    translateX: null,
+    translateY: null,
   };
 
   componentDidMount() {
@@ -91,41 +98,74 @@ class ChildTraveller extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    const { windowWidth, windowHeight } = this.props;
-    const { childRect: oldChildRect } = this.state;
+    const { childRect, status } = this.state;
 
     const hasTargetChanged = this.props.target !== prevProps.target;
 
-    if (oldChildRect && hasTargetChanged) {
-      window.requestAnimationFrame(() => {
-        const newChildRect = createAugmentedClientRect(
-          this.childWrapperNode,
-          windowWidth,
-          windowHeight
-        );
+    // TODO: interrupts?
 
-        const [x, y] = getPositionDelta(oldChildRect, newChildRect);
+    if (childRect && hasTargetChanged) {
+      this.invertNode();
+    }
 
-        // FLIP Animation Time!
-        // First: the position in this.state.childRect
-        // Last: the newChildRect we just captured.
-        // Invert: Let's calculate and apply the inverse translation.
-        const inverseTranslation = `translate(${x}px, ${y}px)`;
-
-        applyStylesToDOMNode(this.childWrapperNode, {
-          transform: inverseTranslation,
-          transition: 'transform 0ms',
-        });
-
-        window.requestAnimationFrame(() => {
-          applyStylesToDOMNode(this.childWrapperNode, {
-            transform: 'translate(0px, 0px)',
-            transition: 'transform 1500ms',
-          });
-        });
-      });
+    if (status === 'inverted') {
+      this.undoInversion();
     }
   }
+
+  invertNode() {
+    const { windowWidth, windowHeight } = this.props;
+    const { childRect: oldChildRect } = this.state;
+
+    // Should be impossible, but Flow
+    if (!oldChildRect) {
+      throw new Error(
+        'No oldChildRect found! Is `invertNode` being called somewhere unexpected?'
+      );
+    }
+
+    window.requestAnimationFrame(() => {
+      const newChildRect = createAugmentedClientRect(
+        this.childWrapperNode,
+        windowWidth,
+        windowHeight
+      );
+
+      const [x, y] = getPositionDelta(oldChildRect, newChildRect);
+
+      this.setState({ translateX: x, translateY: y, status: 'inverted' });
+
+      // // FLIP Animation Time!
+      // // First: the position in this.state.childRect
+      // // Last: the newChildRect we just captured.
+      // // Invert: Let's calculate and apply the inverse translation.
+      // const inverseTranslation = `translate(${x}px, ${y}px)`;
+
+      // applyStylesToDOMNode(this.childWrapperNode, {
+      //   transform: inverseTranslation,
+      //   transition: 'transform 0ms',
+      // });
+
+      // window.requestAnimationFrame(() => {
+      //   applyStylesToDOMNode(this.childWrapperNode, {
+      //     transform: 'translate(0px, 0px)',
+      //     transition: 'transform 1500ms',
+      //   });
+      // });
+    });
+  }
+
+  undoInversion = () => {
+    this.setState({
+      translateX: 0,
+      translateY: 0,
+      status: 'playing',
+    });
+  };
+
+  finishPlaying = () => {
+    this.setState({ status: 'idle' });
+  };
 
   getAugmentedClientRects(props: Props = this.props) {
     const { target, windowWidth, windowHeight } = props;
@@ -366,25 +406,60 @@ class ChildTraveller extends Component<Props, State> {
 
     const transformOrigin = this.getTargetTransformOrigin(quadrant);
 
-    console.log('RENDER', this.getChildPosition(quadrant));
-
-    let targetValues;
-    if (this.childWrapperNode) {
-      // const { translateX, translateY } = this.getTargetTranslate(quadrant);
-
-      targetValues = {
-        scaleX: spring(direction === 'from' ? 1 : 0),
-        scaleY: spring(direction === 'from' ? 1 : 0),
-        ...this.getChildPosition(quadrant),
-        // translateX: direction === 'from' ? translateX : spring(translateX),
-        // translateY: direction === 'from' ? translateY : spring(translateY),
-      };
-    } else {
-      targetValues = {
-        scaleX: 0,
-        scaleY: 0,
-      };
+    let targetValues = {
+      ...this.getChildPosition(quadrant),
+      scaleX: 1,
+      scaleY: 1,
+    };
+    switch (this.state.status) {
+      case 'idle': {
+        targetValues = {
+          ...targetValues,
+          translateX: 0,
+          translateY: 0,
+        };
+        break;
+      }
+      case 'inverted': {
+        targetValues = {
+          ...targetValues,
+          translateX: this.state.translateX,
+          translateY: this.state.translateY,
+          scaleX: this.props.direction === 'to' ? 1 : 0,
+          scaleY: this.props.direction === 'to' ? 1 : 0,
+        };
+        break;
+      }
+      case 'playing': {
+        targetValues = {
+          ...targetValues,
+          translateX: this.props.direction === 'to' ? spring(0) : 0,
+          translateY: this.props.direction === 'to' ? spring(0) : 0,
+          scaleX: spring(this.props.direction === 'to' ? 0 : 1),
+          scaleY: spring(this.props.direction === 'to' ? 0 : 1),
+        };
+        break;
+      }
     }
+
+    console.log(targetValues);
+
+    // if (this.childWrapperNode) {
+    //   // const { translateX, translateY } = this.getTargetTranslate(quadrant);
+
+    //   targetValues = {
+    //     scaleX: spring(direction === 'from' ? 1 : 0),
+    //     scaleY: spring(direction === 'from' ? 1 : 0),
+    //     ...this.getChildPosition(quadrant),
+    //     // translateX: direction === 'from' ? translateX : spring(translateX),
+    //     // translateY: direction === 'from' ? translateY : spring(translateY),
+    //   };
+    // } else {
+    //   targetValues = {
+    //     scaleX: 0,
+    //     scaleY: 0,
+    //   };
+    // }
 
     return (
       <Motion
@@ -395,6 +470,7 @@ class ChildTraveller extends Component<Props, State> {
           // translateY: target.top,
         }}
         style={targetValues}
+        onRest={this.finishPlaying}
       >
         {({
           scaleX,
@@ -413,10 +489,10 @@ class ChildTraveller extends Component<Props, State> {
               left,
               bottom,
               right,
-              // transform: `
-              //       translate(${translateX}px, ${translateY}px)
-              //       scale(${scaleX}, ${scaleY})
-              //     `,
+              transform: `
+                translate(${translateX}px, ${translateY}px)
+                scale(${scaleX}, ${scaleY})
+              `,
               transformOrigin,
             }}
           >
