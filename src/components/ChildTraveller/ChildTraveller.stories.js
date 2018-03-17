@@ -81,6 +81,8 @@ class Wrapper extends Component<Props, State> {
                 innerRef={node => (this.nodes[quadrant] = node)}
                 style={{
                   position: 'fixed',
+                  width: 100,
+                  height: 100,
                   ...this.getPositionForQuadrant(quadrant),
                 }}
                 onClick={() => this.handleClick(this.nodes[quadrant])}
@@ -100,8 +102,8 @@ class Wrapper extends Component<Props, State> {
                 >
                   <div
                     style={{
-                      width: 100,
-                      height: 100,
+                      width: 250,
+                      height: 50,
                       background: 'red',
                     }}
                   />

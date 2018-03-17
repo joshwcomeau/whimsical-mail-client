@@ -9,49 +9,18 @@ import styled from 'styled-components';
 
 import {
   getPositionDelta,
-  applyStylesToDOMNode,
+  createAugmentedClientRect,
+  createAugmentedClientRectFromMinimumData,
 } from './ChildTraveller.helpers';
-import type { AugmentedClientRect } from './ChildTraveller.types';
+import type {
+  AugmentedClientRect,
+  MinimumFixedPosition,
+} from './ChildTraveller.types';
 
 type Quadrant = 1 | 2 | 3 | 4;
-type Position = {
-  top?: number,
-  left?: number,
-  right?: number,
-  bottom?: number,
-};
 
 const fastSpring = { stiffness: 150, damping: 20 };
 const slowSpring = { stiffness: 150, damping: 23 };
-
-const createAugmentedClientRect = (
-  node: HTMLElement,
-  windowWidth: number,
-  windowHeight: number
-): AugmentedClientRect => {
-  const rect = node.getBoundingClientRect();
-
-  return {
-    width: rect.width,
-    height: rect.height,
-
-    top: rect.top,
-    left: rect.left,
-    right: rect.right,
-    bottom: rect.bottom,
-    centerX: rect.left + rect.width / 2,
-    centerY: rect.top + rect.height / 2,
-
-    fromBottomRight: {
-      top: windowHeight - rect.top,
-      left: windowWidth - rect.left,
-      right: windowWidth - rect.right,
-      bottom: windowHeight - rect.bottom,
-      centerX: windowWidth - rect.right + rect.width / 2,
-      centerY: windowHeight - rect.bottom + rect.height / 2,
-    },
-  };
-};
 
 type Status =
   | 'closed'
@@ -211,48 +180,54 @@ class ChildTraveller extends Component<Props, State> {
 
     // TODO: Should the `quadrant` be computed from within this method?
     // is it used anywhere else?
-    const { top, left, right, bottom } = this.getChildPosition(
-      quadrant,
-      relativeRect
+    const minimumPositionData = this.getChildPosition(quadrant, relativeRect);
+
+    // const [x, y] = getPositionDelta(oldChildRect, newChildRect);
+    const pendingChildRect = createAugmentedClientRectFromMinimumData(
+      minimumPositionData,
+      childRect.width,
+      childRect.height,
+      this.props.windowWidth,
+      this.props.windowHeight
     );
 
-    const { translateX, translateY } = this.getTranslate(quadrant);
+    const { translateX, translateY } = this.getTranslate(
+      startStatus,
+      pendingChildRect
+    );
 
     return {
-      top,
-      left,
-      right,
-      bottom,
+      ...minimumPositionData,
       translateX,
       translateY,
       transformOrigin: this.getTransformOrigin(startStatus, quadrant),
     };
   }
 
-  invertNode(nextStatus: Status) {
-    const { windowWidth, windowHeight } = this.props;
-    const { status, childRect: oldChildRect } = this.state;
+  // invertNode(nextStatus: Status) {
+  //   const { windowWidth, windowHeight } = this.props;
+  //   const { status, childRect: oldChildRect } = this.state;
 
-    // Should be impossible, but Flow
-    if (!oldChildRect) {
-      throw new Error(
-        'No oldChildRect found! Is `invertNode` being called somewhere unexpected?'
-      );
-    }
+  //   // Should be impossible, but Flow
+  //   if (!oldChildRect) {
+  //     throw new Error(
+  //       'No oldChildRect found! Is `invertNode` being called somewhere unexpected?'
+  //     );
+  //   }
 
-    window.requestAnimationFrame(() => {
-      const newChildRect = createAugmentedClientRect(
-        this.childWrapperNode,
-        windowWidth,
-        windowHeight
-      );
+  //   window.requestAnimationFrame(() => {
+  //     const newChildRect = createAugmentedClientRect(
+  //       this.childWrapperNode,
+  //       windowWidth,
+  //       windowHeight
+  //     );
 
-      const [x, y] = getPositionDelta(oldChildRect, newChildRect);
+  //     const [x, y] = getPositionDelta(oldChildRect, newChildRect);
 
-      // TODO: Status-incrementer
-      this.setState({ translateX: x, translateY: y, status: nextStatus });
-    });
-  }
+  //     // TODO: Status-incrementer
+  //     this.setState({ translateX: x, translateY: y, status: nextStatus });
+  //   });
+  // }
 
   playAnimation = () => {
     const { status } = this.state;
@@ -332,19 +307,38 @@ class ChildTraveller extends Component<Props, State> {
     }
   }
 
-  getTranslate(quadrant: Quadrant) {
+  getTranslate(
+    startStatus: StartStatus,
+    pendingChildRect: AugmentedClientRect
+  ) {
     const { from, to } = this.props;
-    const { childRect, fromRect, toRect, status } = this.state;
+    const { childRect, fromRect, toRect } = this.state;
 
-    const isClosing = status === 'open';
+    // We don't have any translation on-open.
+    // Might change this later, if we add padding support.
+    if (startStatus === 'start-opening') {
+      return { translateX: 0, translateY: 0 };
+    }
+
+    if (!fromRect || !toRect || !childRect) {
+      throw new Error('Animation started without necessary rects!');
+    }
 
     // If we're going "to" the target, we want to disappear into its center.
-    if (isClosing) {
-      return {
-        translateX: toRect.left + toRect.width / 2 - childRect.width / 2,
-        translateY: toRect.top + toRect.height / 2 - childRect.height / 2,
-      };
-    }
+    // if (isClosing) {
+    //   return {
+    //     translateX: toRect.left + toRect.width / 2 - childRect.width / 2,
+    //     translateY: toRect.top + toRect.height / 2 - childRect.height / 2,
+    //   };
+    // }
+
+    // Ahh unfortunately complicated bit warning!
+    // So, at this moment in time,
+    const [translateX, translateY] = getPositionDelta(
+      childRect,
+      pendingChildRect
+    );
+    return { translateX, translateY };
 
     // Otherwise, the translate values will be based on the quadrant.
     switch (quadrant) {
@@ -370,25 +364,6 @@ class ChildTraveller extends Component<Props, State> {
         };
       default:
         throw new Error(`Unrecognized quadrant: ${quadrant}`);
-    }
-  }
-
-  getScale(status: Status) {
-    switch (status) {
-      case 'closed':
-        return { scaleX: 0, scaleY: 0 };
-      case 'shrunk':
-        return { scaleX: 0, scaleY: 0 };
-      case 'opening':
-        return { scaleX: spring(1), scaleY: spring(1) };
-      case 'open':
-        return { scaleX: 1, scaleY: 1 };
-      case 'teleported':
-        return { scaleX: 1, scaleY: 1 };
-      case 'closing':
-        return { scaleX: spring(0), scaleY: spring(0) };
-      default:
-        throw new Error('Unrecognized status: ' + status);
     }
   }
 
@@ -418,7 +393,7 @@ class ChildTraveller extends Component<Props, State> {
   getChildPosition(
     quadrant: Quadrant,
     targetRect: AugmentedClientRect
-  ): Position {
+  ): MinimumFixedPosition {
     /**
      * Get the top/left/right/bottom position for the child, relative to the
      * current target.
@@ -478,7 +453,7 @@ class ChildTraveller extends Component<Props, State> {
 
     // NOTE: should be impossible, just for Flow.
     if (!childRect) {
-      return {};
+      throw new Error("childRect doesn't exist");
     }
 
     // This is setting the initial position.
@@ -574,8 +549,6 @@ class ChildTraveller extends Component<Props, State> {
     const { children } = this.props;
     const { status, position } = this.state;
 
-    const shouldSpringScale = ['opening', 'closing'].includes(status);
-
     const {
       top,
       left,
@@ -588,6 +561,9 @@ class ChildTraveller extends Component<Props, State> {
       transformOrigin,
     } = position;
 
+    const shouldSpringScale = ['opening', 'closing'].includes(status);
+    const shouldSpringTransform = ['closing'].includes(status);
+
     return (
       <Motion
         defaultStyle={{
@@ -599,8 +575,8 @@ class ChildTraveller extends Component<Props, State> {
         style={{
           scaleX: shouldSpringScale ? spring(scaleX) : scaleX,
           scaleY: shouldSpringScale ? spring(scaleY) : scaleY,
-          translateX: 0, // TEMP
-          translateY: 0, // TEMP
+          translateX: shouldSpringTransform ? spring(translateX) : translateX,
+          translateY: shouldSpringTransform ? spring(translateY) : translateY,
         }}
         onRest={this.finishPlaying}
       >
@@ -635,7 +611,7 @@ const OuterWrapper = styled.div`
 `;
 
 const Wrapper = styled.div`
-  position: absolute;
+  position: fixed;
 `;
 
 export default ChildTraveller;

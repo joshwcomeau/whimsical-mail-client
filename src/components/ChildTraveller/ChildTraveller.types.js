@@ -30,4 +30,9 @@ export type AugmentedClientRect = {
   },
 };
 
-export type Styles = { [key: string]: string };
+export type MinimumFixedPosition = {
+  top?: number,
+  left?: number,
+  right?: number,
+  bottom?: number,
+};
