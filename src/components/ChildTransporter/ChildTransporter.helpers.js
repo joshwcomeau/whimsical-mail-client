@@ -4,7 +4,7 @@ import { hyphenate } from '../../utils';
 import type {
   AugmentedClientRect,
   MinimumFixedPosition,
-} from './ChildTraveller.types';
+} from './ChildTransporter.types';
 
 // Calculate the distance in pixels between two ClientRects
 // prettier-ignore

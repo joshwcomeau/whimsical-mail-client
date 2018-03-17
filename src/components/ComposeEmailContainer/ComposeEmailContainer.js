@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 
 import { NodeConsumer } from '../NodeProvider';
-import ChildTraveller from '../ChildTraveller';
+import ChildTransporter from '../ChildTransporter';
 
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
@@ -15,7 +15,7 @@ type State = {
 };
 
 class ComposeEmailContainer extends Component<Props, State> {
-  getDirectionAndTargetForChildTraveller = (nodes: Nodes) => {
+  getDirectionAndTargetForChildTransporter = (nodes: Nodes) => {
     switch (this.state.step) {
       case 'closing':
       case 'closed':
@@ -25,19 +25,14 @@ class ComposeEmailContainer extends Component<Props, State> {
     }
   };
 
-  getDirectionForChildTraveller = () => {
-    switch (this.state.step) {
-    }
-  };
-
   render() {
     const { step, actionBeingPerformed } = this.state;
 
     return (
       <NodeConsumer>
         {({ nodes }) => (
-          <ChildTraveller
-            {...this.getDirectionAndTargetForChildTraveller(nodes)}
+          <ChildTransporter
+            {...this.getDirectionAndTargetForChildTransporter(nodes)}
           />
         )}
       </NodeConsumer>

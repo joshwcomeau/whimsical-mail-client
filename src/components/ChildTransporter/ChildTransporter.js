@@ -11,11 +11,11 @@ import {
   getPositionDelta,
   createAugmentedClientRect,
   createAugmentedClientRectFromMinimumData,
-} from './ChildTraveller.helpers';
+} from './ChildTransporter.helpers';
 import type {
   AugmentedClientRect,
   MinimumFixedPosition,
-} from './ChildTraveller.types';
+} from './ChildTransporter.types';
 
 const fastSpring = { stiffness: 150, damping: 20 };
 const slowSpring = { stiffness: 200, damping: 20 };
@@ -59,7 +59,7 @@ type State = {
   },
 };
 
-class ChildTraveller extends Component<Props, State> {
+class ChildTransporter extends Component<Props, State> {
   childWrapperNode: HTMLElement;
 
   state = {
@@ -223,7 +223,7 @@ class ChildTraveller extends Component<Props, State> {
      * This method creates "augmented" client rects for them.
      * An AugmentedClientRect is similar to the ClientRect produced by
      * getBoundingClientRect, but features a couple extra data points.
-     * For more info, see ChildTraveller.types.js
+     * For more info, see ChildTransporter.types.js
      */
     const { from, to, windowWidth, windowHeight } = props;
 
@@ -519,4 +519,4 @@ const Wrapper = styled.div`
   position: fixed;
 `;
 
-export default ChildTraveller;
+export default ChildTransporter;

@@ -1,7 +1,7 @@
-<ComposeEmailState>
+<ComposeEmailContainer>
   <NodeConsumer>
     {({ compose, outbox }) => (
-      <ChildTraveller
+      <ChildTransporter
         direction={step === "opening" ? "from" : "to"}
         target={
           if (step === opening) { 
@@ -18,12 +18,12 @@
           front={<ComposeEmail {...state} {...actions} />}
           back={<ComposeEmailEnveloppe />}
         />
-      </ChildTraveller>
+      </ChildTransporter>
 
       <ModalBackdrop isVisible={step !== 'closing' || step !== 'closed'} />
     )}
   </NodeConsumer>
-</ComposeEmailState>
+</ComposeEmailContainer>
 
 
 ComposeEmailState = {
@@ -39,3 +39,8 @@ ComposeEmailState = {
 
 By default: ComposeEmailState.step is `closed`.
 
+// FLIP Technique time!
+// ChildTransporter starts at its FROM position and animates scale.
+// When the `target` changes, we transfer its existing position in the viewport
+// to an instance property (or state), and once it's updated, we apply the
+// inverse transform, add a transition, and let it slide.
