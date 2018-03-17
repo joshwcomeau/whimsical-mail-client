@@ -58,7 +58,6 @@ export const createAugmentedClientRectFromMinimumData = (
   windowWidth: number,
   windowHeight: number
 ) => {
-  console.log('received', data);
   /**
    * During the initial position calculation, we figure out where our
    * child needs to move to, but for brevity, we only get the minimum
@@ -78,6 +77,14 @@ export const createAugmentedClientRectFromMinimumData = (
       'Cannot calculate AugmentedClientRect without either top or bottom'
     );
   }
+
+  // TODO: Flow doesn't like that I have these one-of-two-required args for
+  // top/bottom and left/right. There are some possible solutions:
+  //  - http://tiny.cc/xuwvry
+  //  - http://tiny.cc/7uwvry
+  //
+  // For now, I'm just gonna FlowFixMe. But I should come back to this and
+  // fix it properly.
 
   const top =
     typeof data.top === 'number'

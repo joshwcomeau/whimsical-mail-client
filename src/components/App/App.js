@@ -7,7 +7,7 @@ import { ModalConsumer } from '../ModalProvider';
 import { NodeConsumer } from '../NodeProvider';
 import Sidebar from '../Sidebar';
 import MainPane from '../MainPane';
-import ComposeEmailModal from '../ComposeEmailModal';
+import ComposeEmailContainer from '../ComposeEmailContainer';
 
 type Props = {};
 
@@ -26,19 +26,14 @@ class App extends Component<Props> {
           </MainPaneWrapper>
         </Wrapper>
 
-        <NodeConsumer>
-          {({ boundingBoxes }) => (
-            <ModalConsumer>
-              {({ currentModal, openFromNode, closeModal }) => (
-                <ComposeEmailModal
-                  handleClose={closeModal}
-                  isOpen={currentModal === 'compose'}
-                  triggerBoundingBox={boundingBoxes['compose-button']}
-                />
-              )}
-            </ModalConsumer>
+        <ModalConsumer>
+          {({ currentModal, openFromNode, closeModal }) => (
+            <ComposeEmailContainer
+              handleClose={closeModal}
+              isOpen={currentModal === 'compose'}
+            />
           )}
-        </NodeConsumer>
+        </ModalConsumer>
       </Providers>
     );
   }

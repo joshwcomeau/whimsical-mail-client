@@ -80,14 +80,11 @@ class ChildTransporter extends Component<Props, State> {
     },
   };
 
-  componentDidMount() {
-    // TODO: We probably don't need `toRect` right away, maybe defer this?
-    const { fromRect, toRect, childRect } = this.getAugmentedClientRects();
-
-    this.setState({ fromRect, toRect, childRect });
-  }
-
   componentWillReceiveProps(nextProps: Props) {
+    if (!nextProps.from || !nextProps.to || !this.childWrapperNode) {
+      return;
+    }
+
     const { fromRect, toRect, childRect } = this.getAugmentedClientRects(
       nextProps
     );
@@ -97,10 +94,15 @@ class ChildTransporter extends Component<Props, State> {
     // When the component receives props, it can mean that our child is about
     // to start moving. We need to record its current position, as that'll
     // serve as the 'initial' position to animate from.
-    this.setState({ fromRect, toRect, childRect });
+    if (this.props.from !== nextProps.from || this.props.to !== nextProps.to) {
+      this.setState({ fromRect, toRect, childRect });
+    }
   }
 
   componentDidUpdate(prevProps: Props) {
+    if (!this.props.from || !this.props.to || !this.childWrapperNode) {
+      return;
+    }
     const { status } = this.state;
 
     // We care about changes to the modal's "open" status (if the user has
@@ -132,6 +134,8 @@ class ChildTransporter extends Component<Props, State> {
   getInitialPositionState(startStatus: StartStatus) {
     const { fromRect, toRect, childRect } = this.state;
 
+    console.log(this.state);
+
     if (!fromRect || !toRect || !childRect) {
       throw new Error('Tried to get position without necessary rects!');
     }
@@ -153,8 +157,6 @@ class ChildTransporter extends Component<Props, State> {
     // so the `right` value is the number of pixels between the element and the
     // right edge of the viewport.
     const minimumPositionData = this.getChildPosition(quadrant, relativeRect);
-
-    console.log({ minimumPositionData });
 
     // Because our animations use CSS transforms, we need to convert our
     // fixed-position coords into an AugmentedClientRect
@@ -447,8 +449,12 @@ class ChildTransporter extends Component<Props, State> {
   }
 
   render() {
-    const { children } = this.props;
+    const { from, to, children } = this.props;
     const { status, position } = this.state;
+
+    if (!from || !to) {
+      return null;
+    }
 
     const {
       top,
@@ -470,8 +476,6 @@ class ChildTransporter extends Component<Props, State> {
         defaultStyle={{
           scaleX: 1,
           scaleY: 1,
-          // translateX: target.left,
-          // translateY: target.top,
         }}
         style={{
           scaleX: shouldSpringScale ? spring(scaleX, fastSpring) : scaleX,

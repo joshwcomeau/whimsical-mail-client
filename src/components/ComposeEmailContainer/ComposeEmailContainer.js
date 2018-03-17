@@ -3,37 +3,60 @@ import React, { Component } from 'react';
 
 import { NodeConsumer } from '../NodeProvider';
 import ChildTransporter from '../ChildTransporter';
+import FoldableLetter from '../FoldableLetter';
+import WindowDimensions from '../WindowDimensions';
 
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
-type ComposeEmailStep = 'opening' | 'open' | 'folding' | 'closing' | 'closed';
+type ComposeEmailStep = 'open' | 'folding' | 'closed';
 
-type Props = {};
+type Props = {
+  isOpen: boolean,
+  handleClose: () => void,
+};
 type State = {
-  step: ComposeEmailStep,
-  actionBeingPerformed: 'send' | 'save' | 'delete',
+  status: ComposeEmailStep,
+  actionBeingPerformed: 'send' | 'save' | 'delete' | null,
 };
 
 class ComposeEmailContainer extends Component<Props, State> {
-  getDirectionAndTargetForChildTransporter = (nodes: Nodes) => {
-    switch (this.state.step) {
-      case 'closing':
-      case 'closed':
-        return { target: nodes['outbox'], direction: 'to' };
-      default:
-        return { target: nodes['compose-button'], direction: 'from' };
-    }
+  state = {
+    status: this.props.isOpen ? 'open' : 'closed',
+    actionBeingPerformed: null,
   };
 
+  renderFront() {
+    return <div>Front</div>;
+  }
+
+  renderBack() {
+    return <div>Back</div>;
+  }
+
   render() {
-    const { step, actionBeingPerformed } = this.state;
+    const { isOpen } = this.props;
+    const { status } = this.state;
 
     return (
       <NodeConsumer>
         {({ nodes }) => (
-          <ChildTransporter
-            {...this.getDirectionAndTargetForChildTransporter(nodes)}
-          />
+          <WindowDimensions>
+            {({ windowWidth, windowHeight }) => (
+              <ChildTransporter
+                from={nodes['compose-button']}
+                to={nodes['outbox']}
+                isOpen={isOpen}
+                windowWidth={windowWidth}
+                windowHeight={windowHeight}
+              >
+                <FoldableLetter
+                  isFolded={status === 'folding'}
+                  front={this.renderFront()}
+                  back={this.renderBack()}
+                />
+              </ChildTransporter>
+            )}
+          </WindowDimensions>
         )}
       </NodeConsumer>
     );
