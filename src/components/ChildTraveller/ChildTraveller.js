@@ -47,15 +47,15 @@ type State = {
   childRect: ?AugmentedClientRect,
   status: Status,
   position: {
-    top?: number,
-    left?: number,
-    right?: number,
-    bottom?: number,
+    top: ?number,
+    left: ?number,
+    right: ?number,
+    bottom: ?number,
     translateX: number,
     translateY: number,
     scaleX: number,
     scaleY: number,
-    transformOrigin?: string,
+    transformOrigin: ?string,
   },
 };
 
@@ -68,10 +68,15 @@ class ChildTraveller extends Component<Props, State> {
     childRect: null,
     status: 'closed', // TODO depend on props.isOpen
     position: {
+      top: null,
+      left: null,
+      right: null,
+      bottom: null,
       scaleX: 0,
       scaleY: 0,
       translateX: 0,
       translateY: 0,
+      transformOrigin: null,
     },
   };
 
@@ -149,6 +154,8 @@ class ChildTraveller extends Component<Props, State> {
     // right edge of the viewport.
     const minimumPositionData = this.getChildPosition(quadrant, relativeRect);
 
+    console.log({ minimumPositionData });
+
     // Because our animations use CSS transforms, we need to convert our
     // fixed-position coords into an AugmentedClientRect
     const pendingChildRect = createAugmentedClientRectFromMinimumData(
@@ -168,6 +175,8 @@ class ChildTraveller extends Component<Props, State> {
       ...minimumPositionData,
       translateX,
       translateY,
+      scaleX: this.state.position.scaleX,
+      scaleY: this.state.position.scaleY,
       transformOrigin,
     };
   }

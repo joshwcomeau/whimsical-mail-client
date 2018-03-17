@@ -19,6 +19,7 @@ type Props = {
 };
 
 type State = {
+  direction?: 'left' | 'right',
   containerDimensions?: {
     top: number,
     left: number,
@@ -33,7 +34,7 @@ type State = {
   },
 };
 
-class Scoocher extends PureComponent<Props> {
+class Scoocher extends PureComponent<Props, State> {
   static defaultProps = {
     offsetX: 0,
     offsetY: 0,

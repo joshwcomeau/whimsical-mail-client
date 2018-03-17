@@ -58,6 +58,7 @@ export const createAugmentedClientRectFromMinimumData = (
   windowWidth: number,
   windowHeight: number
 ) => {
+  console.log('received', data);
   /**
    * During the initial position calculation, we figure out where our
    * child needs to move to, but for brevity, we only get the minimum
@@ -67,12 +68,12 @@ export const createAugmentedClientRectFromMinimumData = (
    * This method bridges that gap and derives the needed position data.
    */
 
-  if (data.top == null && data.bottom == null) {
+  if (typeof data.top !== 'number' && typeof data.bottom !== 'number') {
     throw new Error(
       'Cannot calculate AugmentedClientRect without either top or bottom'
     );
   }
-  if (data.left == null && data.right == null) {
+  if (typeof data.left !== 'number' && typeof data.right !== 'number') {
     throw new Error(
       'Cannot calculate AugmentedClientRect without either top or bottom'
     );
@@ -81,11 +82,13 @@ export const createAugmentedClientRectFromMinimumData = (
   const top =
     typeof data.top === 'number'
       ? data.top
-      : windowHeight - data.bottom - childHeight;
+      : // $FlowFixMe
+        windowHeight - data.bottom - childHeight;
   const left =
     typeof data.left === 'number'
       ? data.left
-      : windowWidth - data.right - childWidth;
+      : // $FlowFixMe
+        windowWidth - data.right - childWidth;
 
   // The data values are in fixed positioning terms;
   // this means that `right` and `bottom` are the distance from that side of
@@ -95,20 +98,35 @@ export const createAugmentedClientRectFromMinimumData = (
   const right =
     typeof data.right === 'number'
       ? windowWidth - data.right
-      : windowWidth - data.left - childWidth;
+      : // $FlowFixMe
+        windowWidth - data.left - childWidth;
   const bottom =
     typeof data.bottom === 'number'
       ? windowHeight - data.bottom
-      : windowHeight - data.top - childHeight;
+      : // $FlowFixMe
+        windowHeight - data.top - childHeight;
 
-  return createAugmentedClientRect({
+  const pseudoClientRect = {
     top,
     left,
     right,
     bottom,
     width: childWidth,
     height: childHeight,
-    x: left,
-    y: top,
-  });
+  };
+
+  return createAugmentedClientRect(
+    // Argh, so our method should take a ClientRect, but we can't create one.
+    // This is a bug in Flow; it _should_ take a DOMRect, and so we could then
+    // build one.
+    //
+    // As it stands, this is duck-typed as a ClientRect, regardless of what
+    // Flow thinks!
+    //
+    // See: https://github.com/facebook/flow/issues/5475
+    // $FlowFixMe
+    pseudoClientRect,
+    windowWidth,
+    windowHeight
+  );
 };
