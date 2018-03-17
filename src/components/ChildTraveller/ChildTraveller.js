@@ -53,69 +53,185 @@ const createAugmentedClientRect = (
   };
 };
 
-type Status = 'idle' | 'inverted' | 'playing';
+type Status =
+  | 'closed'
+  | 'start-opening'
+  | 'opening'
+  | 'open'
+  | 'start-closing'
+  | 'closing';
+
+type StartStatus = 'start-opening' | 'start-closing';
 
 type Props = {
   children: React$Node,
-  direction: 'from' | 'to',
-  target: HTMLElement,
+  from: HTMLElement,
+  to: HTMLElement,
+  isOpen: boolean,
   windowWidth: number,
   windowHeight: number,
 };
 
 type State = {
-  targetRect: ?AugmentedClientRect,
+  fromRect: ?AugmentedClientRect,
+  toRect: ?AugmentedClientRect,
   childRect: ?AugmentedClientRect,
   status: Status,
-  translateX: ?number,
-  translateY: ?number,
+  position: {
+    top?: number,
+    left?: number,
+    right?: number,
+    bottom?: number,
+    translateX: number,
+    translateY: number,
+    scaleX: number,
+    scaleY: number,
+  },
+};
+
+const isClosingOrClosed = (status: Status) => {
+  switch (status) {
+    case 'start-closing':
+    case 'closing':
+    case 'closed': {
+      return true;
+    }
+    default:
+      return false;
+  }
+};
+
+const incrementStatus = (currentStatus: Status) => {
+  const STATUSES: Array<Status> = [
+    'closed',
+    'start-opening',
+    'opening',
+    'open',
+    'start-closing',
+    'closing',
+  ];
+
+  const currentIndex = STATUSES.indexOf(currentStatus);
+
+  if (currentIndex === -1) {
+    throw new Error(
+      'Invalid Status provided. Acceptable values: ' + STATUSES.join(', ')
+    );
+  }
+
+  const nextIndex = (currentIndex + 1) % STATUSES.length;
+  return STATUSES[nextIndex];
 };
 
 class ChildTraveller extends Component<Props, State> {
   childWrapperNode: HTMLElement;
 
   state = {
-    targetRect: null,
+    fromRect: null,
+    toRect: null,
     childRect: null,
-    status: 'idle',
-    translateX: null,
-    translateY: null,
+    status: 'closed', // TODO depend on props.isOpen
+    position: {
+      scaleX: 0,
+      scaleY: 0,
+      translateX: 0,
+      translateY: 0,
+    },
   };
 
   componentDidMount() {
-    const { targetRect, childRect } = this.getAugmentedClientRects();
+    // TODO: We probably don't need `toRect` right away, maybe defer this?
+    const { fromRect, toRect, childRect } = this.getAugmentedClientRects();
 
-    this.setState({ targetRect, childRect });
+    this.setState({ fromRect, toRect, childRect });
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const { targetRect, childRect } = this.getAugmentedClientRects(nextProps);
+    const { fromRect, toRect, childRect } = this.getAugmentedClientRects(
+      nextProps
+    );
+
+    // TODO: We don't have to do this in EVERY cWRP. Be more picky!
 
     // When the component receives props, it can mean that our child is about
     // to start moving. We need to record its current position, as that'll
     // serve as the 'initial' position to animate from.
-    this.setState({ targetRect, childRect });
+    this.setState({ fromRect, toRect, childRect });
   }
 
   componentDidUpdate(prevProps: Props) {
-    const { childRect, status } = this.state;
+    const { status } = this.state;
 
-    const hasTargetChanged = this.props.target !== prevProps.target;
+    // We care about changes to the modal's "open" status (if the user has
+    // toggled it open or closed)
+    const wasJustToggled = prevProps.isOpen !== this.props.isOpen;
 
-    // TODO: interrupts?
+    // TODO: This should probably move to cWRP, so that the whole cycle isn't
+    // required right?
+    if (wasJustToggled) {
+      const startStatus = this.props.isOpen ? 'start-opening' : 'start-closing';
 
-    if (childRect && hasTargetChanged) {
-      this.invertNode();
+      const initialPositionState = this.getInitialPositionState(startStatus);
+
+      this.setState({
+        position: initialPositionState,
+        status: startStatus,
+      });
     }
 
-    if (status === 'inverted') {
-      this.undoInversion();
+    // There are two "interim" statuses, that should only exist for a single
+    // update cycle: 'shrunk' and 'teleported'. These are the "Inverted" part
+    // of FLIP, and the one chosen will depend on whether the child is opening
+    // or closing.
+    if (status === 'start-opening' || status === 'start-closing') {
+      this.playAnimation();
     }
   }
 
-  invertNode() {
+  getInitialPositionState(startStatus: StartStatus) {
+    const { fromRect, toRect, childRect } = this.state;
+
+    // TODO: is this just for FLow? Is it even necessary fo Flow? Figure it out
+    if (!childRect) {
+      return;
+    }
+
+    const isOpening = startStatus === 'start-opening';
+
+    // We want to position the element relative to the relevant node.
+    // For opening, this is the "from" node. For closing, this is the "to" node.
+    const relativeRect = isOpening ? fromRect : toRect;
+
+    // Flow fix?
+    if (!relativeRect) {
+      return;
+    }
+
+    const quadrant = this.getQuadrant(relativeRect);
+
+    // TODO: Should the `quadrant` be computed from within this method?
+    // is it used anywhere else?
+    const { top, left, right, bottom } = this.getChildPosition(
+      quadrant,
+      relativeRect
+    );
+
+    const { translateX, translateY } = this.getTranslate(quadrant);
+
+    return {
+      top,
+      left,
+      right,
+      bottom,
+      translateX,
+      translateY,
+      transformOrigin: this.getTransformOrigin(startStatus, quadrant),
+    };
+  }
+
+  invertNode(nextStatus: Status) {
     const { windowWidth, windowHeight } = this.props;
-    const { childRect: oldChildRect } = this.state;
+    const { status, childRect: oldChildRect } = this.state;
 
     // Should be impossible, but Flow
     if (!oldChildRect) {
@@ -133,45 +249,40 @@ class ChildTraveller extends Component<Props, State> {
 
       const [x, y] = getPositionDelta(oldChildRect, newChildRect);
 
-      this.setState({ translateX: x, translateY: y, status: 'inverted' });
-
-      // // FLIP Animation Time!
-      // // First: the position in this.state.childRect
-      // // Last: the newChildRect we just captured.
-      // // Invert: Let's calculate and apply the inverse translation.
-      // const inverseTranslation = `translate(${x}px, ${y}px)`;
-
-      // applyStylesToDOMNode(this.childWrapperNode, {
-      //   transform: inverseTranslation,
-      //   transition: 'transform 0ms',
-      // });
-
-      // window.requestAnimationFrame(() => {
-      //   applyStylesToDOMNode(this.childWrapperNode, {
-      //     transform: 'translate(0px, 0px)',
-      //     transition: 'transform 1500ms',
-      //   });
-      // });
+      // TODO: Status-incrementer
+      this.setState({ translateX: x, translateY: y, status: nextStatus });
     });
   }
 
-  undoInversion = () => {
+  playAnimation = () => {
+    const { status } = this.state;
+    const nextStatus = incrementStatus(status);
+
     this.setState({
-      translateX: 0,
-      translateY: 0,
-      status: 'playing',
+      position: {
+        ...this.state.position,
+        translateX: 0,
+        translateY: 0,
+        scaleX: nextStatus === 'opening' ? 1 : 0,
+        scaleY: nextStatus === 'opening' ? 1 : 0,
+      },
+      status: incrementStatus(status),
     });
   };
 
   finishPlaying = () => {
-    this.setState({ status: 'idle' });
+    // TODO: Use position since it'd be more accurate?
+    const nextStatus = this.state.status === 'opening' ? 'open' : 'closed';
+
+    this.setState({ status: nextStatus });
   };
 
   getAugmentedClientRects(props: Props = this.props) {
-    const { target, windowWidth, windowHeight } = props;
+    const { from, to, windowWidth, windowHeight } = props;
 
     return {
-      targetRect: createAugmentedClientRect(target, windowWidth, windowHeight),
+      fromRect: createAugmentedClientRect(from, windowWidth, windowHeight),
+      toRect: createAugmentedClientRect(to, windowWidth, windowHeight),
       childRect: createAugmentedClientRect(
         this.childWrapperNode,
         windowWidth,
@@ -180,11 +291,10 @@ class ChildTraveller extends Component<Props, State> {
     };
   }
 
-  getTargetQuadrant() {
-    const { target, windowWidth, windowHeight } = this.props;
-    const { targetRect } = this.state;
+  getQuadrant(rect: ?AugmentedClientRect) {
+    const { windowWidth, windowHeight } = this.props;
 
-    if (!targetRect) {
+    if (!rect) {
       return 1;
     }
 
@@ -213,25 +323,26 @@ class ChildTraveller extends Component<Props, State> {
       y: windowHeight / 2,
     };
 
-    if (targetRect.centerY < windowCenter.y) {
+    if (rect.centerY < windowCenter.y) {
       // top half, left or right
-      return targetRect.centerX < windowCenter.x ? 1 : 2;
+      return rect.centerX < windowCenter.x ? 1 : 2;
     } else {
       // bottom half, left or right
-      return targetRect.centerX < windowCenter.x ? 3 : 4;
+      return rect.centerX < windowCenter.x ? 3 : 4;
     }
   }
 
-  getTargetTranslate(quadrant: Quadrant) {
-    const { target } = this.props;
+  getTranslate(quadrant: Quadrant) {
+    const { from, to } = this.props;
+    const { childRect, fromRect, toRect, status } = this.state;
 
-    const childBox = this.childWrapperNode.getBoundingClientRect();
+    const isClosing = status === 'open';
 
     // If we're going "to" the target, we want to disappear into its center.
-    if (this.props.direction === 'to') {
+    if (isClosing) {
       return {
-        translateX: target.left + target.width / 2 - childBox.width / 2,
-        translateY: target.top + target.height / 2 - childBox.height / 2,
+        translateX: toRect.left + toRect.width / 2 - childRect.width / 2,
+        translateY: toRect.top + toRect.height / 2 - childRect.height / 2,
       };
     }
 
@@ -239,33 +350,52 @@ class ChildTraveller extends Component<Props, State> {
     switch (quadrant) {
       case 1:
         return {
-          translateX: target.right,
-          translateY: target.bottom,
+          translateX: fromRect.right,
+          translateY: fromRect.bottom,
         };
       case 2:
         return {
-          translateX: target.left - childBox.width,
-          translateY: target.bottom,
+          translateX: fromRect.left - childRect.width,
+          translateY: fromRect.bottom,
         };
       case 3:
         return {
-          translateX: target.right,
-          translateY: target.top,
+          translateX: fromRect.right,
+          translateY: fromRect.top,
         };
       case 4:
         return {
-          translateX: target.left,
-          translateY: target.top,
+          translateX: fromRect.left,
+          translateY: fromRect.top,
         };
       default:
         throw new Error(`Unrecognized quadrant: ${quadrant}`);
     }
   }
 
-  getTargetTransformOrigin(quadrant: Quadrant) {
+  getScale(status: Status) {
+    switch (status) {
+      case 'closed':
+        return { scaleX: 0, scaleY: 0 };
+      case 'shrunk':
+        return { scaleX: 0, scaleY: 0 };
+      case 'opening':
+        return { scaleX: spring(1), scaleY: spring(1) };
+      case 'open':
+        return { scaleX: 1, scaleY: 1 };
+      case 'teleported':
+        return { scaleX: 1, scaleY: 1 };
+      case 'closing':
+        return { scaleX: spring(0), scaleY: spring(0) };
+      default:
+        throw new Error('Unrecognized status: ' + status);
+    }
+  }
+
+  getTransformOrigin(startStatus: Status, quadrant: Quadrant) {
     // If we're going "to" the target, we want to disappear into its center.
     // For this reason, the transform-origin will always be the middle.
-    if (this.props.direction === 'to') {
+    if (startStatus === 'start-closing') {
       return 'center center';
     }
 
@@ -285,7 +415,10 @@ class ChildTraveller extends Component<Props, State> {
     }
   }
 
-  getChildPosition(quadrant: Quadrant): ?Position {
+  getChildPosition(
+    quadrant: Quadrant,
+    targetRect: AugmentedClientRect
+  ): Position {
     /**
      * Get the top/left/right/bottom position for the child, relative to the
      * current target.
@@ -340,126 +473,120 @@ class ChildTraveller extends Component<Props, State> {
      *     shrinking it. We want it to disappear into the target, and so we
      *     position it right in the center.
      */
-    const { direction, windowWidth, windowHeight } = this.props;
-    const { targetRect, childRect } = this.state;
+    const { windowWidth, windowHeight } = this.props;
+    const { status, childRect } = this.state;
 
-    // Shouldn't be possible, but Flow doesn't know that.
-    // TODO: Improve this.
-    if (!targetRect || !childRect) {
-      return null;
+    // NOTE: should be impossible, just for Flow.
+    if (!childRect) {
+      return {};
     }
+
+    // This is setting the initial position.
+    // Therefore, if the current status is "closed", it means we're about to
+    // open it, and vice-versa.
+    const isOpening = status === 'closed' || status === 'closing';
 
     switch (quadrant) {
       case 1:
         return {
-          top:
-            direction === 'from'
-              ? targetRect.bottom
-              : targetRect.centerY - childRect.height / 2,
-          left:
-            direction === 'from'
-              ? targetRect.right
-              : targetRect.centerX - childRect.width / 2,
+          top: isOpening
+            ? targetRect.bottom
+            : targetRect.centerY - childRect.height / 2,
+          left: isOpening
+            ? targetRect.right
+            : targetRect.centerX - childRect.width / 2,
         };
       case 2:
         return {
-          top:
-            direction === 'from'
-              ? targetRect.bottom
-              : targetRect.centerY - childRect.height / 2,
-          right:
-            direction === 'from'
-              ? targetRect.fromBottomRight.left
-              : targetRect.fromBottomRight.centerX - childRect.width / 2,
+          top: isOpening
+            ? targetRect.bottom
+            : targetRect.centerY - childRect.height / 2,
+          right: isOpening
+            ? targetRect.fromBottomRight.left
+            : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       case 3:
         return {
-          bottom:
-            direction === 'from'
-              ? targetRect.fromBottomRight.top
-              : targetRect.fromBottomRight.centerY - childRect.height / 2,
-          left:
-            direction === 'from'
-              ? targetRect.right
-              : targetRect.centerX - childRect.width / 2,
+          bottom: isOpening
+            ? targetRect.fromBottomRight.top
+            : targetRect.fromBottomRight.centerY - childRect.height / 2,
+          left: isOpening
+            ? targetRect.right
+            : targetRect.centerX - childRect.width / 2,
         };
       case 4:
         return {
-          bottom:
-            direction === 'from'
-              ? targetRect.fromBottomRight.top
-              : targetRect.fromBottomRight.centerY - childRect.height / 2,
-          right:
-            direction === 'from'
-              ? targetRect.fromBottomRight.left
-              : targetRect.fromBottomRight.centerX - childRect.width / 2,
+          bottom: isOpening
+            ? targetRect.fromBottomRight.top
+            : targetRect.fromBottomRight.centerY - childRect.height / 2,
+          right: isOpening
+            ? targetRect.fromBottomRight.left
+            : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       default:
         throw new Error(`Unrecognized quadrant: ${quadrant}`);
     }
   }
 
+  // getChildPosition() {
+  //   const quadrant = this.getTargetQuadrant();
+
+  //   const transformOrigin = this.getTransformOrigin(quadrant);
+
+  //   let targetValues = {
+  //     ...this.getChildPosition(quadrant),
+  //     scaleX: 1,
+  //     scaleY: 1,
+  //   };
+  //   switch (this.state.status) {
+  //     case 'idle': {
+  //       targetValues = {
+  //         ...targetValues,
+  //         translateX: 0,
+  //         translateY: 0,
+  //       };
+  //       break;
+  //     }
+  //     case 'inverted': {
+  //       targetValues = {
+  //         ...targetValues,
+  //         translateX: this.state.translateX,
+  //         translateY: this.state.translateY,
+  //         scaleX: this.props.direction === 'to' ? 1 : 0,
+  //         scaleY: this.props.direction === 'to' ? 1 : 0,
+  //       };
+  //       break;
+  //     }
+  //     case 'playing': {
+  //       targetValues = {
+  //         ...targetValues,
+  //         translateX: this.props.direction === 'to' ? spring(0) : 0,
+  //         translateY: this.props.direction === 'to' ? spring(0) : 0,
+  //         scaleX: spring(this.props.direction === 'to' ? 0 : 1),
+  //         scaleY: spring(this.props.direction === 'to' ? 0 : 1),
+  //       };
+  //       break;
+  //     }
+  //   }
+  // }
+
   render() {
-    const { target, direction, children } = this.props;
+    const { children } = this.props;
+    const { status, position } = this.state;
 
-    const quadrant = this.getTargetQuadrant();
+    const shouldSpringScale = ['opening', 'closing'].includes(status);
 
-    const transformOrigin = this.getTargetTransformOrigin(quadrant);
-
-    let targetValues = {
-      ...this.getChildPosition(quadrant),
-      scaleX: 1,
-      scaleY: 1,
-    };
-    switch (this.state.status) {
-      case 'idle': {
-        targetValues = {
-          ...targetValues,
-          translateX: 0,
-          translateY: 0,
-        };
-        break;
-      }
-      case 'inverted': {
-        targetValues = {
-          ...targetValues,
-          translateX: this.state.translateX,
-          translateY: this.state.translateY,
-          scaleX: this.props.direction === 'to' ? 1 : 0,
-          scaleY: this.props.direction === 'to' ? 1 : 0,
-        };
-        break;
-      }
-      case 'playing': {
-        targetValues = {
-          ...targetValues,
-          translateX: this.props.direction === 'to' ? spring(0) : 0,
-          translateY: this.props.direction === 'to' ? spring(0) : 0,
-          scaleX: spring(this.props.direction === 'to' ? 0 : 1),
-          scaleY: spring(this.props.direction === 'to' ? 0 : 1),
-        };
-        break;
-      }
-    }
-
-    console.log(targetValues);
-
-    // if (this.childWrapperNode) {
-    //   // const { translateX, translateY } = this.getTargetTranslate(quadrant);
-
-    //   targetValues = {
-    //     scaleX: spring(direction === 'from' ? 1 : 0),
-    //     scaleY: spring(direction === 'from' ? 1 : 0),
-    //     ...this.getChildPosition(quadrant),
-    //     // translateX: direction === 'from' ? translateX : spring(translateX),
-    //     // translateY: direction === 'from' ? translateY : spring(translateY),
-    //   };
-    // } else {
-    //   targetValues = {
-    //     scaleX: 0,
-    //     scaleY: 0,
-    //   };
-    // }
+    const {
+      top,
+      left,
+      right,
+      bottom,
+      scaleX,
+      scaleY,
+      translateX,
+      translateY,
+      transformOrigin,
+    } = position;
 
     return (
       <Motion
@@ -469,19 +596,15 @@ class ChildTraveller extends Component<Props, State> {
           // translateX: target.left,
           // translateY: target.top,
         }}
-        style={targetValues}
+        style={{
+          scaleX: shouldSpringScale ? spring(scaleX) : scaleX,
+          scaleY: shouldSpringScale ? spring(scaleY) : scaleY,
+          translateX: 0, // TEMP
+          translateY: 0, // TEMP
+        }}
         onRest={this.finishPlaying}
       >
-        {({
-          scaleX,
-          scaleY,
-          translateX,
-          translateY,
-          top,
-          left,
-          bottom,
-          right,
-        }) => (
+        {({ scaleX, scaleY, translateX, translateY }) => (
           <Wrapper
             innerRef={node => (this.childWrapperNode = node)}
             style={{

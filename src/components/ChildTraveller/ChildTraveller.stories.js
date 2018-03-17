@@ -8,25 +8,21 @@ import WindowDimensions from '../WindowDimensions';
 
 type Quadrant = 1 | 2 | 3 | 4;
 
-type Props = {
-  startingQuadrant: Quadrant,
-  fromQuadrants: Array<Quadrant>,
-  toQuadrants: Array<Quadrant>,
-};
+const QUADRANTS: Array<Quadrant> = [1, 2, 3, 4];
+
+type Props = {};
 
 type State = {
-  direction: 'to' | 'from' | null,
-  target: ?HTMLElement,
+  from: ?HTMLElement,
+  to: ?HTMLElement,
+  isOpen: boolean,
 };
 
 class Wrapper extends Component<Props, State> {
-  static defaultProps = {
-    startingQuadrant: 1,
-  };
-
   state = {
-    direction: null,
-    target: null,
+    from: null,
+    to: null,
+    isOpen: false,
   };
 
   nodes: {
@@ -34,23 +30,28 @@ class Wrapper extends Component<Props, State> {
   } = {};
 
   componentDidMount() {
-    const from = this.nodes[this.props.startingQuadrant];
+    const from = this.nodes[1];
+    const to = this.nodes[2];
 
     this.setState({
-      direction: 'from',
-      target: from,
+      from,
+      to,
     });
   }
 
-  goTo = node => {
-    this.setState({ direction: 'to', target: node });
-  };
-
-  goFrom = node => {
-    this.setState({
-      direction: 'from',
-      target: node,
-    });
+  handleClick = node => {
+    if (this.state.isOpen) {
+      this.setState({
+        to: node,
+        isOpen: false,
+      });
+    } else {
+      this.setState({
+        from: node,
+        to: node,
+        isOpen: true,
+      });
+    }
   };
 
   getPositionForQuadrant = quadrant => {
@@ -69,45 +70,31 @@ class Wrapper extends Component<Props, State> {
   };
 
   render() {
-    const { fromQuadrants, toQuadrants } = this.props;
-
     return (
       <WindowDimensions>
         {({ windowWidth, windowHeight }) => (
           <Fragment>
-            {fromQuadrants.map(quadrant => (
+            {QUADRANTS.map(quadrant => (
               <Button
                 key={quadrant}
+                id={`button-${quadrant}`}
                 innerRef={node => (this.nodes[quadrant] = node)}
                 style={{
                   position: 'fixed',
                   ...this.getPositionForQuadrant(quadrant),
                 }}
-                onClick={() => this.goFrom(this.nodes[quadrant])}
+                onClick={() => this.handleClick(this.nodes[quadrant])}
               >
-                From
+                Button
               </Button>
             ))}
 
-            {toQuadrants.map(quadrant => (
-              <Button
-                key={quadrant}
-                innerRef={node => (this.nodes[quadrant] = node)}
-                style={{
-                  position: 'fixed',
-                  ...this.getPositionForQuadrant(quadrant),
-                }}
-                onClick={() => this.goTo(this.nodes[quadrant])}
-              >
-                To
-              </Button>
-            ))}
-
-            {this.state.direction &&
-              this.state.target && (
+            {this.state.from &&
+              this.state.to && (
                 <ChildTraveller
-                  direction={this.state.direction}
-                  target={this.state.target}
+                  isOpen={this.state.isOpen}
+                  from={this.state.from}
+                  to={this.state.to}
                   windowWidth={windowWidth}
                   windowHeight={windowHeight}
                 >
