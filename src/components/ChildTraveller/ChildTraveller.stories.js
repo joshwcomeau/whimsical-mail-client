@@ -103,7 +103,7 @@ class Wrapper extends Component<Props, State> {
                   <div
                     style={{
                       width: 250,
-                      height: 50,
+                      height: 450,
                       background: 'red',
                     }}
                   />
