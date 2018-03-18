@@ -37,7 +37,7 @@ class FoldableLetter extends PureComponent<Props> {
   }
 
   renderFoldedCopy() {
-    const { front, speed, isFolded } = this.props;
+    const { front, back, speed, isFolded } = this.props;
 
     if (!isFolded) {
       return null;
@@ -57,7 +57,7 @@ class FoldableLetter extends PureComponent<Props> {
               dangerouslySetInnerHTML={{ __html: topFoldNode.outerHTML }}
             />
           </HideOverflow>
-          <TopFoldBack id="tfb" />
+          <TopFoldBack>{back}</TopFoldBack>
         </TopFold>
 
         <MiddleFold height={height}>
@@ -76,7 +76,7 @@ class FoldableLetter extends PureComponent<Props> {
               dangerouslySetInnerHTML={{ __html: bottomFoldNode.outerHTML }}
             />
           </HideOverflow>
-          <BottomFoldBack id="tfb" />
+          <BottomFoldBack />
         </BottomFold>
       </Wrapper>
     );

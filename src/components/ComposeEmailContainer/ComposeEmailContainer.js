@@ -10,6 +10,7 @@ import WindowDimensions from '../WindowDimensions';
 import ChildTransporter from '../ChildTransporter';
 import FoldableLetter from '../FoldableLetter';
 import ComposeEmail from '../ComposeEmail';
+import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
 
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
@@ -56,7 +57,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   }
 
   renderBack() {
-    return <div>Back</div>;
+    return <ComposeEmailEnvelope />;
   }
 
   render() {
