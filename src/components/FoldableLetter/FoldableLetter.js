@@ -1,5 +1,5 @@
 // @flow
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import styled, { keyframes } from 'styled-components';
 
 type Props = {
@@ -8,7 +8,6 @@ type Props = {
   back: React$Element<*>,
   speed: number,
   onCompleteFolding: () => void,
-  innerRef: (elem: HTMLElement) => any,
 };
 
 class FoldableLetter extends PureComponent<Props> {
@@ -25,14 +24,24 @@ class FoldableLetter extends PureComponent<Props> {
     window.setTimeout(this.props.onCompleteFolding, 1333);
   }
 
-  render() {
-    const { front, speed, innerRef } = this.props;
+  renderOriginal() {
+    const { front, speed, isFolded } = this.props;
 
-    // We expect that when this component mounts, it is not folded.
-    // In this case, we just want to render the "front", but capture a ref to
-    // it, so that when the time comes to fold, we have a node we can work with.
-    if (!this.props.isFolded) {
-      return React.cloneElement(front, { ref: node => (this.node = node) });
+    return (
+      <div
+        ref={node => (this.node = node)}
+        style={{ display: 'inline-block', opacity: isFolded ? 0 : 1 }}
+      >
+        {front}
+      </div>
+    );
+  }
+
+  renderFoldedCopy() {
+    const { front, speed, isFolded } = this.props;
+
+    if (!isFolded) {
+      return null;
     }
 
     const { top, left, width, height } = this.node.getBoundingClientRect();
@@ -42,7 +51,7 @@ class FoldableLetter extends PureComponent<Props> {
     const bottomFoldNode = this.node.cloneNode(true);
 
     return (
-      <Wrapper innerRef={innerRef} style={{ top, left, width, height }}>
+      <Wrapper style={{ top: 0, left: 0, width, height }}>
         <TopFold speed={speed} height={height}>
           <HideOverflow>
             <TopFoldContents
@@ -71,6 +80,17 @@ class FoldableLetter extends PureComponent<Props> {
           <BottomFoldBack id="tfb" />
         </BottomFold>
       </Wrapper>
+    );
+  }
+
+  render() {
+    const { front, speed, isFolded } = this.props;
+
+    return (
+      <Fragment>
+        {this.renderOriginal()}
+        {this.renderFoldedCopy()}
+      </Fragment>
     );
   }
 }

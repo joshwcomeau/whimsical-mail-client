@@ -9,6 +9,7 @@ import { NodeConsumer } from '../NodeProvider';
 import WindowDimensions from '../WindowDimensions';
 import ChildTransporter from '../ChildTransporter';
 import FoldableLetter from '../FoldableLetter';
+import ComposeEmail from '../ComposeEmail';
 
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
@@ -38,10 +39,20 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     actionBeingPerformed: null,
   };
 
+  sendEmail = () => {
+    this.setState({ actionBeingPerformed: 'send', status: 'folding' });
+  };
+
+  finishAction = () => {
+    this.setState({ actionBeingPerformed: null, status: 'closed' }, () => {
+      this.props.handleClose();
+    });
+  };
+
   renderFront() {
     return (
-      <div style={{ width: 200, height: 600, backgroundColor: 'red' }}>
-        Front
+      <div>
+        <ComposeEmail handleSend={this.sendEmail} />
       </div>
     );
   }
@@ -59,13 +70,14 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       windowWidth,
       windowHeight,
     } = this.props;
-    const { status } = this.state;
+    const { status, actionBeingPerformed } = this.state;
 
-    console.log(handleClose);
+    console.log(status, actionBeingPerformed);
 
     return (
       <Fragment>
         <Backdrop isOpen={isOpen} onClick={handleClose} />
+
         <ChildTransporter
           from={from}
           to={to}
@@ -75,6 +87,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
         >
           <FoldableLetter
             isFolded={status === 'folding'}
+            onCompleteFolding={this.finishAction}
             front={this.renderFront()}
             back={this.renderBack()}
           />
