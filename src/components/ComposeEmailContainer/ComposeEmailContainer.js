@@ -1,32 +1,49 @@
 // @flow
-import React, { Component } from 'react';
+import React, { PureComponent, Fragment } from 'react';
+import styled from 'styled-components';
 
+import { Z_INDICES } from '../../constants';
+
+import { ModalConsumer } from '../ModalProvider';
 import { NodeConsumer } from '../NodeProvider';
+import WindowDimensions from '../WindowDimensions';
 import ChildTransporter from '../ChildTransporter';
 import FoldableLetter from '../FoldableLetter';
-import WindowDimensions from '../WindowDimensions';
 
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
 type ComposeEmailStep = 'open' | 'folding' | 'closed';
 
 type Props = {
-  isOpen: boolean,
+  /**
+   * NOTE: The following props are provided by a higher-order component,
+   * defined at the base of this file.
+   */
   handleClose: () => void,
+  isOpen: boolean,
+  to: ?HTMLElement,
+  from: ?HTMLElement,
+  windowWidth: number,
+  windowHeight: any,
 };
+
 type State = {
   status: ComposeEmailStep,
   actionBeingPerformed: 'send' | 'save' | 'delete' | null,
 };
 
-class ComposeEmailContainer extends Component<Props, State> {
+class ComposeEmailContainer extends PureComponent<Props, State> {
   state = {
     status: this.props.isOpen ? 'open' : 'closed',
     actionBeingPerformed: null,
   };
 
   renderFront() {
-    return <div>Front</div>;
+    return (
+      <div style={{ width: 200, height: 600, backgroundColor: 'red' }}>
+        Front
+      </div>
+    );
   }
 
   renderBack() {
@@ -34,33 +51,77 @@ class ComposeEmailContainer extends Component<Props, State> {
   }
 
   render() {
-    const { isOpen } = this.props;
+    const {
+      handleClose,
+      isOpen,
+      from,
+      to,
+      windowWidth,
+      windowHeight,
+    } = this.props;
     const { status } = this.state;
 
+    console.log(handleClose);
+
     return (
-      <NodeConsumer>
-        {({ nodes }) => (
-          <WindowDimensions>
-            {({ windowWidth, windowHeight }) => (
-              <ChildTransporter
-                from={nodes['compose-button']}
-                to={nodes['outbox']}
-                isOpen={isOpen}
-                windowWidth={windowWidth}
-                windowHeight={windowHeight}
-              >
-                <FoldableLetter
-                  isFolded={status === 'folding'}
-                  front={this.renderFront()}
-                  back={this.renderBack()}
-                />
-              </ChildTransporter>
-            )}
-          </WindowDimensions>
-        )}
-      </NodeConsumer>
+      <Fragment>
+        <Backdrop isOpen={isOpen} onClick={handleClose} />
+        <ChildTransporter
+          from={from}
+          to={to}
+          isOpen={isOpen}
+          windowWidth={windowWidth}
+          windowHeight={windowHeight}
+        >
+          <FoldableLetter
+            isFolded={status === 'folding'}
+            front={this.renderFront()}
+            back={this.renderBack()}
+          />
+        </ChildTransporter>
+      </Fragment>
     );
   }
 }
 
-export default ComposeEmailContainer;
+const Backdrop = styled.div`
+  position: absolute;
+  z-index: ${Z_INDICES.modalBackdrop};
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: black;
+  opacity: ${props => (props.isOpen ? 0.25 : 0)};
+  pointer-events: ${props => (props.isOpen ? 'auto' : 'none')};
+  transition: opacity 500ms;
+`;
+
+// Thin HOC which collects information about:
+//  - whether or not this modal is open
+//  - the DOM nodes necessary for the open/close animation
+//  - the window dimensions (width and height), needed by ChildTransporter
+const withEnvironmentData = WrappedComponent => (props: any) => (
+  <WindowDimensions>
+    {({ windowWidth, windowHeight }) => (
+      <ModalConsumer>
+        {({ currentModal, closeModal }) => (
+          <NodeConsumer>
+            {({ nodes }) => (
+              <WrappedComponent
+                {...props}
+                from={nodes['compose-button']}
+                to={nodes['outbox']}
+                isOpen={currentModal === 'compose'}
+                handleClose={closeModal}
+                windowWidth={windowWidth}
+                windowHeight={windowHeight}
+              />
+            )}
+          </NodeConsumer>
+        )}
+      </ModalConsumer>
+    )}
+  </WindowDimensions>
+);
+export default withEnvironmentData(ComposeEmailContainer);

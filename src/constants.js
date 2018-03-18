@@ -25,3 +25,7 @@ export const COLORS = {
     '900': '#111',
   },
 };
+
+export const Z_INDICES = {
+  modalBackdrop: 100,
+};

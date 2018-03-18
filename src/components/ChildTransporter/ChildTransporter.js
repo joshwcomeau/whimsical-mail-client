@@ -7,6 +7,8 @@ import React, { Component } from 'react';
 import { Motion, spring } from 'react-motion';
 import styled from 'styled-components';
 
+import { isEmpty } from '../../utils';
+
 import {
   getPositionDelta,
   createAugmentedClientRect,
@@ -85,21 +87,19 @@ class ChildTransporter extends Component<Props, State> {
       return;
     }
 
-    const { fromRect, toRect, childRect } = this.getAugmentedClientRects(
-      nextProps
-    );
+    // If the `isOpen` status changes, we need to recapture our boxes.
+    // NOTE: We're assuming that all available nodes are available when
+    // we reach this step.
+    if (this.props.isOpen !== nextProps.isOpen) {
+      const { fromRect, toRect, childRect } = this.getAugmentedClientRects(
+        nextProps
+      );
 
-    // TODO: We don't have to do this in EVERY cWRP. Be more picky!
-
-    // When the component receives props, it can mean that our child is about
-    // to start moving. We need to record its current position, as that'll
-    // serve as the 'initial' position to animate from.
-    if (this.props.from !== nextProps.from || this.props.to !== nextProps.to) {
       this.setState({ fromRect, toRect, childRect });
     }
   }
 
-  componentDidUpdate(prevProps: Props) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     if (!this.props.from || !this.props.to || !this.childWrapperNode) {
       return;
     }
@@ -133,8 +133,6 @@ class ChildTransporter extends Component<Props, State> {
 
   getInitialPositionState(startStatus: StartStatus) {
     const { fromRect, toRect, childRect } = this.state;
-
-    console.log(this.state);
 
     if (!fromRect || !toRect || !childRect) {
       throw new Error('Tried to get position without necessary rects!');
@@ -521,6 +519,7 @@ const OuterWrapper = styled.div`
 
 const Wrapper = styled.div`
   position: fixed;
+  z-index: 10000;
 `;
 
 export default ChildTransporter;

@@ -3,11 +3,9 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 
 import Providers from '../Providers';
-import { ModalConsumer } from '../ModalProvider';
-import { NodeConsumer } from '../NodeProvider';
 import Sidebar from '../Sidebar';
 import MainPane from '../MainPane';
-import ComposeEmailContainer from '../ComposeEmailContainer';
+import ComposeEmailModal from '../ComposeEmailContainer';
 
 type Props = {};
 
@@ -26,14 +24,7 @@ class App extends Component<Props> {
           </MainPaneWrapper>
         </Wrapper>
 
-        <ModalConsumer>
-          {({ currentModal, openFromNode, closeModal }) => (
-            <ComposeEmailContainer
-              handleClose={closeModal}
-              isOpen={currentModal === 'compose'}
-            />
-          )}
-        </ModalConsumer>
+        <ComposeEmailModal />
       </Providers>
     );
   }
