@@ -12,33 +12,27 @@ type State = {
   // This is an artificial constraint, though. If you needed multiple modals,
   // you could use a map-like object, eg { [modalId: string]: boolean }
   currentModal: ModalId | null,
-  // When the modal opens, it expands outwards in 2 dimensions, similar to
-  // Material Design. For it to work, we need to know the node that triggered
-  // the update, to "source" the animation from there.
-  openFromNode: ?HTMLElement,
 };
 
 class ModalProvider extends Component<Props, State> {
   state = {
     currentModal: null,
-    openFromNode: null,
   };
 
   openModal = (modalId: ModalId, openFromNode: HTMLElement) =>
-    this.setState({ currentModal: modalId, openFromNode });
+    this.setState({ currentModal: modalId });
 
   closeModal = () => this.setState({ currentModal: null });
 
   render() {
     const { children } = this.props;
-    const { currentModal, openFromNode } = this.state;
+    const { currentModal } = this.state;
 
     return (
       <ModalContext.Provider
         value={{
           // State
           currentModal,
-          openFromNode,
 
           // Actions
           openModal: this.openModal,

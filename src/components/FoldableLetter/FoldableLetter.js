@@ -17,11 +17,10 @@ class FoldableLetter extends PureComponent<Props> {
 
   node: HTMLElement;
 
-  componentDidMount() {
-    // Once the "folding" animation completes, fire off the callback.
-    // For now, I'm just waiting until the animation delay has elapsed,
-    // but it'd be better to use a transitionend callback maybe?
-    window.setTimeout(this.props.onCompleteFolding, 1333);
+  componentDidUpdate(prevProps: Props) {
+    if (!prevProps.isFolded && this.props.isFolded) {
+      window.setTimeout(this.props.onCompleteFolding, 1000);
+    }
   }
 
   renderOriginal() {

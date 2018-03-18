@@ -44,9 +44,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   };
 
   finishAction = () => {
-    this.setState({ actionBeingPerformed: null, status: 'closed' }, () => {
-      this.props.handleClose();
-    });
+    this.props.handleClose();
   };
 
   renderFront() {
@@ -71,8 +69,6 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       windowHeight,
     } = this.props;
     const { status, actionBeingPerformed } = this.state;
-
-    console.log(status, actionBeingPerformed);
 
     return (
       <Fragment>
@@ -107,7 +103,7 @@ const Backdrop = styled.div`
   background: black;
   opacity: ${props => (props.isOpen ? 0.25 : 0)};
   pointer-events: ${props => (props.isOpen ? 'auto' : 'none')};
-  transition: opacity 500ms;
+  transition: opacity 1000ms;
 `;
 
 // Thin HOC which collects information about:
