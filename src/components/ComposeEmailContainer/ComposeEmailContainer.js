@@ -14,7 +14,7 @@ import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
 
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
-type ComposeEmailStep = 'open' | 'folding' | 'closed';
+type ComposeEmailStep = 'idle' | 'folding' | 'transporting';
 
 type Props = {
   /**
@@ -36,8 +36,18 @@ type State = {
 
 class ComposeEmailContainer extends PureComponent<Props, State> {
   state = {
-    status: this.props.isOpen ? 'open' : 'closed',
+    status: 'idle',
     actionBeingPerformed: null,
+  };
+
+  handleOpenOrClose = (status: 'open' | 'closed') => {
+    if (status === 'closed') {
+      // Reset for future opens
+      this.setState({
+        status: 'idle',
+        actionBeingPerformed: null,
+      });
+    }
   };
 
   sendEmail = () => {
@@ -45,7 +55,16 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   };
 
   finishAction = () => {
+    this.setState({ actionBeingPerformed: null, status: 'transporting' });
     this.props.handleClose();
+
+    // HACK: We want to wait until the transportation has completed before
+    // we "unset" the folded state; otherwise it'll unfold in transit, and
+    // that's not what a proper envelope should do!
+    // Because we use Spring Physics(tm) for everything, though, we can't
+    // simply use a TRANSPORT_DURATION constant. Instead, we'll guesstimate it
+    // here, and tweak as needed based on the spring settings.
+    //
   };
 
   renderFront() {
@@ -69,7 +88,9 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       windowWidth,
       windowHeight,
     } = this.props;
+
     const { status, actionBeingPerformed } = this.state;
+    console.log('status and ation', status, actionBeingPerformed);
 
     return (
       <Fragment>
@@ -81,9 +102,10 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           isOpen={isOpen}
           windowWidth={windowWidth}
           windowHeight={windowHeight}
+          handleFinishTransportation={this.handleOpenOrClose}
         >
           <FoldableLetter
-            isFolded={status === 'folding'}
+            isFolded={status === 'folding' || status === 'transporting'}
             onCompleteFolding={this.finishAction}
             front={this.renderFront()}
             back={this.renderBack()}

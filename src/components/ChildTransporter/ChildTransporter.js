@@ -33,6 +33,7 @@ type Status =
   | 'closing';
 
 type StartStatus = 'start-opening' | 'start-closing';
+type FinalStatus = 'open' | 'closed';
 
 type Props = {
   children: React$Node,
@@ -41,6 +42,7 @@ type Props = {
   isOpen: boolean,
   windowWidth: number,
   windowHeight: number,
+  handleFinishTransportation: (status: FinalStatus) => any,
 };
 
 type State = {
@@ -210,6 +212,10 @@ class ChildTransporter extends Component<Props, State> {
     const nextStatus = this.state.status === 'opening' ? 'open' : 'closed';
 
     this.setState({ status: nextStatus });
+
+    if (typeof this.props.handleFinishTransportation === 'function') {
+      this.props.handleFinishTransportation(nextStatus);
+    }
   };
 
   getAugmentedClientRects(props: Props = this.props) {
