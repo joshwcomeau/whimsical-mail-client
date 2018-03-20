@@ -3,24 +3,48 @@
  * This is yet another "fake" component. It doesn't do anything with the values
  * typed into it.
  */
-import React from 'react';
+import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 
 import { COLORS } from '../../constants';
 
 type Props = {
+  id: string,
+  value: string,
   label: string,
-  height?: number,
+  height: number,
+  isVisible: boolean,
+  onChange: (ev: SyntheticEvent<any>) => void,
 };
 
-const ComposeEmailInput = ({ label, height = 32, ...delegated }: Props) => {
-  return (
-    <Wrapper height={height}>
-      <TextLabel>{label}:</TextLabel>
-      <Input type="email" {...delegated} />
-    </Wrapper>
-  );
-};
+class ComposeEmailAddressInput extends PureComponent<Props> {
+  static defaultProps = {
+    height: 32,
+  };
+
+  render() {
+    const {
+      label,
+      value,
+      onChange,
+      height,
+      isVisible,
+      ...delegated
+    } = this.props;
+
+    return (
+      <Wrapper height={height}>
+        <TextLabel>{label}:</TextLabel>
+        <Input
+          type="email"
+          value={value}
+          onChange={this.props.onChange}
+          {...delegated}
+        />
+      </Wrapper>
+    );
+  }
+}
 
 const Wrapper = styled.label`
   display: flex;
@@ -48,6 +72,7 @@ const Input = styled.input`
   outline: none;
   transform: translateY(1px);
   font-size: 14px;
+  backface-visibility: hidden;
 
   &:focus {
     border-bottom: 2px solid ${COLORS.pink[500]};
@@ -58,4 +83,4 @@ const Input = styled.input`
   }
 `;
 
-export default ComposeEmailInput;
+export default ComposeEmailAddressInput;

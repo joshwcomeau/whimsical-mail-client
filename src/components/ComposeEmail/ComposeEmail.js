@@ -6,31 +6,62 @@ import SendIcon from 'react-icons/lib/md/send';
 import { COLORS } from '../../constants';
 
 import Button from '../Button';
-import ComposeEmailInput from '../ComposeEmailInput';
+import ComposeEmailAddressInput from '../ComposeEmailAddressInput';
+import ControlledInput from '../ControlledInput';
 
-type Props = {};
+type Props = {
+  updateField: (data: any) => void,
+  handleSend: () => void,
+};
 
 class ComposeEmail extends Component<Props> {
   render() {
+    const { updateField, handleSend } = this.props;
     return (
       <Wrapper>
         <ModalContents>
           <Header>
-            <ComposeEmailInput
+            <ComposeEmailAddressInput
               disabled
-              label="from"
               value="Josh Comeau <joshua@khanacademy.org>"
+              id="from"
+              label="from"
             />
-            <ComposeEmailInput label="to" placeholder="jane@example.com" />
+            <ControlledInput>
+              {(value, handleChange) => (
+                <ComposeEmailAddressInput
+                  value={value}
+                  onChange={handleChange}
+                  label="to"
+                  placeholder="jane@example.com"
+                />
+              )}
+            </ControlledInput>
           </Header>
 
           <MainContent>
-            <Subject placeholder="Subject" />
-            <Body placeholder="Write something..." />
+            <ControlledInput id="to">
+              {(value, handleChange) => (
+                <Subject
+                  placeholder="Subject"
+                  value={value}
+                  onChange={handleChange}
+                />
+              )}
+            </ControlledInput>
+            <ControlledInput id="to">
+              {(value, handleChange) => (
+                <Body
+                  placeholder="Write something..."
+                  value={value}
+                  onChange={handleChange}
+                />
+              )}
+            </ControlledInput>
           </MainContent>
 
           <Footer>
-            <Button onClick={this.props.handleSend}>
+            <Button onClick={handleSend}>
               <SendIcon />
             </Button>
           </Footer>

@@ -19,9 +19,6 @@ import type {
   MinimumFixedPosition,
 } from './ChildTransporter.types';
 
-const fastSpring = { stiffness: 150, damping: 20 };
-const slowSpring = { stiffness: 200, damping: 20 };
-
 type Quadrant = 1 | 2 | 3 | 4;
 
 type Status =
@@ -32,6 +29,12 @@ type Status =
   | 'start-closing'
   | 'closing';
 
+type SpringSettings = {
+  stiffness: number,
+  damping: number,
+  precision?: number,
+};
+
 type StartStatus = 'start-opening' | 'start-closing';
 type FinalStatus = 'open' | 'closed';
 
@@ -40,6 +43,10 @@ type Props = {
   from: HTMLElement,
   to: HTMLElement,
   isOpen: boolean,
+  SpringOpenHorizontal: SpringSettings,
+  SpringOpenVertical: SpringSettings,
+  SpringCloseHorizontal: SpringSettings,
+  SpringCloseVertical: SpringSettings,
   windowWidth: number,
   windowHeight: number,
   handleFinishTransportation: (status: FinalStatus) => any,
@@ -64,6 +71,12 @@ type State = {
 };
 
 class ChildTransporter extends Component<Props, State> {
+  static defaultProps = {
+    springOpenHorizontal: { stiffness: 150, damping: 20 },
+    springOpenVertical: { stiffness: 200, damping: 20 },
+    springCloseHorizontal: { stiffness: 100, damping: 22 },
+    springCloseVertical: { stiffness: 100, damping: 22 },
+  };
   childWrapperNode: HTMLElement;
 
   state = {
@@ -453,7 +466,15 @@ class ChildTransporter extends Component<Props, State> {
   }
 
   render() {
-    const { from, to, children } = this.props;
+    const {
+      from,
+      to,
+      children,
+      springOpenHorizontal,
+      springOpenVertical,
+      springCloseHorizontal,
+      springCloseVertical,
+    } = this.props;
     const { status, position } = this.state;
 
     if (!from || !to) {
@@ -475,6 +496,11 @@ class ChildTransporter extends Component<Props, State> {
     const shouldSpringScale = ['opening', 'closing'].includes(status);
     const shouldSpringTransform = ['closing'].includes(status);
 
+    const springHorizontal =
+      status === 'opening' ? springOpenHorizontal : springCloseHorizontal;
+    const springVertical =
+      status === 'opening' ? springOpenVertical : springCloseVertical;
+
     return (
       <Motion
         defaultStyle={{
@@ -482,13 +508,13 @@ class ChildTransporter extends Component<Props, State> {
           scaleY: 1,
         }}
         style={{
-          scaleX: shouldSpringScale ? spring(scaleX, fastSpring) : scaleX,
-          scaleY: shouldSpringScale ? spring(scaleY, slowSpring) : scaleY,
+          scaleX: shouldSpringScale ? spring(scaleX, springHorizontal) : scaleX,
+          scaleY: shouldSpringScale ? spring(scaleY, springVertical) : scaleY,
           translateX: shouldSpringTransform
-            ? spring(translateX, fastSpring)
+            ? spring(translateX, springHorizontal)
             : translateX,
           translateY: shouldSpringTransform
-            ? spring(translateY, slowSpring)
+            ? spring(translateY, springVertical)
             : translateY,
         }}
         onRest={this.finishPlaying}

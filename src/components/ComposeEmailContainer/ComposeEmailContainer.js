@@ -3,6 +3,7 @@ import React, { PureComponent, Fragment } from 'react';
 import styled from 'styled-components';
 
 import { Z_INDICES } from '../../constants';
+import { debounce } from '../../utils';
 
 import { ModalConsumer } from '../ModalProvider';
 import { NodeConsumer } from '../NodeProvider';
@@ -14,7 +15,12 @@ import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
 
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
-type ComposeEmailStep = 'idle' | 'folding' | 'transporting';
+type ComposeEmailStep =
+  | 'idle'
+  | 'opening'
+  | 'open'
+  | 'folding'
+  | 'transporting';
 
 type Props = {
   /**
@@ -23,29 +29,57 @@ type Props = {
    */
   handleClose: () => void,
   isOpen: boolean,
-  to: ?HTMLElement,
-  from: ?HTMLElement,
+  nodes: {
+    'compose-button': ?HTMLElement,
+    outbox: HTMLElement,
+  },
   windowWidth: number,
   windowHeight: any,
 };
 
+type EmailData = {
+  from: 'Josh Comeau <joshwcomeau@gmail.com>',
+  to: '',
+  subject: '',
+  body: '',
+};
+
+type EmailDataField = $Keys<typeof EmailData>;
+
 type State = {
   status: ComposeEmailStep,
   actionBeingPerformed: 'send' | 'save' | 'delete' | null,
+  emailData: EmailData,
 };
 
 class ComposeEmailContainer extends PureComponent<Props, State> {
   state = {
     status: 'idle',
     actionBeingPerformed: null,
+    emailData: {
+      from: 'Josh Comeau <joshwcomeau@gmail.com>',
+      to: '',
+      subject: '',
+      body: '',
+    },
   };
+
+  componentWillReceiveProps(nextProps: Props) {
+    if (!this.props.isOpen && nextProps.isOpen) {
+      this.setState({ status: 'opening' });
+    }
+  }
 
   handleOpenOrClose = (status: 'open' | 'closed') => {
     if (status === 'closed') {
       // Reset for future opens
       this.setState({
-        status: 'idle',
         actionBeingPerformed: null,
+        status: 'idle',
+      });
+    } else {
+      this.setState({
+        status: 'open',
       });
     }
   };
@@ -55,16 +89,18 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   };
 
   finishAction = () => {
-    this.setState({ actionBeingPerformed: null, status: 'transporting' });
-    this.props.handleClose();
+    // This is triggerd right after the letter is finished folding, for the
+    // 'send' action.
+    // In that case, we want to delay by a bit so that the user has time to see
+    // the envelope.
+    window.setTimeout(() => {
+      this.setState({ status: 'transporting' });
 
-    // HACK: We want to wait until the transportation has completed before
-    // we "unset" the folded state; otherwise it'll unfold in transit, and
-    // that's not what a proper envelope should do!
-    // Because we use Spring Physics(tm) for everything, though, we can't
-    // simply use a TRANSPORT_DURATION constant. Instead, we'll guesstimate it
-    // here, and tweak as needed based on the spring settings.
-    //
+      // This modal's open/close state is actually managed by the parent
+      // <ModalProvider>. We can indicate that it should close once our letter
+      // is "on the way"
+      this.props.handleClose();
+    }, 250);
   };
 
   renderFront() {
@@ -83,22 +119,22 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     const {
       handleClose,
       isOpen,
-      from,
-      to,
+      nodes,
       windowWidth,
       windowHeight,
     } = this.props;
+    const { status, actionBeingPerformed, emailData } = this.state;
 
-    const { status, actionBeingPerformed } = this.state;
-    console.log('status and ation', status, actionBeingPerformed);
+    const fromNode = nodes['compose-button'];
+    const toNode = actionBeingPerformed === 'send' ? nodes['outbox'] : fromNode;
 
     return (
       <Fragment>
         <Backdrop isOpen={isOpen} onClick={handleClose} />
 
         <ChildTransporter
-          from={from}
-          to={to}
+          from={fromNode}
+          to={toNode}
           isOpen={isOpen}
           windowWidth={windowWidth}
           windowHeight={windowHeight}
@@ -107,6 +143,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           <FoldableLetter
             isFolded={status === 'folding' || status === 'transporting'}
             onCompleteFolding={this.finishAction}
+            emailData={emailData}
             front={this.renderFront()}
             back={this.renderBack()}
           />
@@ -142,8 +179,7 @@ const withEnvironmentData = WrappedComponent => (props: any) => (
             {({ nodes }) => (
               <WrappedComponent
                 {...props}
-                from={nodes['compose-button']}
-                to={nodes['outbox']}
+                nodes={nodes}
                 isOpen={currentModal === 'compose'}
                 handleClose={closeModal}
                 windowWidth={windowWidth}
