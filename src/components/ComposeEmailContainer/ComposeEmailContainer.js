@@ -48,7 +48,7 @@ type EmailDataField = $Keys<typeof EmailData>;
 
 type State = {
   status: ComposeEmailStep,
-  actionBeingPerformed: 'send' | 'save' | 'delete' | null,
+  actionBeingPerformed: 'send' | 'save' | 'delete' | 'dismiss' | null,
   emailData: EmailData,
 };
 
@@ -70,6 +70,11 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     }
   }
 
+  dismiss = () => {
+    this.setState({ actionBeingPerformed: 'dismiss' });
+    this.props.handleClose();
+  };
+
   handleOpenOrClose = (status: 'open' | 'closed') => {
     if (status === 'closed') {
       // Reset for future opens
@@ -79,6 +84,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       });
     } else {
       this.setState({
+        actionBeingPerformed: null,
         status: 'open',
       });
     }
@@ -126,16 +132,21 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     const { status, actionBeingPerformed, emailData } = this.state;
 
     const fromNode = nodes['compose-button'];
-    const toNode = actionBeingPerformed === 'send' ? nodes['outbox'] : fromNode;
+    const toNode = nodes['outbox'];
+
+    let childTransporterStatus = isOpen ? 'open' : 'closed';
+    if (actionBeingPerformed === 'dismiss') {
+      childTransporterStatus = 'retracted';
+    }
 
     return (
       <Fragment>
-        <Backdrop isOpen={isOpen} onClick={handleClose} />
+        <Backdrop isOpen={isOpen} onClick={this.dismiss} />
 
         <ChildTransporter
           from={fromNode}
           to={toNode}
-          isOpen={isOpen}
+          status={childTransporterStatus}
           windowWidth={windowWidth}
           windowHeight={windowHeight}
           handleFinishTransportation={this.handleOpenOrClose}

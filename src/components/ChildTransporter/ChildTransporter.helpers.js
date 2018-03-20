@@ -5,6 +5,7 @@ import type {
   AugmentedClientRect,
   MinimumFixedPosition,
 } from './ChildTransporter.types';
+import type { Status } from './ChildTransporter';
 
 // Calculate the distance in pixels between two ClientRects
 // prettier-ignore

@@ -21,13 +21,13 @@ import type {
 
 type Quadrant = 1 | 2 | 3 | 4;
 
-type Status =
-  | 'closed'
+export type StartStatus =
   | 'start-opening'
-  | 'opening'
-  | 'open'
   | 'start-closing'
-  | 'closing';
+  | 'start-retracting';
+export type TransitionStatus = 'opening' | 'closing' | 'retracting';
+export type EndStatus = 'open' | 'closed' | 'retracted';
+export type Status = StartStatus | TransitionStatus | EndStatus;
 
 type SpringSettings = {
   stiffness: number,
@@ -35,21 +35,18 @@ type SpringSettings = {
   precision?: number,
 };
 
-type StartStatus = 'start-opening' | 'start-closing';
-type FinalStatus = 'open' | 'closed';
-
 type Props = {
   children: React$Node,
   from: HTMLElement,
   to: HTMLElement,
-  isOpen: boolean,
-  SpringOpenHorizontal: SpringSettings,
-  SpringOpenVertical: SpringSettings,
-  SpringCloseHorizontal: SpringSettings,
-  SpringCloseVertical: SpringSettings,
+  status: EndStatus,
+  springOpenHorizontal: SpringSettings,
+  springOpenVertical: SpringSettings,
+  springCloseHorizontal: SpringSettings,
+  springCloseVertical: SpringSettings,
   windowWidth: number,
   windowHeight: number,
-  handleFinishTransportation: (status: FinalStatus) => any,
+  handleFinishTransportation: (status: EndStatus) => any,
 };
 
 type State = {
@@ -77,13 +74,14 @@ class ChildTransporter extends Component<Props, State> {
     springCloseHorizontal: { stiffness: 100, damping: 22 },
     springCloseVertical: { stiffness: 100, damping: 22 },
   };
+
   childWrapperNode: HTMLElement;
 
   state = {
     fromRect: null,
     toRect: null,
     childRect: null,
-    status: 'closed', // TODO depend on props.isOpen
+    status: this.props.status,
     position: {
       top: null,
       left: null,
@@ -102,10 +100,7 @@ class ChildTransporter extends Component<Props, State> {
       return;
     }
 
-    // If the `isOpen` status changes, we need to recapture our boxes.
-    // NOTE: We're assuming that all available nodes are available when
-    // we reach this step.
-    if (this.props.isOpen !== nextProps.isOpen) {
+    if (this.props.status !== nextProps.status) {
       const { fromRect, toRect, childRect } = this.getAugmentedClientRects(
         nextProps
       );
@@ -122,12 +117,19 @@ class ChildTransporter extends Component<Props, State> {
 
     // We care about changes to the modal's "open" status (if the user has
     // toggled it open or closed)
-    const wasJustToggled = prevProps.isOpen !== this.props.isOpen;
+    const wasJustToggled = prevProps.status !== this.props.status;
 
     // TODO: This should probably move to cWRP, so that the whole cycle isn't
     // required right?
     if (wasJustToggled) {
-      const startStatus = this.props.isOpen ? 'start-opening' : 'start-closing';
+      let startStatus;
+      if (this.props.status === 'open') {
+        startStatus = 'start-opening';
+      } else if (this.props.status === 'closed') {
+        startStatus = 'start-closing';
+      } else {
+        startStatus = 'start-retracting';
+      }
 
       const initialPositionState = this.getInitialPositionState(startStatus);
 
@@ -141,7 +143,11 @@ class ChildTransporter extends Component<Props, State> {
     // update cycle: 'shrunk' and 'teleported'. These are the "Inverted" part
     // of FLIP, and the one chosen will depend on whether the child is opening
     // or closing.
-    if (status === 'start-opening' || status === 'start-closing') {
+    if (
+      status === 'start-opening' ||
+      status === 'start-closing' ||
+      status === 'start-retracting'
+    ) {
       this.playAnimation();
     }
   }
@@ -155,7 +161,7 @@ class ChildTransporter extends Component<Props, State> {
 
     // We want to position the element relative to the relevant node.
     // For opening, this is the "from" node. For closing, this is the "to" node.
-    const relativeRect = startStatus === 'start-opening' ? fromRect : toRect;
+    const relativeRect = startStatus === 'start-closing' ? toRect : fromRect;
 
     // Figure out which of the 4 quarters of the screen our child is moving
     // to or from.
@@ -169,7 +175,11 @@ class ChildTransporter extends Component<Props, State> {
     // Unlike ClientRect, these are the values in `position: fixed` terms, and
     // so the `right` value is the number of pixels between the element and the
     // right edge of the viewport.
-    const minimumPositionData = this.getChildPosition(quadrant, relativeRect);
+    const minimumPositionData = this.getChildPosition(
+      quadrant,
+      relativeRect,
+      startStatus
+    );
 
     // Because our animations use CSS transforms, we need to convert our
     // fixed-position coords into an AugmentedClientRect
@@ -204,8 +214,10 @@ class ChildTransporter extends Component<Props, State> {
       nextStatus = 'opening';
     } else if (status === 'start-closing') {
       nextStatus = 'closing';
+    } else if (status === 'start-retracting') {
+      nextStatus = 'retracting';
     } else {
-      throw new Error('`playAnimation` called at an unexpected time.');
+      throw new Error('`playAnimation` called at an invalid moment in time');
     }
 
     this.setState({
@@ -221,13 +233,26 @@ class ChildTransporter extends Component<Props, State> {
   };
 
   finishPlaying = () => {
-    // TODO: Use position since it'd be more accurate?
-    const nextStatus = this.state.status === 'opening' ? 'open' : 'closed';
+    const { status } = this.state;
 
-    this.setState({ status: nextStatus });
+    let restingStatus;
+    if (status === 'opening') {
+      restingStatus = 'open';
+    } else if (status === 'closing') {
+      restingStatus = 'closed';
+    } else if (status === 'retracting') {
+      restingStatus = 'retracted';
+    } else {
+      // ReactMotion is in charge of calling this method, and it appears that
+      // it calls it on mount, when the status is `closed`. Just ignore this
+      // case.
+      return;
+    }
+
+    this.setState({ status: restingStatus });
 
     if (typeof this.props.handleFinishTransportation === 'function') {
-      this.props.handleFinishTransportation(nextStatus);
+      this.props.handleFinishTransportation(restingStatus);
     }
   };
 
@@ -320,7 +345,7 @@ class ChildTransporter extends Component<Props, State> {
 
     // We don't have any translation on-open.
     // Might change this later, if we add spacing support.
-    if (startStatus === 'start-opening') {
+    if (startStatus === 'start-opening' || startStatus === 'start-retracting') {
       return { translateX: 0, translateY: 0 };
     }
 
@@ -353,7 +378,8 @@ class ChildTransporter extends Component<Props, State> {
 
   getChildPosition(
     quadrant: Quadrant,
-    targetRect: AugmentedClientRect
+    targetRect: AugmentedClientRect,
+    startStatus: StartStatus
   ): MinimumFixedPosition {
     /**
      * Get the fixed position for the child, calculated using the target rect
@@ -409,54 +435,49 @@ class ChildTransporter extends Component<Props, State> {
      *     the target's corner, but it should shrink into the target's center.
      */
     const { windowWidth, windowHeight } = this.props;
-    const { status, childRect } = this.state;
+    const { childRect } = this.state;
 
     if (!childRect) {
       throw new Error("childRect doesn't exist");
     }
 
-    // This is setting the initial position.
-    // Therefore, if the current status is "closed", it means we're about to
-    // open it, and vice-versa.
-    // If we interrupt it, the status will be "closing" instead of "closed",
-    // but we want to treat it the same way.
-    // TODO: Nicer interrupt-handling.
-    const isOpening = status === 'closed' || status === 'closing';
+    const orientRelativeToCorner =
+      startStatus === 'start-opening' || startStatus === 'start-retracting';
 
     switch (quadrant) {
       case 1:
         return {
-          top: isOpening
+          top: orientRelativeToCorner
             ? targetRect.bottom
             : targetRect.centerY - childRect.height / 2,
-          left: isOpening
+          left: orientRelativeToCorner
             ? targetRect.right
             : targetRect.centerX - childRect.width / 2,
         };
       case 2:
         return {
-          top: isOpening
+          top: orientRelativeToCorner
             ? targetRect.bottom
             : targetRect.centerY - childRect.height / 2,
-          right: isOpening
+          right: orientRelativeToCorner
             ? targetRect.fromBottomRight.left
             : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       case 3:
         return {
-          bottom: isOpening
+          bottom: orientRelativeToCorner
             ? targetRect.fromBottomRight.top
             : targetRect.fromBottomRight.centerY - childRect.height / 2,
-          left: isOpening
+          left: orientRelativeToCorner
             ? targetRect.right
             : targetRect.centerX - childRect.width / 2,
         };
       case 4:
         return {
-          bottom: isOpening
+          bottom: orientRelativeToCorner
             ? targetRect.fromBottomRight.top
             : targetRect.fromBottomRight.centerY - childRect.height / 2,
-          right: isOpening
+          right: orientRelativeToCorner
             ? targetRect.fromBottomRight.left
             : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
@@ -493,13 +514,15 @@ class ChildTransporter extends Component<Props, State> {
       transformOrigin,
     } = position;
 
-    const shouldSpringScale = ['opening', 'closing'].includes(status);
+    const shouldSpringScale = ['opening', 'closing', 'retracting'].includes(
+      status
+    );
     const shouldSpringTransform = ['closing'].includes(status);
 
     const springHorizontal =
-      status === 'opening' ? springOpenHorizontal : springCloseHorizontal;
+      status === 'closing' ? springCloseHorizontal : springOpenHorizontal;
     const springVertical =
-      status === 'opening' ? springOpenVertical : springCloseVertical;
+      status === 'closing' ? springCloseVertical : springOpenVertical;
 
     return (
       <Motion
@@ -529,7 +552,7 @@ class ChildTransporter extends Component<Props, State> {
               right,
               transform: `
                 translate(${translateX}px, ${translateY}px)
-                scale(${scaleX}, ${scaleY})
+                scale(${Math.max(scaleX, 0)}, ${Math.max(scaleY, 0)})
               `,
               transformOrigin,
             }}
