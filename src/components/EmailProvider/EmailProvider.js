@@ -68,15 +68,28 @@ class EmailProvider extends Component<Props, State> {
       body,
     };
 
-    this.setState({ emails: this.state.emails.set(id, newEmail) });
+    this.setState({
+      emails: this.state.emails.set(id, newEmail),
+      notificationOnBoxes: [...this.state.notificationOnBoxes, boxId],
+    });
   };
 
-  selectBox = (box: BoxId) => {
-    this.setState({ selectedBoxId: box });
+  selectBox = (boxId: BoxId) => {
+    this.setState({
+      selectedBoxId: boxId,
+      notificationOnBoxes: this.state.notificationOnBoxes.filter(
+        notificationOnBoxId => notificationOnBoxId !== boxId
+      ),
+    });
   };
 
   render() {
-    const { emails, selectedBoxId, selectedEmailId } = this.state;
+    const {
+      emails,
+      selectedBoxId,
+      selectedEmailId,
+      notificationOnBoxes,
+    } = this.state;
 
     const emailList = Array.from(emails.values())
       .filter(email => email.boxId === selectedBoxId)
@@ -93,6 +106,7 @@ class EmailProvider extends Component<Props, State> {
           emails,
           selectedBoxId,
           selectedEmailId,
+          notificationOnBoxes,
 
           // Derived values
           // TODO: I wonder if there's a better pattern for these...

@@ -71,8 +71,8 @@ class ChildTransporter extends Component<Props, State> {
   static defaultProps = {
     springOpenHorizontal: { stiffness: 150, damping: 20 },
     springOpenVertical: { stiffness: 200, damping: 20 },
-    springCloseHorizontal: { stiffness: 100, damping: 22 },
-    springCloseVertical: { stiffness: 100, damping: 22 },
+    springCloseHorizontal: { stiffness: 150, damping: 22 },
+    springCloseVertical: { stiffness: 150, damping: 22 },
   };
 
   childWrapperNode: HTMLElement;

@@ -7,6 +7,7 @@ import { pick } from '../../utils';
 
 import Scoocher from '../Scoocher';
 import SidebarHeading from '../SidebarHeading';
+import NotificationDot from '../NotificationDot';
 import { NodeConsumer } from '../NodeProvider';
 import { EmailConsumer } from '../EmailProvider';
 
@@ -26,18 +27,21 @@ class SidebarHeader extends PureComponent<Props> {
 
     return (
       <EmailConsumer>
-        {({ selectedBoxId, selectBox }) => (
+        {({ selectedBoxId, selectBox, notificationOnBoxes }) => (
           <Wrapper height={height}>
             <InnerWrapper>
               {boxIds.map(boxId => (
-                <Fragment key={boxId}>
+                <SidebarHeadingWrapper key={boxId}>
                   <SidebarHeading
                     boxId={boxId}
                     height={height}
                     isSelected={selectedBoxId === boxId}
                     handleClick={() => selectBox(boxId)}
                   />
-                </Fragment>
+                  <NotificationDotWrapper>
+                    {notificationOnBoxes.includes(boxId) && <NotificationDot />}
+                  </NotificationDotWrapper>
+                </SidebarHeadingWrapper>
               ))}
               <NodeConsumer>
                 {({ nodes, boundingBoxes }) => {
@@ -45,8 +49,8 @@ class SidebarHeader extends PureComponent<Props> {
                     <Scoocher
                       offsetY={
                         // Our 60px header includes a 1px border.
-                        // We want our scoocher to sit just above the border, so we
-                        // adjust it up by 1px.
+                        // We want our scoocher to sit just above the border,
+                        // so we adjust it up by 1px.
                         -1
                       }
                       headerNodeIds={boxIds}
@@ -65,6 +69,7 @@ class SidebarHeader extends PureComponent<Props> {
 }
 
 const Wrapper = styled.div`
+  position: relative;
   height: ${props => props.height}px;
   line-height: ${props => props.height}px;
   background: white;
@@ -76,6 +81,16 @@ const InnerWrapper = styled.div`
   justify-content: space-between;
   max-width: 270px;
   padding-left: 24px;
+`;
+
+const SidebarHeadingWrapper = styled.div`
+  position: relative;
+`;
+
+const NotificationDotWrapper = styled.div`
+  position: absolute;
+  top: 30%;
+  right: 2px;
 `;
 
 export default SidebarHeader;

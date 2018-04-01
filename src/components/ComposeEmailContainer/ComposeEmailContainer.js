@@ -87,6 +87,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   };
 
   handleOpenOrClose = (status: 'open' | 'closed') => {
+    console.log('open or close!');
     const { actionBeingPerformed } = this.state;
 
     if (status === 'closed') {
@@ -112,8 +113,6 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   sendEmail = () => {
     this.setState({ actionBeingPerformed: 'send', status: 'folding' });
   };
-
-  updateEmailList = () => {};
 
   finishAction = () => {
     // This is triggerd right after the letter is finished folding, for the
