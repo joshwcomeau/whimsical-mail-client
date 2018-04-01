@@ -6701,9 +6701,9 @@ react-docgen@^2.20.0:
     node-dir "^0.1.10"
     recast "^0.12.6"
 
-react-dom@^16.4.0-alpha.2:
-  version "16.4.0-alpha.0911da3"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.4.0-alpha.0911da3.tgz#4f50568a3f44fade1da7d0747b1308d46281210c"
+react-dom@16.3:
+  version "16.3.0"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.3.0.tgz#b318e52184188ecb5c3e81117420cca40618643e"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -6848,9 +6848,9 @@ react-treebeard@^2.1.0:
     shallowequal "^0.2.2"
     velocity-react "^1.3.1"
 
-react@^16.4.0-alpha.2:
-  version "16.4.0-alpha.0911da3"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.4.0-alpha.0911da3.tgz#5dbd38a7432b07853f5fd517a14ee614499f8093"
+react@16.3:
+  version "16.3.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.3.0.tgz#fc5a01c68f91e9b38e92cf83f7b795ebdca8ddff"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
