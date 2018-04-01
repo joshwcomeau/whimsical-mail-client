@@ -1,5 +1,5 @@
 // @flow
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import styled from 'styled-components';
 
 import { COLORS } from '../../constants';
@@ -8,6 +8,7 @@ import { pick } from '../../utils';
 import Scoocher from '../Scoocher';
 import SidebarHeading from '../SidebarHeading';
 import { NodeConsumer } from '../NodeProvider';
+import { EmailConsumer } from '../EmailProvider';
 
 import type { BoxId } from '../../types';
 
@@ -24,36 +25,41 @@ class SidebarHeader extends PureComponent<Props> {
     const { height, selectedBoxId, handleSelectBox } = this.props;
 
     return (
-      <Wrapper height={height}>
-        <InnerWrapper>
-          {boxIds.map(boxId => (
-            <SidebarHeading
-              key={boxId}
-              boxId={boxId}
-              height={height}
-              isSelected={selectedBoxId === boxId}
-              handleClick={() => handleSelectBox(boxId)}
-            />
-          ))}
-          <NodeConsumer>
-            {({ nodes, boundingBoxes }) => {
-              return (
-                <Scoocher
-                  offsetY={
-                    // Our 60px header includes a 1px border.
-                    // We want our scoocher to sit just above the border, so we
-                    // adjust it up by 1px.
-                    -1
-                  }
-                  headerNodeIds={boxIds}
-                  selectedNodeId={selectedBoxId}
-                  boundingBoxes={boundingBoxes}
-                />
-              );
-            }}
-          </NodeConsumer>
-        </InnerWrapper>
-      </Wrapper>
+      <EmailConsumer>
+        {({ selectedBoxId, selectBox }) => (
+          <Wrapper height={height}>
+            <InnerWrapper>
+              {boxIds.map(boxId => (
+                <Fragment key={boxId}>
+                  <SidebarHeading
+                    boxId={boxId}
+                    height={height}
+                    isSelected={selectedBoxId === boxId}
+                    handleClick={() => selectBox(boxId)}
+                  />
+                </Fragment>
+              ))}
+              <NodeConsumer>
+                {({ nodes, boundingBoxes }) => {
+                  return (
+                    <Scoocher
+                      offsetY={
+                        // Our 60px header includes a 1px border.
+                        // We want our scoocher to sit just above the border, so we
+                        // adjust it up by 1px.
+                        -1
+                      }
+                      headerNodeIds={boxIds}
+                      selectedNodeId={selectedBoxId}
+                      boundingBoxes={boundingBoxes}
+                    />
+                  );
+                }}
+              </NodeConsumer>
+            </InnerWrapper>
+          </Wrapper>
+        )}
+      </EmailConsumer>
     );
   }
 }

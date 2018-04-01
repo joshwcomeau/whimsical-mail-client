@@ -20,8 +20,9 @@ import avatar13 from '../../assets/avatars/avatar-13.jpg';
 import avatar14 from '../../assets/avatars/avatar-14.jpg';
 import avatar15 from '../../assets/avatars/avatar-15.jpg';
 import avatar16 from '../../assets/avatars/avatar-16.jpg';
+import avatarMe from '../../assets/avatars/me.jpg';
 
-import type { EmailData } from '../../types';
+import type { EmailData, BoxId } from '../../types';
 
 const avatarSrcs = [
   avatar1,
@@ -69,26 +70,39 @@ const EmailFactory = {
   body: generators.lorem().paragraphs(6),
 };
 
-const BOXES = ['inbox', 'outbox', 'drafts'];
+const BOX_IDS: Array<BoxId> = ['inbox', 'outbox', 'drafts'];
+
+export const getRandomAvatar = () => sample(avatarSrcs);
+
+export const loggedInUserData = {
+  email: 'josh@example.com',
+  name: 'Josh Comeau',
+  avatarSrc: avatarMe,
+};
 
 export const generateData = (num: number): Map<number, EmailData> => {
   let time = new Date();
 
   const data = createMany(EmailFactory, num).map((data, i) => {
+    const boxId = BOX_IDS[i % 3];
+
     const subject = subjects[i % subjects.length];
     const preview = previews[i % previews.length];
     const avatarSrc = avatarSrcs[i % avatarSrcs.length];
 
     time -= Math.random() * 10000000;
 
+    const generatedContact = {
+      email: data.from.email,
+      name: `${data.from.firstName} ${data.from.lastName}`,
+      avatarSrc,
+    };
+
     return {
       id: data.id,
-      box: BOXES[i % 3],
-      from: {
-        email: data.from.email,
-        name: `${data.from.firstName} ${data.from.lastName}`,
-        avatarSrc,
-      },
+      boxId,
+      from: boxId === 'inbox' ? generatedContact : loggedInUserData,
+      to: boxId === 'inbox' ? loggedInUserData : generatedContact,
       timestamp: time,
       subject,
       preview,

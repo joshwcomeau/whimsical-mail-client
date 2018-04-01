@@ -7,6 +7,7 @@ import { debounce } from '../../utils';
 
 import { ModalConsumer } from '../ModalProvider';
 import { NodeConsumer } from '../NodeProvider';
+import { EmailConsumer } from '../EmailProvider';
 import WindowDimensions from '../WindowDimensions';
 import ChildTransporter from '../ChildTransporter';
 import FoldableLetter from '../FoldableLetter';
@@ -35,13 +36,14 @@ type Props = {
   },
   windowWidth: number,
   windowHeight: any,
+  addNewEmailToBox: (data: any) => void,
 };
 
 type EmailData = {
-  from: 'Josh Comeau <joshwcomeau@gmail.com>',
-  to: '',
-  subject: '',
-  body: '',
+  fromEmail: string,
+  toEmail: string,
+  subject: string,
+  body: string,
 };
 
 type EmailDataField = $Keys<EmailData>;
@@ -57,8 +59,8 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     status: 'idle',
     actionBeingPerformed: null,
     emailData: {
-      from: 'Josh Comeau <joshwcomeau@gmail.com>',
-      to: '',
+      fromEmail: 'Josh Comeau <joshwcomeau@gmail.com>',
+      toEmail: '',
       subject: '',
       body: '',
     },
@@ -70,13 +72,30 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     }
   }
 
+  updateField = (fieldName: string) => (ev: SyntheticInputEvent) => {
+    this.setState({
+      emailData: {
+        ...this.state.emailData,
+        [fieldName]: ev.target.value,
+      },
+    });
+  };
+
   dismiss = () => {
     this.setState({ actionBeingPerformed: 'dismiss' });
     this.props.handleClose();
   };
 
   handleOpenOrClose = (status: 'open' | 'closed') => {
+    const { actionBeingPerformed } = this.state;
+
     if (status === 'closed') {
+      if (actionBeingPerformed === 'send' || actionBeingPerformed === 'save') {
+        const boxId = actionBeingPerformed === 'send' ? 'outbox' : 'drafts';
+
+        this.props.addNewEmailToBox({ boxId, ...this.state.emailData });
+      }
+
       // Reset for future opens
       this.setState({
         actionBeingPerformed: null,
@@ -93,6 +112,8 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   sendEmail = () => {
     this.setState({ actionBeingPerformed: 'send', status: 'folding' });
   };
+
+  updateEmailList = () => {};
 
   finishAction = () => {
     // This is triggerd right after the letter is finished folding, for the
@@ -111,9 +132,11 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
 
   renderFront() {
     return (
-      <div>
-        <ComposeEmail handleSend={this.sendEmail} />
-      </div>
+      <ComposeEmail
+        {...this.state.emailData}
+        updateField={this.updateField}
+        handleSend={this.sendEmail}
+      />
     );
   }
 
@@ -188,14 +211,19 @@ const withEnvironmentData = WrappedComponent => (props: any) => (
         {({ currentModal, closeModal }) => (
           <NodeConsumer>
             {({ nodes }) => (
-              <WrappedComponent
-                {...props}
-                nodes={nodes}
-                isOpen={currentModal === 'compose'}
-                handleClose={closeModal}
-                windowWidth={windowWidth}
-                windowHeight={windowHeight}
-              />
+              <EmailConsumer>
+                {({ addNewEmailToBox }) => (
+                  <WrappedComponent
+                    {...props}
+                    nodes={nodes}
+                    isOpen={currentModal === 'compose'}
+                    handleClose={closeModal}
+                    addNewEmailToBox={addNewEmailToBox}
+                    windowWidth={windowWidth}
+                    windowHeight={windowHeight}
+                  />
+                )}
+              </EmailConsumer>
             )}
           </NodeConsumer>
         )}

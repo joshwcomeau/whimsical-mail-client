@@ -30,7 +30,7 @@ class App extends Component<Props> {
         <ComposeEmailModal />
 
         {/* Preload sounds */}
-        <Sound autoLoad src={popSoundSrc} />
+        <Sound autoLoad url={popSoundSrc} playStatus={Sound.status.STOPPED} />
       </Providers>
     );
   }

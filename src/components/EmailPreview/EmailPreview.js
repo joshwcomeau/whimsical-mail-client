@@ -2,11 +2,20 @@
 import React from 'react';
 import styled from 'styled-components';
 import format from 'date-fns/format';
+import isSameDay from 'date-fns/is_same_day';
 
 import Avatar from '../Avatar';
 import Spacer from '../Spacer';
 
 import type { EmailData } from '../../types';
+
+const formatTime = timestamp => {
+  if (isSameDay(timestamp, new Date())) {
+    return format(timestamp, 'h:mm a');
+  }
+
+  return format(timestamp, 'MMM Do');
+};
 
 type Props = {
   data: EmailData,
@@ -22,7 +31,7 @@ const EmailPreview = ({ data, height, isSelected, handleClick }: Props) => {
       <Summary>
         <Header>
           <From>{data.from.name}</From>
-          <At>{format(data.timestamp, 'H:mm a')}</At>
+          <At>{formatTime(data.timestamp)}</At>
         </Header>
 
         <Subject>{data.subject}</Subject>

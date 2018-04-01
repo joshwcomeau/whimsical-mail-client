@@ -10,13 +10,17 @@ import ComposeEmailAddressInput from '../ComposeEmailAddressInput';
 import ControlledInput from '../ControlledInput';
 
 type Props = {
-  updateField: (data: any) => void,
+  toEmail: string,
+  subject: string,
+  body: string,
+  updateField: (fieldName: string) => (val: string) => void,
   handleSend: () => void,
 };
 
 class ComposeEmail extends Component<Props> {
   render() {
-    const { updateField, handleSend } = this.props;
+    const { toEmail, subject, body, updateField, handleSend } = this.props;
+
     return (
       <Wrapper>
         <ModalContents>
@@ -24,40 +28,27 @@ class ComposeEmail extends Component<Props> {
             <ComposeEmailAddressInput
               disabled
               value="Josh Comeau <joshua@khanacademy.org>"
-              id="from"
               label="from"
             />
-            <ControlledInput>
-              {(value, handleChange) => (
-                <ComposeEmailAddressInput
-                  value={value}
-                  onChange={handleChange}
-                  label="to"
-                  placeholder="jane@example.com"
-                />
-              )}
-            </ControlledInput>
+            <ComposeEmailAddressInput
+              value={toEmail}
+              onChange={updateField('toEmail')}
+              label="to"
+              placeholder="jane@example.com"
+            />
           </Header>
 
           <MainContent>
-            <ControlledInput id="to">
-              {(value, handleChange) => (
-                <Subject
-                  placeholder="Subject"
-                  value={value}
-                  onChange={handleChange}
-                />
-              )}
-            </ControlledInput>
-            <ControlledInput id="to">
-              {(value, handleChange) => (
-                <Body
-                  placeholder="Write something..."
-                  value={value}
-                  onChange={handleChange}
-                />
-              )}
-            </ControlledInput>
+            <Subject
+              placeholder="Subject"
+              value={subject}
+              onChange={updateField('subject')}
+            />
+            <Body
+              placeholder="Write something..."
+              value={body}
+              onChange={updateField('body')}
+            />
           </MainContent>
 
           <Footer>

@@ -2,7 +2,11 @@
 import React, { Component } from 'react';
 import produce from 'immer';
 
-import { generateData } from './EmailProvider.data';
+import {
+  generateData,
+  loggedInUserData,
+  getRandomAvatar,
+} from './EmailProvider.data';
 
 import type { EmailData, BoxId } from '../../types';
 
@@ -16,6 +20,7 @@ type State = {
   emails: Map<number, EmailData>,
   selectedBoxId: BoxId,
   selectedEmailId: number,
+  notificationOnBoxes: Array<BoxId>,
 };
 
 class EmailProvider extends Component<Props, State> {
@@ -23,6 +28,7 @@ class EmailProvider extends Component<Props, State> {
     emails: generateData(30),
     selectedBoxId: 'inbox',
     selectedEmailId: 1,
+    notificationOnBoxes: [],
   };
 
   viewEmail = (id: number) => {
@@ -39,6 +45,32 @@ class EmailProvider extends Component<Props, State> {
     this.setState(nextState);
   };
 
+  addNewEmailToBox = ({ boxId, to, subject, body }: any) => {
+    // NOTE: This is totally unrealistic.
+    // I'm doing this in a very unrealistic way, because this stuff isn't core
+    // to what the demo is demonstrating.
+    const id = this.state.emails.size + 1;
+
+    const from = loggedInUserData;
+
+    const newEmail = {
+      id,
+      boxId,
+      from: loggedInUserData,
+      to: {
+        email: to,
+        name: 'Some Name',
+        avatarSrc: getRandomAvatar(),
+      },
+      timestamp: Date.now(),
+      subject,
+      preview: body,
+      body,
+    };
+
+    this.setState({ emails: this.state.emails.set(id, newEmail) });
+  };
+
   selectBox = (box: BoxId) => {
     this.setState({ selectedBoxId: box });
   };
@@ -46,9 +78,9 @@ class EmailProvider extends Component<Props, State> {
   render() {
     const { emails, selectedBoxId, selectedEmailId } = this.state;
 
-    const emailList = Array.from(emails.values()).filter(
-      email => email.box === selectedBoxId
-    );
+    const emailList = Array.from(emails.values())
+      .filter(email => email.boxId === selectedBoxId)
+      .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1));
 
     const selectedEmailIndex = emailList.findIndex(
       letter => letter.id === selectedEmailId
@@ -70,6 +102,7 @@ class EmailProvider extends Component<Props, State> {
           // Actions
           selectBox: this.selectBox,
           viewEmail: this.viewEmail,
+          addNewEmailToBox: this.addNewEmailToBox,
         }}
       >
         {this.props.children}

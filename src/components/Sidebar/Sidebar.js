@@ -8,7 +8,6 @@ import SidebarHeader from '../SidebarHeader';
 import Search from '../Search';
 import EmailList from '../EmailList';
 import Spacer from '../Spacer';
-import { EmailConsumer } from '../EmailProvider';
 
 import type { BoxId } from '../../types';
 
@@ -18,50 +17,29 @@ type Props = {
   headerHeight: number,
 };
 
-type State = {
-  selectedBox: BoxId,
-};
-
-class Sidebar extends Component<Props, State> {
+class Sidebar extends Component<Props> {
   static defaultProps = {
     width: 400,
     itemHeight: 100,
     headerHeight: 50,
   };
 
-  state = {
-    selectedBox: 'inbox',
-  };
-
-  handleSelectBox = (box: BoxId) => {
-    this.setState({ selectedBox: box });
-  };
-
   render() {
     const { width, itemHeight, headerHeight } = this.props;
-    const { selectedBox } = this.state;
 
     return (
-      <EmailConsumer>
-        {({ selectedBoxId, selectBox }) => (
-          <Wrapper width={width}>
-            <Foreground>
-              <SidebarHeader
-                height={headerHeight}
-                selectedBoxId={selectedBoxId}
-                handleSelectBox={selectBox}
-              />
-              <EmailListWrapper headerHeight={headerHeight}>
-                <Search />
-                <Spacer size={10} />
-                <EmailList itemHeight={itemHeight} />
-              </EmailListWrapper>
-            </Foreground>
+      <Wrapper width={width}>
+        <Foreground>
+          <SidebarHeader height={headerHeight} />
+          <EmailListWrapper headerHeight={headerHeight}>
+            <Search />
+            <Spacer size={10} />
+            <EmailList itemHeight={itemHeight} />
+          </EmailListWrapper>
+        </Foreground>
 
-            <Background />
-          </Wrapper>
-        )}
-      </EmailConsumer>
+        <Background />
+      </Wrapper>
     );
   }
 }
