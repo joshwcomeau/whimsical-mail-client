@@ -8,6 +8,7 @@ import SidebarHeader from '../SidebarHeader';
 import Search from '../Search';
 import EmailList from '../EmailList';
 import Spacer from '../Spacer';
+import { EmailConsumer } from '../EmailProvider';
 
 import type { BoxId } from '../../types';
 
@@ -41,22 +42,26 @@ class Sidebar extends Component<Props, State> {
     const { selectedBox } = this.state;
 
     return (
-      <Wrapper width={width}>
-        <Foreground>
-          <SidebarHeader
-            height={headerHeight}
-            selectedBox={selectedBox}
-            handleSelectBox={this.handleSelectBox}
-          />
-          <EmailListWrapper headerHeight={headerHeight}>
-            <Search />
-            <Spacer size={10} />
-            <EmailList itemHeight={itemHeight} />
-          </EmailListWrapper>
-        </Foreground>
+      <EmailConsumer>
+        {({ selectedBoxId, selectBox }) => (
+          <Wrapper width={width}>
+            <Foreground>
+              <SidebarHeader
+                height={headerHeight}
+                selectedBoxId={selectedBoxId}
+                handleSelectBox={selectBox}
+              />
+              <EmailListWrapper headerHeight={headerHeight}>
+                <Search />
+                <Spacer size={10} />
+                <EmailList itemHeight={itemHeight} />
+              </EmailListWrapper>
+            </Foreground>
 
-        <Background />
-      </Wrapper>
+            <Background />
+          </Wrapper>
+        )}
+      </EmailConsumer>
     );
   }
 }

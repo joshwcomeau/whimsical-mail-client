@@ -4,7 +4,7 @@ import produce from 'immer';
 
 import { generateData } from './EmailProvider.data';
 
-import type { EmailData } from '../../types';
+import type { EmailData, BoxId } from '../../types';
 
 // $FlowFixMe
 const EmailContext = React.createContext('email');
@@ -14,12 +14,14 @@ type Props = {
 };
 type State = {
   emails: Map<number, EmailData>,
+  selectedBoxId: BoxId,
   selectedEmailId: number,
 };
 
 class EmailProvider extends Component<Props, State> {
   state = {
-    emails: generateData(10),
+    emails: generateData(30),
+    selectedBoxId: 'inbox',
     selectedEmailId: 1,
   };
 
@@ -37,10 +39,16 @@ class EmailProvider extends Component<Props, State> {
     this.setState(nextState);
   };
 
-  render() {
-    const { emails, selectedEmailId } = this.state;
+  selectBox = (box: BoxId) => {
+    this.setState({ selectedBoxId: box });
+  };
 
-    const emailList = Array.from(emails.values());
+  render() {
+    const { emails, selectedBoxId, selectedEmailId } = this.state;
+
+    const emailList = Array.from(emails.values()).filter(
+      email => email.box === selectedBoxId
+    );
 
     const selectedEmailIndex = emailList.findIndex(
       letter => letter.id === selectedEmailId
@@ -51,6 +59,7 @@ class EmailProvider extends Component<Props, State> {
         value={{
           // State
           emails,
+          selectedBoxId,
           selectedEmailId,
 
           // Derived values
@@ -59,6 +68,7 @@ class EmailProvider extends Component<Props, State> {
           selectedEmail: emails.get(selectedEmailId),
 
           // Actions
+          selectBox: this.selectBox,
           viewEmail: this.viewEmail,
         }}
       >

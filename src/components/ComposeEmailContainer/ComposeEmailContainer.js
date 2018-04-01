@@ -44,7 +44,7 @@ type EmailData = {
   body: '',
 };
 
-type EmailDataField = $Keys<typeof EmailData>;
+type EmailDataField = $Keys<EmailData>;
 
 type State = {
   status: ComposeEmailStep,

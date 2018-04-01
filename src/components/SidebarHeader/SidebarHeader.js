@@ -13,7 +13,7 @@ import type { BoxId } from '../../types';
 
 type Props = {
   height: number,
-  selectedBox: BoxId,
+  selectedBoxId: BoxId,
   handleSelectBox: (box: BoxId) => void,
 };
 
@@ -21,7 +21,7 @@ const boxIds: Array<BoxId> = ['inbox', 'outbox', 'drafts'];
 
 class SidebarHeader extends PureComponent<Props> {
   render() {
-    const { height, selectedBox, handleSelectBox } = this.props;
+    const { height, selectedBoxId, handleSelectBox } = this.props;
 
     return (
       <Wrapper height={height}>
@@ -31,7 +31,7 @@ class SidebarHeader extends PureComponent<Props> {
               key={boxId}
               boxId={boxId}
               height={height}
-              isSelected={selectedBox === boxId}
+              isSelected={selectedBoxId === boxId}
               handleClick={() => handleSelectBox(boxId)}
             />
           ))}
@@ -46,7 +46,7 @@ class SidebarHeader extends PureComponent<Props> {
                     -1
                   }
                   headerNodeIds={boxIds}
-                  selectedNodeId={selectedBox}
+                  selectedNodeId={selectedBoxId}
                   boundingBoxes={boundingBoxes}
                 />
               );

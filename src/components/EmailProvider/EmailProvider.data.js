@@ -69,6 +69,8 @@ const EmailFactory = {
   body: generators.lorem().paragraphs(6),
 };
 
+const BOXES = ['inbox', 'outbox', 'drafts'];
+
 export const generateData = (num: number): Map<number, EmailData> => {
   let time = new Date();
 
@@ -81,6 +83,7 @@ export const generateData = (num: number): Map<number, EmailData> => {
 
     return {
       id: data.id,
+      box: BOXES[i % 3],
       from: {
         email: data.from.email,
         name: `${data.from.firstName} ${data.from.lastName}`,
