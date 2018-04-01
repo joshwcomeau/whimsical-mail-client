@@ -1,6 +1,9 @@
 // @flow
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import Sound from 'react-sound';
+
+import popSoundSrc from '../../assets/pop.wav';
 
 import Providers from '../Providers';
 import Sidebar from '../Sidebar';
@@ -25,6 +28,9 @@ class App extends Component<Props> {
         </Wrapper>
 
         <ComposeEmailModal />
+
+        {/* Preload sounds */}
+        <Sound autoLoad src={popSoundSrc} />
       </Providers>
     );
   }

@@ -1,149 +1,134 @@
 // @flow
-import React, { Component } from 'react';
-import styled from 'styled-components';
+import React, { Component, Fragment } from 'react';
+import styled, { keyframes } from 'styled-components';
 import { Motion, spring } from 'react-motion';
+import Sound from 'react-sound';
 
 import { COLORS } from '../../constants';
+import popSoundSrc from '../../assets/pop.wav';
 
-type Status = 'closed' | 'opening' | 'open' | 'closing';
+const MAIN_DOT_SPRING = { stiffness: 225, damping: 10 };
+const FIRST_DOT_SPRING = { stiffness: 35, damping: 7 };
+const SECOND_DOT_SPRING = { stiffness: 65, damping: 7 };
+const THIRD_DOT_SPRING = { stiffness: 95, damping: 7 };
 
 type Props = {
+  size: number,
   isOpen: boolean,
 };
-type State = {
-  status: Status,
-};
 
-class NotificationDot extends Component<Props, State> {
-  state = {
-    status: 'closed',
+class NotificationDot extends Component<Props> {
+  static defaultProps = {
+    size: 10,
   };
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    console.log('get derived', this);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (this.props.isOpen && !nextProps.isOpen) {
-      this.setState({ status: 'closing' });
-      return;
-    }
-
-    if (!this.props.isOpen && nextProps.isOpen) {
-      this.setState({ status: 'opening' });
-      return;
-    }
-  }
-
-  getStylesForStatus = (status: Status) => {
-    switch (status) {
-      case 'closed': {
-        return {
-          mainDotScale: 0,
-          firstDotPositionX: 0,
-          firstDotPositionY: 0,
-          firstDotScale: 1,
-          secondDotPositionX: 0,
-          secondDotPositionY: 0,
-          secondDotScale: 1,
-          thirdDotPositionX: 0,
-          thirdDotPositionY: 0,
-          thirdDotScale: 1,
-        };
-      }
-
-      case 'opening': {
-        return {
-          mainDotScale: spring(1),
-          firstDotPositionX: spring(-20),
-          firstDotPositionY: spring(-16),
-          firstDotScale: spring(0),
-          secondDotPositionX: spring(10),
-          secondDotPositionY: spring(-6),
-          secondDotScale: spring(0),
-          thirdDotPositionX: spring(-5),
-          thirdDotPositionY: spring(25),
-          thirdDotScale: spring(0),
-        };
-      }
-
-      case 'open': {
-        return {
-          mainDotScale: 1,
-          firstDotPositionX: 0,
-          firstDotPositionY: 0,
-          firstDotScale: 0,
-          secondDotPositionX: 0,
-          secondDotPositionY: 0,
-          secondDotScale: 0,
-          thirdDotPositionX: 0,
-          thirdDotPositionY: 0,
-          thirdDotScale: 0,
-        };
-      }
-
-      case 'closing': {
-        return {
-          mainDotScale: spring(0),
-          firstDotPositionX: 0,
-          firstDotPositionY: 0,
-          firstDotScale: 0,
-          secondDotPositionX: 0,
-          secondDotPositionY: 0,
-          secondDotScale: 0,
-          thirdDotPositionX: 0,
-          thirdDotPositionY: 0,
-          thirdDotScale: 0,
-        };
-      }
-
-      default:
-        throw new Error('Unrecognized NotificationDot status');
-    }
-  };
-
   render() {
-    const { isOpen } = this.props;
+    const { size } = this.props;
 
     return (
-      <Motion style={this.getStylesForStatus(this.state.status)}>
-        {({
-          mainDotScale,
-          firstDotPositionX,
-          firstDotPositionY,
-          firstDotScale,
-          secondDotPositionX,
-          secondDotPositionY,
-          secondDotScale,
-          thirdDotPositionX,
-          thirdDotPositionY,
-          thirdDotScale,
-        }) => (
-          <Wrapper>
-            <MainDot scale={mainDotScale} />
-          </Wrapper>
-        )}
-      </Motion>
+      <Fragment>
+        <Sound url={popSoundSrc} playStatus={Sound.status.PLAYING} />
+        <Motion
+          defaultStyle={{
+            mainDotScale: 0,
+            firstDotPositionX: 0,
+            firstDotPositionY: 0,
+            secondDotPositionX: 0,
+            secondDotPositionY: 0,
+            thirdDotPositionX: 0,
+            thirdDotPositionY: 0,
+          }}
+          style={{
+            mainDotScale: spring(1, MAIN_DOT_SPRING),
+            firstDotPositionX: spring(size * -0.75, FIRST_DOT_SPRING),
+            firstDotPositionY: spring(size * -0.35, FIRST_DOT_SPRING),
+            secondDotPositionX: spring(size * 0.8, SECOND_DOT_SPRING),
+            secondDotPositionY: spring(size * -0.3, SECOND_DOT_SPRING),
+            thirdDotPositionX: spring(size * -0.2, THIRD_DOT_SPRING),
+            thirdDotPositionY: spring(size * 0.9, THIRD_DOT_SPRING),
+          }}
+        >
+          {({
+            mainDotScale,
+            firstDotPositionX,
+            firstDotPositionY,
+            secondDotPositionX,
+            secondDotPositionY,
+            thirdDotPositionX,
+            thirdDotPositionY,
+          }) => (
+            <Wrapper>
+              <MainDot
+                color={COLORS.red[400]}
+                size={size}
+                scale={mainDotScale}
+              />
+              <OtherDot
+                size={size * 0.5}
+                color={COLORS.pink[500]}
+                x={firstDotPositionX}
+                y={firstDotPositionY}
+              />
+              <OtherDot
+                size={size * 0.5}
+                color={COLORS.purple[500]}
+                x={secondDotPositionX}
+                y={secondDotPositionY}
+              />
+              <OtherDot
+                size={size * 0.5}
+                color={COLORS.blue[400]}
+                x={thirdDotPositionX}
+                y={thirdDotPositionY}
+              />
+            </Wrapper>
+          )}
+        </Motion>
+      </Fragment>
     );
   }
 }
 
-const Wrapper = styled.div`
-  position: relative;
+const fadeOut = keyframes`
+  from { opacity: 1; }
+  to { opacity: 0; }
 `;
 
-const MainDot = styled.div`
+const Wrapper = styled.div`
+  position: relative;
+  width: 10px;
+  height: 10px;
+`;
+
+const Dot = styled.div`
   position: absolute;
-  z-index: 2;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   margin: auto;
-  width: 10px;
-  height: 10px;
-  background-color: ${COLORS.red[500]};
-  transform: ${props => `scale(${props.scale})`};
+  border-radius: 50%;
+  background-color: ${props => props.color};
+`;
+
+const MainDot = styled(Dot).attrs({
+  style: props => ({
+    transform: `scale(${props.scale})`,
+  }),
+})`
+  z-index: 2;
+  width: ${props => props.size}px;
+  height: ${props => props.size}px;
+`;
+
+const OtherDot = styled(Dot).attrs({
+  style: props => ({
+    transform: `translate(${props.x}px, ${props.y}px)`,
+  }),
+})`
+  z-index: 1;
+  width: ${props => props.size}px;
+  height: ${props => props.size}px;
+  animation: ${fadeOut} 2s 300ms both;
 `;
 
 export default NotificationDot;
