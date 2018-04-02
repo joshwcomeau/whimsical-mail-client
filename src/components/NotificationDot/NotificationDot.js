@@ -5,6 +5,7 @@ import { Motion, spring } from 'react-motion';
 import Sound from 'react-sound';
 
 import { COLORS } from '../../constants';
+// Flow doesn't believe this wav exists :/ $FlowFixMe
 import popSoundSrc from '../../assets/pop.wav';
 
 const MAIN_DOT_SPRING = { stiffness: 225, damping: 7 };

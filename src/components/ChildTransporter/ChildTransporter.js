@@ -30,8 +30,8 @@ export type EndStatus = 'open' | 'closed' | 'retracted';
 export type Status = StartStatus | TransitionStatus | EndStatus;
 
 type SpringSettings = {
-  stiffness: number,
-  damping: number,
+  stiffness?: number,
+  damping?: number,
   precision?: number,
 };
 
@@ -46,7 +46,7 @@ type Props = {
   springCloseVertical: SpringSettings,
   windowWidth: number,
   windowHeight: number,
-  handleFinishTransportation: (status: EndStatus) => any,
+  handleFinishTransportation?: (status: EndStatus) => any,
 };
 
 type State = {

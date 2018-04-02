@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import Sound from 'react-sound';
 
+// For some reason, Flow complains about this module not being found.
+// Maybe because it's a .wav? Works fine though. $FlowFixMe
 import popSoundSrc from '../../assets/pop.wav';
 
 import Providers from '../Providers';

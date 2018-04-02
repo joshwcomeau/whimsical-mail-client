@@ -15,7 +15,7 @@ class FoldableLetter extends PureComponent<Props> {
     speed: 1000,
   };
 
-  node: HTMLElement;
+  node: ?HTMLElement;
 
   componentDidUpdate(prevProps: Props) {
     if (!prevProps.isFolded && this.props.isFolded) {
@@ -28,7 +28,7 @@ class FoldableLetter extends PureComponent<Props> {
 
     return (
       <div
-        ref={node => (this.node = node)}
+        ref={node => (node = node)}
         style={{ display: 'inline-block', opacity: isFolded ? 0 : 1 }}
       >
         {front}
@@ -38,16 +38,23 @@ class FoldableLetter extends PureComponent<Props> {
 
   renderFoldedCopy() {
     const { front, back, speed, isFolded } = this.props;
+    const { node } = this;
+
+    // If we weren't able to capture a ref to the node, we can't do any of this
+    // However, I think that's impossible? This is just for Flow.
+    if (!node) {
+      return;
+    }
 
     if (!isFolded) {
       return null;
     }
 
-    const { top, left, width, height } = this.node.getBoundingClientRect();
+    const { top, left, width, height } = node.getBoundingClientRect();
 
-    const topFoldNode = this.node;
-    const middleFoldNode = this.node.cloneNode(true);
-    const bottomFoldNode = this.node.cloneNode(true);
+    const topFoldNode = node;
+    const middleFoldNode = node.cloneNode(true);
+    const bottomFoldNode = node.cloneNode(true);
 
     return (
       <Wrapper style={{ top: 0, left: 0, width, height }}>

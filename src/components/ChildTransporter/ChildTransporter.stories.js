@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import ChildTransporter from './ChildTransporter';
 import WindowDimensions from '../WindowDimensions';
 
+import type { EndStatus } from './ChildTransporter';
+
 type Quadrant = 1 | 2 | 3 | 4;
 
 const QUADRANTS: Array<Quadrant> = [1, 2, 3, 4];
@@ -15,14 +17,14 @@ type Props = {};
 type State = {
   from: ?HTMLElement,
   to: ?HTMLElement,
-  isOpen: boolean,
+  status: EndStatus,
 };
 
 class Wrapper extends Component<Props, State> {
   state = {
     from: null,
     to: null,
-    isOpen: false,
+    status: 'closed',
   };
 
   nodes: {
@@ -40,18 +42,18 @@ class Wrapper extends Component<Props, State> {
   }
 
   handleClick = node => {
-    if (this.state.isOpen) {
+    if (this.state.status === 'open') {
       this.setState({
         to: node,
-        isOpen: false,
+        status: node === this.state.from ? 'retracted' : 'closed',
       });
-    } else {
-      this.setState({
-        from: node,
-        to: node,
-        isOpen: true,
-      });
+      return;
     }
+
+    this.setState({
+      from: node,
+      status: 'open',
+    });
   };
 
   getPositionForQuadrant = quadrant => {
@@ -70,6 +72,7 @@ class Wrapper extends Component<Props, State> {
   };
 
   render() {
+    console.log('RENDER', this.state);
     return (
       <WindowDimensions>
         {({ windowWidth, windowHeight }) => (
@@ -94,7 +97,7 @@ class Wrapper extends Component<Props, State> {
             {this.state.from &&
               this.state.to && (
                 <ChildTransporter
-                  isOpen={this.state.isOpen}
+                  status={this.state.status}
                   from={this.state.from}
                   to={this.state.to}
                   windowWidth={windowWidth}

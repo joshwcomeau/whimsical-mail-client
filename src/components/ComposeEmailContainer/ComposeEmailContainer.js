@@ -72,7 +72,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     }
   }
 
-  updateField = (fieldName: string) => (ev: SyntheticInputEvent) => {
+  updateField = (fieldName: string) => (ev: SyntheticInputEvent<*>) => {
     this.setState({
       emailData: {
         ...this.state.emailData,
