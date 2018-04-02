@@ -5,17 +5,21 @@ import styled from 'styled-components';
 import airMailSrc from '../../assets/air-mail.png';
 
 type Props = {
-  from: string,
-  to: string,
+  toEmail: string,
   subject: string,
 };
 
 class ComposeEmailEnvelope extends Component<Props> {
   render() {
+    const { subject, toEmail } = this.props;
+
     return (
-      <Wrapper>
+      <Wrapper aria-hidden="true">
         <AirMailBorder />
-        <InnerContents>Hello World</InnerContents>
+        <InnerContents>
+          <Subject>{subject}</Subject>
+          <To>{toEmail}</To>
+        </InnerContents>
       </Wrapper>
     );
   }
@@ -47,8 +51,23 @@ const InnerContents = styled.div`
   bottom: 10px;
   background: white;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+`;
+
+const Subject = styled.div`
+  max-width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 15px;
+  font-size: 15px;
+  font-weight: bold;
+`;
+
+const To = styled.div`
+  font-size: 15px;
+  opacity: 0.8;
 `;
 
 export default ComposeEmailEnvelope;
