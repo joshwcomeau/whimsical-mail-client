@@ -9,7 +9,7 @@ import { COLORS } from '../../constants';
 import Avatar from '../Avatar';
 import Spacer from '../Spacer';
 
-import type { EmailData } from '../../types';
+import type { EmailData, BoxId } from '../../types';
 
 const formatTime = timestamp => {
   if (isSameDay(timestamp, new Date())) {
@@ -21,18 +21,27 @@ const formatTime = timestamp => {
 
 type Props = {
   data: EmailData,
+  selectedBoxId: BoxId,
   height: number,
   isSelected: boolean,
   handleClick: () => void,
 };
-const EmailPreview = ({ data, height, isSelected, handleClick }: Props) => {
+const EmailPreview = ({
+  data,
+  selectedBoxId,
+  height,
+  isSelected,
+  handleClick,
+}: Props) => {
+  const user = selectedBoxId === 'inbox' ? data.from : data.to;
+
   return (
     <Wrapper height={height} isSelected={isSelected} onClick={handleClick}>
-      <Avatar size={50} src={data.from.avatarSrc} />
+      <Avatar size={50} src={user.avatarSrc} />
       <Spacer size={10} />
       <Summary>
         <Header>
-          <From>{data.from.name}</From>
+          <From>{user.name}</From>
           <At>{formatTime(data.timestamp)}</At>
         </Header>
 

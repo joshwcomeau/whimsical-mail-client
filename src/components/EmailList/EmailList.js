@@ -5,13 +5,16 @@ import styled from 'styled-components';
 import { EmailConsumer } from '../EmailProvider';
 import EmailPreview from '../EmailPreview';
 
+import type { BoxId } from '../../types';
+
 type Props = {
   itemHeight: number,
+  selectedBoxId: BoxId,
 };
 
 class EmailList extends Component<Props> {
   render() {
-    const { itemHeight } = this.props;
+    const { itemHeight, selectedBoxId } = this.props;
 
     return (
       <EmailConsumer>
@@ -20,6 +23,7 @@ class EmailList extends Component<Props> {
             {emailList.map(email => (
               <EmailPreview
                 key={email.id}
+                selectedBoxId={selectedBoxId}
                 data={email}
                 height={itemHeight}
                 isSelected={email.id === selectedEmailId}

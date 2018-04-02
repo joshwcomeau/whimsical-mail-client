@@ -8,6 +8,7 @@ import SidebarHeader from '../SidebarHeader';
 import Search from '../Search';
 import EmailList from '../EmailList';
 import Spacer from '../Spacer';
+import { EmailConsumer } from '../EmailProvider';
 
 import type { BoxId } from '../../types';
 
@@ -36,7 +37,14 @@ class Sidebar extends Component<Props> {
               <Search />
             </SearchWrapper>
             <Spacer size={24} />
-            <EmailList itemHeight={itemHeight} />
+            <EmailConsumer>
+              {({ selectedBoxId }) => (
+                <EmailList
+                  selectedBoxId={selectedBoxId}
+                  itemHeight={itemHeight}
+                />
+              )}
+            </EmailConsumer>
           </EmailListWrapper>
         </Foreground>
 
