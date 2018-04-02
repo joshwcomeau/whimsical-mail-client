@@ -69,7 +69,17 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
 
   componentWillReceiveProps(nextProps: Props) {
     if (!this.props.isOpen && nextProps.isOpen) {
-      this.setState({ status: 'opening' });
+      const initialState: any = { status: 'opening' };
+
+      if (nextProps.replyTo) {
+        initialState.emailData = {
+          ...initialState.emailData,
+          to: nextProps.replyTo.from,
+          subject: `RE: ${nextProps.replyTo.subject}`,
+        };
+      }
+
+      this.setState(initialState);
     }
   }
 
@@ -111,6 +121,14 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       this.setState({
         actionBeingPerformed: null,
         status: 'idle',
+        emailData: {
+          from: this.props.userData,
+          to: {
+            email: '',
+          },
+          subject: '',
+          body: '',
+        },
       });
     }
   };
@@ -229,7 +247,7 @@ const withEnvironmentData = WrappedComponent => (props: any) => (
   <AuthenticationConsumer>
     {({ userData }) => (
       <ModalConsumer>
-        {({ currentModal, openFromNode, closeModal, isReplyToSelected }) => (
+        {({ currentModal, openFromNode, closeModal, isReply }) => (
           <NodeConsumer>
             {({ nodes }) => (
               <EmailConsumer>
@@ -239,9 +257,7 @@ const withEnvironmentData = WrappedComponent => (props: any) => (
                       <WrappedComponent
                         {...props}
                         userData={userData}
-                        replyTo={
-                          isReplyToSelected ? emails[selectedEmailId] : null
-                        }
+                        replyTo={isReply ? emails.get(selectedEmailId) : null}
                         openFromNode={openFromNode}
                         outboxNode={nodes.outbox}
                         draftsNode={nodes.drafts}

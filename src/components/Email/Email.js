@@ -15,8 +15,6 @@ class Email extends Component<Props> {
   render() {
     const { subject, to, from, timestamp, body } = this.props.data;
 
-    console.log(this.props.data);
-
     const formattedBody = body
       .split('\n')
       .map((paragraph, index) => (

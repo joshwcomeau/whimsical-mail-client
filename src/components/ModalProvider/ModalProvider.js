@@ -27,7 +27,6 @@ class ModalProvider extends Component<Props, State> {
     this.setState({ currentModal: modalId, openFromNode, delegated });
 
   closeModal = () => {
-    console.log('Close!');
     this.setState({ currentModal: null });
   };
 
@@ -41,7 +40,7 @@ class ModalProvider extends Component<Props, State> {
           // State
           currentModal,
           openFromNode,
-          delegated,
+          ...delegated,
 
           // Actions
           openModal: this.openModal,

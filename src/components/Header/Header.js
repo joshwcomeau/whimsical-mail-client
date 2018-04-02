@@ -32,7 +32,9 @@ class Header extends Component<Props> {
                       secondary
                       innerRef={node => refCapturer('reply-button', node)}
                       onClick={() =>
-                        openModal('compose', nodes['reply-button'])
+                        openModal('compose', nodes['reply-button'], {
+                          isReply: true,
+                        })
                       }
                     >
                       <ReplyIcon />
