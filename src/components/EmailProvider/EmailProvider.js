@@ -43,16 +43,15 @@ class EmailProvider extends Component<Props, State> {
     this.setState(nextState);
   };
 
-  addNewEmailToBox = ({ boxId, toEmail, subject, body }: any) => {
+  addNewEmailToBox = ({ boxId, to, subject, body }: any) => {
     const { userData } = this.props;
 
     const id = this.state.emails.size + 1;
-    const to = generateUser({ email: toEmail });
 
     const newEmail = {
       id,
       boxId,
-      to,
+      to: generateUser(to),
       from: this.props.userData,
       subject,
       body,

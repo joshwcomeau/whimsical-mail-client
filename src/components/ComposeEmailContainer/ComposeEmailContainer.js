@@ -5,8 +5,10 @@ import Sound from 'react-sound';
 
 import { Z_INDICES } from '../../constants';
 import { debounce } from '../../utils';
+// Flow doesn't like MP3s. $FlowFixMe
 import wooshSoundSrc from '../../assets/woosh-2.mp3';
 
+import { AuthenticationConsumer } from '../AuthenticationProvider';
 import { ModalConsumer } from '../ModalProvider';
 import { NodeConsumer } from '../NodeProvider';
 import { EmailConsumer } from '../EmailProvider';
@@ -16,6 +18,7 @@ import FoldableLetter from '../FoldableLetter';
 import ComposeEmail from '../ComposeEmail';
 import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
 
+import type { UserData, EmailData } from '../../types';
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
 type ComposeEmailStep =
@@ -32,27 +35,22 @@ type Props = {
    */
   handleClose: () => void,
   isOpen: boolean,
+  replyTo: ?EmailData,
   openFromNode: HTMLElement,
   outboxNode: HTMLElement,
   draftsNode: HTMLElement,
   windowWidth: number,
   windowHeight: any,
+  userData: UserData,
   addNewEmailToBox: (data: any) => void,
 };
-
-type EmailData = {
-  fromEmail: string,
-  toEmail: string,
-  subject: string,
-  body: string,
-};
-
-type EmailDataField = $Keys<EmailData>;
 
 type State = {
   status: ComposeEmailStep,
   actionBeingPerformed: 'send' | 'save' | 'delete' | 'dismiss' | null,
-  emailData: EmailData,
+  // `EmailData` is the type for sent email: it includes an ID and timestamp.
+  // For email we're composing, we just want a subset.
+  emailData: $Shape<EmailData>,
 };
 
 class ComposeEmailContainer extends PureComponent<Props, State> {
@@ -60,8 +58,10 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     status: 'idle',
     actionBeingPerformed: null,
     emailData: {
-      fromEmail: 'Josh Comeau <joshwcomeau@gmail.com>',
-      toEmail: '',
+      from: this.props.userData,
+      to: {
+        email: '',
+      },
       subject: '',
       body: '',
     },
@@ -74,10 +74,13 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   }
 
   updateField = (fieldName: string) => (ev: SyntheticInputEvent<*>) => {
+    const newValue =
+      fieldName === 'to' ? { email: ev.target.value } : ev.target.value;
+
     this.setState({
       emailData: {
         ...this.state.emailData,
-        [fieldName]: ev.target.value,
+        [fieldName]: newValue,
       },
     });
   };
@@ -90,22 +93,24 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   handleOpenOrClose = (status: 'open' | 'closed') => {
     const { actionBeingPerformed } = this.state;
 
-    if (status === 'closed') {
+    // TODO: Can I refactor this so that the `actionBeingPerformed` check
+    // doesn't care about `status`? I think I can...
+
+    if (status === 'open') {
+      this.setState({
+        actionBeingPerformed: null,
+        status: 'open',
+      });
+    } else {
       if (actionBeingPerformed === 'send' || actionBeingPerformed === 'save') {
         const boxId = actionBeingPerformed === 'send' ? 'outbox' : 'drafts';
 
         this.props.addNewEmailToBox({ boxId, ...this.state.emailData });
       }
 
-      // Reset for future opens
       this.setState({
         actionBeingPerformed: null,
         status: 'idle',
-      });
-    } else {
-      this.setState({
-        actionBeingPerformed: null,
-        status: 'open',
       });
     }
   };
@@ -136,7 +141,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   renderFront() {
     return (
       <ComposeEmail
-        {...this.state.emailData}
+        emailData={this.state.emailData}
         updateField={this.updateField}
         handleSend={this.sendEmail}
         handleSave={this.saveEmail}
@@ -194,7 +199,6 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           <FoldableLetter
             isFolded={status === 'folding' || status === 'transporting'}
             onCompleteFolding={this.finishAction}
-            emailData={emailData}
             front={this.renderFront()}
             back={this.renderBack()}
           />
@@ -222,26 +226,34 @@ const Backdrop = styled.div`
 // writing, no native `adopt` solution exists, and libraries like react-adopt
 // aren't compelling enough to be worth it for a demo.
 const withEnvironmentData = WrappedComponent => (props: any) => (
-  <WindowDimensions>
-    {({ windowWidth, windowHeight }) => (
+  <AuthenticationConsumer>
+    {({ userData }) => (
       <ModalConsumer>
-        {({ currentModal, openFromNode, closeModal }) => (
+        {({ currentModal, openFromNode, closeModal, isReplyToSelected }) => (
           <NodeConsumer>
             {({ nodes }) => (
               <EmailConsumer>
-                {({ addNewEmailToBox }) => (
-                  <WrappedComponent
-                    {...props}
-                    openFromNode={openFromNode}
-                    outboxNode={nodes.outbox}
-                    draftsNode={nodes.drafts}
-                    nodes={nodes}
-                    isOpen={currentModal === 'compose'}
-                    handleClose={closeModal}
-                    addNewEmailToBox={addNewEmailToBox}
-                    windowWidth={windowWidth}
-                    windowHeight={windowHeight}
-                  />
+                {({ selectedEmailId, emails, addNewEmailToBox }) => (
+                  <WindowDimensions>
+                    {({ windowWidth, windowHeight }) => (
+                      <WrappedComponent
+                        {...props}
+                        userData={userData}
+                        replyTo={
+                          isReplyToSelected ? emails[selectedEmailId] : null
+                        }
+                        openFromNode={openFromNode}
+                        outboxNode={nodes.outbox}
+                        draftsNode={nodes.drafts}
+                        nodes={nodes}
+                        isOpen={currentModal === 'compose'}
+                        handleClose={closeModal}
+                        addNewEmailToBox={addNewEmailToBox}
+                        windowWidth={windowWidth}
+                        windowHeight={windowHeight}
+                      />
+                    )}
+                  </WindowDimensions>
                 )}
               </EmailConsumer>
             )}
@@ -249,6 +261,6 @@ const withEnvironmentData = WrappedComponent => (props: any) => (
         )}
       </ModalConsumer>
     )}
-  </WindowDimensions>
+  </AuthenticationConsumer>
 );
 export default withEnvironmentData(ComposeEmailContainer);

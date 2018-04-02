@@ -11,10 +11,10 @@ import Button from '../Button';
 import Spacer from '../Spacer';
 import ComposeEmailAddressInput from '../ComposeEmailAddressInput';
 
+import type { EmailData } from '../../types';
+
 type Props = {
-  toEmail: string,
-  subject: string,
-  body: string,
+  emailData: $Shape<EmailData>,
   updateField: (fieldName: string) => (val: string) => void,
   handleSend: () => void,
   handleSave: () => void,
@@ -24,9 +24,7 @@ type Props = {
 class ComposeEmail extends Component<Props> {
   render() {
     const {
-      toEmail,
-      subject,
-      body,
+      emailData,
       updateField,
       handleSend,
       handleSave,
@@ -43,8 +41,8 @@ class ComposeEmail extends Component<Props> {
               label="from"
             />
             <ComposeEmailAddressInput
-              value={toEmail}
-              onChange={updateField('toEmail')}
+              value={emailData.to.email}
+              onChange={updateField('to')}
               label="to"
               placeholder="jane@example.com"
             />
@@ -53,12 +51,12 @@ class ComposeEmail extends Component<Props> {
           <MainContent>
             <Subject
               placeholder="Subject"
-              value={subject}
+              value={emailData.subject}
               onChange={updateField('subject')}
             />
             <Body
               placeholder="Write something..."
-              value={body}
+              value={emailData.body}
               onChange={updateField('body')}
             />
           </MainContent>

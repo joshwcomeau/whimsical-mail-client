@@ -1,5 +1,5 @@
 export type UserData = {
-  name: string,
+  name?: string,
   email: string,
   avatarSrc?: string,
 };
@@ -10,7 +10,6 @@ export type EmailData = {
   to: UserData,
   timestamp: number,
   subject: string,
-  preview: string,
   body: React$Node,
 };
 

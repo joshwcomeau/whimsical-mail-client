@@ -72,7 +72,6 @@ class Wrapper extends Component<Props, State> {
   };
 
   render() {
-    console.log('RENDER', this.state);
     return (
       <WindowDimensions>
         {({ windowWidth, windowHeight }) => (

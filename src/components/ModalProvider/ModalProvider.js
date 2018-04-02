@@ -13,22 +13,27 @@ type State = {
   // you could use a map-like object, eg { [modalId: string]: boolean }
   currentModal: ?ModalId,
   openFromNode: ?HTMLElement,
+  delegated: any,
 };
 
 class ModalProvider extends Component<Props, State> {
   state = {
     currentModal: null,
     openFromNode: null,
+    delegated: null,
   };
 
-  openModal = (modalId: ModalId, openFromNode: HTMLElement) =>
-    this.setState({ currentModal: modalId, openFromNode });
+  openModal = (modalId: ModalId, openFromNode: HTMLElement, delegated: any) =>
+    this.setState({ currentModal: modalId, openFromNode, delegated });
 
-  closeModal = () => this.setState({ currentModal: null });
+  closeModal = () => {
+    console.log('Close!');
+    this.setState({ currentModal: null });
+  };
 
   render() {
     const { children } = this.props;
-    const { currentModal, openFromNode } = this.state;
+    const { currentModal, openFromNode, delegated } = this.state;
 
     return (
       <ModalContext.Provider
@@ -36,6 +41,7 @@ class ModalProvider extends Component<Props, State> {
           // State
           currentModal,
           openFromNode,
+          delegated,
 
           // Actions
           openModal: this.openModal,
