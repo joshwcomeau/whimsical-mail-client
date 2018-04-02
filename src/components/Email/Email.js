@@ -5,7 +5,7 @@ import format from 'date-fns/format';
 
 import { COLORS } from '../../constants';
 
-import type { EmailData } from '../../types';
+import type { UserData, EmailData } from '../../types';
 
 type Props = {
   data: EmailData,
@@ -13,7 +13,9 @@ type Props = {
 
 class Email extends Component<Props> {
   render() {
-    const { subject, from, timestamp, body } = this.props.data;
+    const { subject, to, from, timestamp, body } = this.props.data;
+
+    console.log(this.props.data);
 
     const formattedBody = body
       .split('\n')
@@ -21,12 +23,15 @@ class Email extends Component<Props> {
         <Paragraph key={index}>{paragraph}</Paragraph>
       ));
 
+    const formattedFrom = from.name || from.email;
+    const formattedTo = to.name || to.email;
+
     return (
       <Wrapper>
         <Header>
-          <From>
-            {from.name}, {from.email}
-          </From>
+          <Addresses>
+            {formattedFrom} → {formattedTo}
+          </Addresses>
           <Subject>{subject}</Subject>
           <Timestamp>{format(timestamp, 'MMM Do, YYYY [at] h:mm A')}</Timestamp>
         </Header>
@@ -48,9 +53,9 @@ const Header = styled.header`
   margin-bottom: 50px;
 `;
 
-const From = styled.div`
+const Addresses = styled.div`
   color: ${COLORS.gray[400]};
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 14px;
 `;
 
