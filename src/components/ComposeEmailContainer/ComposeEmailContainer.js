@@ -35,6 +35,7 @@ type Props = {
   nodes: {
     'compose-button': ?HTMLElement,
     outbox: HTMLElement,
+    drafts: HTMLElement,
   },
   windowWidth: number,
   windowHeight: any,
@@ -115,6 +116,10 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     this.setState({ actionBeingPerformed: 'send', status: 'folding' });
   };
 
+  saveEmail = () => {
+    this.setState({ actionBeingPerformed: 'save', status: 'folding' });
+  };
+
   finishAction = () => {
     // This is triggerd right after the letter is finished folding, for the
     // 'send' action.
@@ -136,6 +141,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
         {...this.state.emailData}
         updateField={this.updateField}
         handleSend={this.sendEmail}
+        handleSave={this.saveEmail}
       />
     );
   }
@@ -155,7 +161,8 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     const { status, actionBeingPerformed, emailData } = this.state;
 
     const fromNode = nodes['compose-button'];
-    const toNode = nodes['outbox'];
+    const toNode =
+      actionBeingPerformed === 'send' ? nodes['outbox'] : nodes['drafts'];
 
     let childTransporterStatus = isOpen ? 'open' : 'closed';
     if (actionBeingPerformed === 'dismiss') {

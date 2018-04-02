@@ -2,10 +2,13 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import SendIcon from 'react-icons/lib/md/send';
+import SaveIcon from 'react-icons/lib/md/save';
+import DeleteIcon from 'react-icons/lib/md/delete';
 
 import { COLORS } from '../../constants';
 
 import Button from '../Button';
+import Spacer from '../Spacer';
 import ComposeEmailAddressInput from '../ComposeEmailAddressInput';
 
 type Props = {
@@ -14,11 +17,21 @@ type Props = {
   body: string,
   updateField: (fieldName: string) => (val: string) => void,
   handleSend: () => void,
+  handleSave: () => void,
+  handleDelete: () => void,
 };
 
 class ComposeEmail extends Component<Props> {
   render() {
-    const { toEmail, subject, body, updateField, handleSend } = this.props;
+    const {
+      toEmail,
+      subject,
+      body,
+      updateField,
+      handleSend,
+      handleSave,
+      handleDelete,
+    } = this.props;
 
     return (
       <Wrapper>
@@ -51,9 +64,20 @@ class ComposeEmail extends Component<Props> {
           </MainContent>
 
           <Footer>
-            <Button onClick={handleSend}>
-              <SendIcon />
-            </Button>
+            <Side>
+              <Button secondary onClick={handleDelete}>
+                <DeleteIcon />
+              </Button>
+            </Side>
+            <Side>
+              <Button secondary onClick={handleSave}>
+                <DraftCopy>Save</DraftCopy>
+              </Button>
+              <Spacer size={24} />
+              <Button onClick={handleSend}>
+                <SendIcon />
+              </Button>
+            </Side>
           </Footer>
         </ModalContents>
       </Wrapper>
@@ -94,12 +118,24 @@ const MainContent = styled.section`
 `;
 
 const Footer = styled.div`
-  height: 60px;
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  justify-content: space-between;
+  padding-left: 10px;
   padding-right: 10px;
   border-top: 1px solid ${COLORS.gray[200]};
+`;
+
+const Side = styled.div`
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const DraftCopy = styled.div`
+  font-size: 16px;
+  color: ${COLORS.purple[700]};
+  font-weight: bold;
 `;
 
 const InvisibleTextarea = styled.textarea`
