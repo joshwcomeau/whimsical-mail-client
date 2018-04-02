@@ -72,7 +72,7 @@ class ChildTransporter extends Component<Props, State> {
     springOpenHorizontal: { stiffness: 150, damping: 20 },
     springOpenVertical: { stiffness: 200, damping: 20 },
     springCloseHorizontal: { stiffness: 150, damping: 22 },
-    springCloseVertical: { stiffness: 150, damping: 22 },
+    springCloseVertical: { stiffness: 150, damping: 25 },
   };
 
   childWrapperNode: HTMLElement;

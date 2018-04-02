@@ -1,9 +1,11 @@
 // @flow
 import React, { PureComponent, Fragment } from 'react';
 import styled from 'styled-components';
+import Sound from 'react-sound';
 
 import { Z_INDICES } from '../../constants';
 import { debounce } from '../../utils';
+import wooshSoundSrc from '../../assets/woosh-2.mp3';
 
 import { ModalConsumer } from '../ModalProvider';
 import { NodeConsumer } from '../NodeProvider';
@@ -163,6 +165,18 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     return (
       <Fragment>
         <Backdrop isOpen={isOpen} onClick={this.dismiss} />
+
+        <Sound
+          autoLoad
+          url={wooshSoundSrc}
+          playFromPosition={850}
+          volume={40}
+          playStatus={
+            status === 'transporting'
+              ? Sound.status.PLAYING
+              : Sound.status.STOPPED
+          }
+        />
 
         <ChildTransporter
           from={fromNode}

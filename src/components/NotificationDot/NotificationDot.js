@@ -1,5 +1,5 @@
 // @flow
-import React, { Component, Fragment } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { Motion, spring } from 'react-motion';
 import Sound from 'react-sound';
@@ -18,7 +18,7 @@ type Props = {
   isOpen: boolean,
 };
 
-class NotificationDot extends Component<Props> {
+class NotificationDot extends PureComponent<Props> {
   static defaultProps = {
     size: 8,
   };
