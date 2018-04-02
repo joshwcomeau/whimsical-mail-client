@@ -13,7 +13,7 @@ type Props = {
 
 class Email extends Component<Props> {
   render() {
-    const { subject, from, timestamp, preview, body } = this.props.data;
+    const { subject, from, timestamp, body } = this.props.data;
 
     const formattedBody = body
       .split('\n')
@@ -31,10 +31,7 @@ class Email extends Component<Props> {
           <Timestamp>{format(timestamp, 'MMM Do, YYYY [at] h:mm A')}</Timestamp>
         </Header>
 
-        <Body>
-          <Paragraph>{preview}</Paragraph>
-          {formattedBody}
-        </Body>
+        <Body>{formattedBody}</Body>
       </Wrapper>
     );
   }

@@ -56,7 +56,6 @@ class EmailProvider extends Component<Props, State> {
       from: this.props.userData,
       subject,
       body,
-      preview: body,
       timestamp: Date.now(),
     };
 

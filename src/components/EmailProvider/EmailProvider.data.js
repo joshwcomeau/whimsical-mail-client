@@ -97,7 +97,7 @@ export const generateData = (
     const boxId = BOX_IDS[i % 3];
 
     const subject = subjects[i % subjects.length];
-    const preview = previews[i % previews.length];
+    const body = previews[i % previews.length] + '\n' + data.body;
     const avatarSrc = avatarSrcs[i % avatarSrcs.length];
 
     time -= Math.random() * 10000000;
@@ -115,7 +115,6 @@ export const generateData = (
       to: boxId === 'inbox' ? userData : generatedContact,
       timestamp: time,
       subject,
-      preview,
       body: data.body,
       ...overrides,
     };

@@ -37,7 +37,7 @@ const EmailPreview = ({ data, height, isSelected, handleClick }: Props) => {
         </Header>
 
         <Subject>{data.subject}</Subject>
-        <Preview>{data.preview}</Preview>
+        <Preview>{data.body}</Preview>
       </Summary>
     </Wrapper>
   );
