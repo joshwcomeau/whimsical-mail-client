@@ -89,8 +89,11 @@ const SidebarHeadingWrapper = styled.div`
 
 const NotificationDotWrapper = styled.div`
   position: absolute;
-  top: 30%;
-  right: 2px;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  margin: auto;
+  width: 8px;
 `;
 
 export default SidebarHeader;

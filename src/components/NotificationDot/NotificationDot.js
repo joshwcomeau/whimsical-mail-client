@@ -7,7 +7,7 @@ import Sound from 'react-sound';
 import { COLORS } from '../../constants';
 import popSoundSrc from '../../assets/pop.wav';
 
-const MAIN_DOT_SPRING = { stiffness: 225, damping: 10 };
+const MAIN_DOT_SPRING = { stiffness: 225, damping: 7 };
 const FIRST_DOT_SPRING = { stiffness: 35, damping: 7 };
 const SECOND_DOT_SPRING = { stiffness: 65, damping: 7 };
 const THIRD_DOT_SPRING = { stiffness: 95, damping: 7 };
@@ -19,7 +19,7 @@ type Props = {
 
 class NotificationDot extends Component<Props> {
   static defaultProps = {
-    size: 10,
+    size: 8,
   };
   render() {
     const { size } = this.props;
@@ -58,24 +58,24 @@ class NotificationDot extends Component<Props> {
           }) => (
             <Wrapper>
               <MainDot
-                color={COLORS.red[400]}
+                color={COLORS.pink[500]}
                 size={size}
                 scale={mainDotScale}
               />
               <OtherDot
-                size={size * 0.5}
-                color={COLORS.pink[500]}
+                size={size * 0.25}
+                color={COLORS.purple[500]}
                 x={firstDotPositionX}
                 y={firstDotPositionY}
               />
               <OtherDot
                 size={size * 0.5}
-                color={COLORS.purple[500]}
+                color={COLORS.red[400]}
                 x={secondDotPositionX}
                 y={secondDotPositionY}
               />
               <OtherDot
-                size={size * 0.5}
+                size={size * (5 / 8)}
                 color={COLORS.blue[400]}
                 x={thirdDotPositionX}
                 y={thirdDotPositionY}

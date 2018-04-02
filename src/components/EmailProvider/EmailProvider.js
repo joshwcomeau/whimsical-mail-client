@@ -68,9 +68,15 @@ class EmailProvider extends Component<Props, State> {
       body,
     };
 
+    const addNotification =
+      !this.state.notificationOnBoxes.includes(boxId) &&
+      this.state.selectedBoxId !== boxId;
+
     this.setState({
       emails: this.state.emails.set(id, newEmail),
-      notificationOnBoxes: [...this.state.notificationOnBoxes, boxId],
+      notificationOnBoxes: addNotification
+        ? [...this.state.notificationOnBoxes, boxId]
+        : this.state.notificationOnBoxes,
     });
   };
 
