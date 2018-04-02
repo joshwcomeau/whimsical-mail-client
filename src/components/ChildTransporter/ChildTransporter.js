@@ -498,10 +498,6 @@ class ChildTransporter extends Component<Props, State> {
     } = this.props;
     const { status, position } = this.state;
 
-    if (!from || !to) {
-      return null;
-    }
-
     const {
       top,
       left,
@@ -544,7 +540,11 @@ class ChildTransporter extends Component<Props, State> {
       >
         {({ scaleX, scaleY, translateX, translateY }) => (
           <Wrapper
-            innerRef={node => (this.childWrapperNode = node)}
+            innerRef={node => {
+              if (!this.childWrapperNode) {
+                this.childWrapperNode = node;
+              }
+            }}
             style={{
               top,
               left,

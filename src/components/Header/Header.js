@@ -9,7 +9,8 @@ import DeleteIcon from 'react-icons/lib/md/delete';
 import { COLORS } from '../../constants';
 
 import Button from '../Button';
-import ComposeButton from '../ComposeButton';
+import { ModalConsumer } from '../ModalProvider';
+import { NodeConsumer } from '../NodeProvider';
 
 type Props = {
   height: number,
@@ -20,31 +21,52 @@ class Header extends Component<Props> {
     const { height } = this.props;
 
     return (
-      <Wrapper height={height}>
-        <Side>
-          <ButtonGroup>
-            <Button secondary>
-              <ReplyIcon />
-            </Button>
-            <Button secondary>
-              <ReplyAllIcon />
-            </Button>
-            <Button secondary>
-              <ForwardIcon />
-            </Button>
-          </ButtonGroup>
-          <Separator height={height} />
-          <ButtonGroup>
-            <Button secondary>
-              <DeleteIcon />
-            </Button>
-          </ButtonGroup>
-        </Side>
+      <ModalConsumer>
+        {({ openModal }) => (
+          <NodeConsumer>
+            {({ refCapturer, nodes }) => (
+              <Wrapper height={height}>
+                <Side>
+                  <ButtonGroup>
+                    <Button
+                      secondary
+                      innerRef={node => refCapturer('reply-button', node)}
+                      onClick={() =>
+                        openModal('compose', nodes['reply-button'])
+                      }
+                    >
+                      <ReplyIcon />
+                    </Button>
+                    <Button secondary>
+                      <ReplyAllIcon />
+                    </Button>
+                    <Button secondary>
+                      <ForwardIcon />
+                    </Button>
+                  </ButtonGroup>
+                  <Separator height={height} />
+                  <ButtonGroup>
+                    <Button secondary>
+                      <DeleteIcon />
+                    </Button>
+                  </ButtonGroup>
+                </Side>
 
-        <Side>
-          <ComposeButton />
-        </Side>
-      </Wrapper>
+                <Side>
+                  <Button
+                    innerRef={node => refCapturer('compose-button', node)}
+                    onClick={() =>
+                      openModal('compose', nodes['compose-button'])
+                    }
+                  >
+                    Compose
+                  </Button>
+                </Side>
+              </Wrapper>
+            )}
+          </NodeConsumer>
+        )}
+      </ModalConsumer>
     );
   }
 }

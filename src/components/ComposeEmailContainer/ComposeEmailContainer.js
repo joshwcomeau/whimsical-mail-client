@@ -32,11 +32,9 @@ type Props = {
    */
   handleClose: () => void,
   isOpen: boolean,
-  nodes: {
-    'compose-button': ?HTMLElement,
-    outbox: HTMLElement,
-    drafts: HTMLElement,
-  },
+  openFromNode: HTMLElement,
+  outboxNode: HTMLElement,
+  draftsNode: HTMLElement,
   windowWidth: number,
   windowHeight: any,
   addNewEmailToBox: (data: any) => void,
@@ -154,15 +152,15 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     const {
       handleClose,
       isOpen,
-      nodes,
+      openFromNode,
+      outboxNode,
+      draftsNode,
       windowWidth,
       windowHeight,
     } = this.props;
     const { status, actionBeingPerformed, emailData } = this.state;
 
-    const fromNode = nodes['compose-button'];
-    const toNode =
-      actionBeingPerformed === 'send' ? nodes['outbox'] : nodes['drafts'];
+    const toNode = actionBeingPerformed === 'send' ? outboxNode : draftsNode;
 
     let childTransporterStatus = isOpen ? 'open' : 'closed';
     if (actionBeingPerformed === 'dismiss') {
@@ -186,7 +184,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
         />
 
         <ChildTransporter
-          from={fromNode}
+          from={openFromNode}
           to={toNode}
           status={childTransporterStatus}
           windowWidth={windowWidth}
@@ -227,13 +225,16 @@ const withEnvironmentData = WrappedComponent => (props: any) => (
   <WindowDimensions>
     {({ windowWidth, windowHeight }) => (
       <ModalConsumer>
-        {({ currentModal, closeModal }) => (
+        {({ currentModal, openFromNode, closeModal }) => (
           <NodeConsumer>
             {({ nodes }) => (
               <EmailConsumer>
                 {({ addNewEmailToBox }) => (
                   <WrappedComponent
                     {...props}
+                    openFromNode={openFromNode}
+                    outboxNode={nodes.outbox}
+                    draftsNode={nodes.drafts}
                     nodes={nodes}
                     isOpen={currentModal === 'compose'}
                     handleClose={closeModal}
