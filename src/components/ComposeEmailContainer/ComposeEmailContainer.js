@@ -87,7 +87,6 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   };
 
   handleOpenOrClose = (status: 'open' | 'closed') => {
-    console.log('open or close!');
     const { actionBeingPerformed } = this.state;
 
     if (status === 'closed') {
@@ -140,7 +139,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   }
 
   renderBack() {
-    return <ComposeEmailEnvelope />;
+    return <ComposeEmailEnvelope {...this.state.emailData} />;
   }
 
   render() {
@@ -199,10 +198,10 @@ const Backdrop = styled.div`
   transition: opacity 1000ms;
 `;
 
-// Thin HOC which collects information about:
-//  - whether or not this modal is open
-//  - the DOM nodes necessary for the open/close animation
-//  - the window dimensions (width and height), needed by ChildTransporter
+// Thin wrapper which aggregates a bunch of different render-prop data
+// providers. This is not a very nice-looking solution, but at the time of
+// writing, no native `adopt` solution exists, and libraries like react-adopt
+// aren't compelling enough to be worth it for a demo.
 const withEnvironmentData = WrappedComponent => (props: any) => (
   <WindowDimensions>
     {({ windowWidth, windowHeight }) => (

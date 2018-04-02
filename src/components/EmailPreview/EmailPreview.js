@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import format from 'date-fns/format';
 import isSameDay from 'date-fns/is_same_day';
 
+import { COLORS } from '../../constants';
+
 import Avatar from '../Avatar';
 import Spacer from '../Spacer';
 
@@ -42,8 +44,10 @@ const EmailPreview = ({ data, height, isSelected, handleClick }: Props) => {
 };
 
 const Wrapper = styled.div`
-  padding: 18px 0;
+  padding: 18px 24px;
   height: ${props => props.height + 'px'};
+  background-color: ${props => props.isSelected && COLORS.blue[700]};
+  color: ${props => props.isSelected && '#FFF'};
   display: flex;
   align-items: center;
   line-height: 1.6;
@@ -68,7 +72,7 @@ const Summary = styled.div`
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
-  color: #222;
+  opacity: 0.9;
   font-weight: 500;
 `;
 
@@ -87,8 +91,8 @@ const Preview = styled.p`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 200;
-  color: #666;
+  font-weight: 300;
+  opacity: 0.85;
 `;
 
 export default EmailPreview;

@@ -32,8 +32,10 @@ class Sidebar extends Component<Props> {
         <Foreground>
           <SidebarHeader height={headerHeight} />
           <EmailListWrapper headerHeight={headerHeight}>
-            <Search />
-            <Spacer size={10} />
+            <SearchWrapper>
+              <Search />
+            </SearchWrapper>
+            <Spacer size={24} />
             <EmailList itemHeight={itemHeight} />
           </EmailListWrapper>
         </Foreground>
@@ -68,8 +70,12 @@ const Background = styled.div`
 
 const EmailListWrapper = styled.div`
   height: calc(100% - ${({ headerHeight }) => headerHeight}px);
-  padding: 24px;
+  padding: 24px 0;
   overflow: scroll;
+`;
+
+const SearchWrapper = styled.div`
+  padding: 0 24px;
 `;
 
 export default Sidebar;

@@ -97,6 +97,7 @@ const Wrapper = styled.div`
   position: relative;
   width: 10px;
   height: 10px;
+  pointer-events: none;
 `;
 
 const Dot = styled.div`

@@ -9,6 +9,7 @@ export const COLORS = {
   },
   blue: {
     '400': '#42A5F5',
+    '700': '#2962FF',
   },
   purple: {
     '500': '#6139f5',

@@ -1,10 +1,13 @@
+export type UserData = {
+  name: string,
+  email: string,
+  avatarSrc?: string,
+};
+
 export type EmailData = {
   id: number,
-  from: {
-    name: string,
-    email: string,
-    avatarSrc: string,
-  },
+  from: UserData,
+  to: UserData,
   timestamp: number,
   subject: string,
   preview: string,

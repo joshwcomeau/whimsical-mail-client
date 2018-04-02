@@ -2,18 +2,16 @@
 import React, { Component } from 'react';
 import produce from 'immer';
 
-import {
-  generateData,
-  loggedInUserData,
-  getRandomAvatar,
-} from './EmailProvider.data';
+import { generateData, generateUser } from './EmailProvider.data';
+import { AuthenticationConsumer } from '../AuthenticationProvider';
 
-import type { EmailData, BoxId } from '../../types';
+import type { UserData, EmailData, BoxId } from '../../types';
 
 // $FlowFixMe
 const EmailContext = React.createContext('email');
 
 type Props = {
+  userData: UserData,
   children: React$Node,
 };
 type State = {
@@ -25,7 +23,7 @@ type State = {
 
 class EmailProvider extends Component<Props, State> {
   state = {
-    emails: generateData(30),
+    emails: generateData(this.props.userData, 30),
     selectedBoxId: 'inbox',
     selectedEmailId: 1,
     notificationOnBoxes: [],
@@ -45,27 +43,21 @@ class EmailProvider extends Component<Props, State> {
     this.setState(nextState);
   };
 
-  addNewEmailToBox = ({ boxId, to, subject, body }: any) => {
-    // NOTE: This is totally unrealistic.
-    // I'm doing this in a very unrealistic way, because this stuff isn't core
-    // to what the demo is demonstrating.
-    const id = this.state.emails.size + 1;
+  addNewEmailToBox = ({ boxId, toEmail, subject, body }: any) => {
+    const { userData } = this.props;
 
-    const from = loggedInUserData;
+    const id = this.state.emails.size + 1;
+    const to = generateUser({ email: toEmail });
 
     const newEmail = {
       id,
       boxId,
-      from: loggedInUserData,
-      to: {
-        email: to,
-        name: 'Some Name',
-        avatarSrc: getRandomAvatar(),
-      },
-      timestamp: Date.now(),
+      to,
+      from: this.props.userData,
       subject,
-      preview: body,
       body,
+      preview: body,
+      timestamp: Date.now(),
     };
 
     const addNotification =
@@ -133,4 +125,10 @@ class EmailProvider extends Component<Props, State> {
 
 export const EmailConsumer = EmailContext.Consumer;
 
-export default EmailProvider;
+const withEnvironmentData = WrappedComponent => (props: any) => (
+  <AuthenticationConsumer>
+    {({ userData }) => <WrappedComponent {...props} userData={userData} />}
+  </AuthenticationConsumer>
+);
+
+export default withEnvironmentData(EmailProvider);

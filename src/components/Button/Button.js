@@ -22,7 +22,6 @@ const ButtonBase = styled.button`
   align-items: center;
   height: 40px;
   border: none;
-  outline: none;
   cursor: pointer;
   -webkit-font-smoothing: antialiased;
 `;

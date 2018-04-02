@@ -7,7 +7,6 @@ import { COLORS } from '../../constants';
 
 import Button from '../Button';
 import ComposeEmailAddressInput from '../ComposeEmailAddressInput';
-import ControlledInput from '../ControlledInput';
 
 type Props = {
   toEmail: string,
@@ -109,6 +108,11 @@ const InvisibleTextarea = styled.textarea`
   border: none;
   resize: none;
   outline: none;
+
+  &:focus::placeholder {
+    color: ${COLORS.blue[700]};
+    opacity: 0.6;
+  }
 `;
 
 const Subject = styled(InvisibleTextarea)`

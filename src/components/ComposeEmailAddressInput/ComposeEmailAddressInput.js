@@ -75,7 +75,7 @@ const Input = styled.input`
   backface-visibility: hidden;
 
   &:focus {
-    border-bottom: 2px solid ${COLORS.pink[500]};
+    border-bottom: 2px solid ${COLORS.blue[700]};
   }
 
   &::placeholder {

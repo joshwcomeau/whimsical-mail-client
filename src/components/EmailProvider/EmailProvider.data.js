@@ -1,6 +1,6 @@
 // @flow
 import React, { Fragment } from 'react';
-import { generators, createMany } from 'sharkhorse';
+import { generators, create, createMany } from 'sharkhorse';
 
 import { sample } from '../../utils';
 
@@ -20,9 +20,8 @@ import avatar13 from '../../assets/avatars/avatar-13.jpg';
 import avatar14 from '../../assets/avatars/avatar-14.jpg';
 import avatar15 from '../../assets/avatars/avatar-15.jpg';
 import avatar16 from '../../assets/avatars/avatar-16.jpg';
-import avatarMe from '../../assets/avatars/me.jpg';
 
-import type { EmailData, BoxId } from '../../types';
+import type { UserData, EmailData, BoxId } from '../../types';
 
 const avatarSrcs = [
   avatar1,
@@ -59,13 +58,15 @@ const previews = [
   'so most chain letters are nonsense but this one is the REAL DEAL. FORWARD or BAD FIRE will happen to your HOME.',
 ];
 
+const UserFactory = {
+  firstName: generators.name().first(),
+  lastName: generators.name().last(),
+  email: generators.email(),
+};
+
 const EmailFactory = {
   id: generators.sequence(),
-  from: {
-    firstName: generators.name().first(),
-    lastName: generators.name().last(),
-    email: generators.email(),
-  },
+  from: UserFactory,
 
   body: generators.lorem().paragraphs(6),
 };
@@ -74,13 +75,22 @@ const BOX_IDS: Array<BoxId> = ['inbox', 'outbox', 'drafts'];
 
 export const getRandomAvatar = () => sample(avatarSrcs);
 
-export const loggedInUserData = {
-  email: 'josh@example.com',
-  name: 'Josh Comeau',
-  avatarSrc: avatarMe,
+export const generateUser = (overrides: any = {}) => {
+  const factoryUser = create(UserFactory);
+
+  return {
+    name: `${factoryUser.firstName} ${factoryUser.lastName}`,
+    email: factoryUser.email,
+    avatarSrc: sample(avatarSrcs),
+    ...overrides,
+  };
 };
 
-export const generateData = (num: number): Map<number, EmailData> => {
+export const generateData = (
+  userData: UserData,
+  num: number,
+  overrides: any = {}
+): Map<number, EmailData> => {
   let time = new Date();
 
   const data = createMany(EmailFactory, num).map((data, i) => {
@@ -92,21 +102,22 @@ export const generateData = (num: number): Map<number, EmailData> => {
 
     time -= Math.random() * 10000000;
 
-    const generatedContact = {
-      email: data.from.email,
+    const generatedContact: UserData = {
       name: `${data.from.firstName} ${data.from.lastName}`,
+      email: data.from.email,
       avatarSrc,
     };
 
     return {
       id: data.id,
       boxId,
-      from: boxId === 'inbox' ? generatedContact : loggedInUserData,
-      to: boxId === 'inbox' ? loggedInUserData : generatedContact,
+      from: boxId === 'inbox' ? generatedContact : userData,
+      to: boxId === 'inbox' ? userData : generatedContact,
       timestamp: time,
       subject,
       preview,
       body: data.body,
+      ...overrides,
     };
   });
 
