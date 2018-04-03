@@ -194,9 +194,12 @@ class ChildTransporter extends Component<Props, State> {
     );
 
     const { translateX, translateY } = this.getTranslate(
+      quadrant,
       startStatus,
       pendingChildRect
     );
+
+    console.log({ translateX, translateY });
 
     return {
       ...minimumPositionData,
@@ -326,6 +329,7 @@ class ChildTransporter extends Component<Props, State> {
   }
 
   getTranslate(
+    quadrant: Quadrant,
     startStatus: StartStatus,
     pendingChildRect: AugmentedClientRect
   ) {
@@ -349,12 +353,22 @@ class ChildTransporter extends Component<Props, State> {
     // We don't have any translation on-open.
     // Might change this later, if we add spacing support.
     if (startStatus === 'start-opening' || startStatus === 'start-retracting') {
-      return { translateX: spacingFrom, translateY: spacingFrom };
+      let translateX =
+        quadrant === 1 || quadrant === 3 ? -spacingFrom : spacingFrom;
+
+      let translateY =
+        quadrant === 3 || quadrant === 4 ? spacingFrom : -spacingFrom;
+
+      if (startStatus === 'start-retracting') {
+        translateX *= -1;
+        translateY *= -1;
+      }
+
+      return { translateX, translateY };
     }
 
     const [x, y] = getPositionDelta(currentChildRect, pendingChildRect);
 
-    console.log({ x, y });
     return { translateX: x, translateY: y };
   }
 
@@ -449,41 +463,43 @@ class ChildTransporter extends Component<Props, State> {
     const orientRelativeToCorner =
       startStatus === 'start-opening' || startStatus === 'start-retracting';
 
+    const offset = startStatus === 'start-opening' ? spacingFrom : 0;
+
     switch (quadrant) {
       case 1:
         return {
           top: orientRelativeToCorner
-            ? targetRect.bottom + spacingFrom
+            ? targetRect.bottom + offset
             : targetRect.centerY - childRect.height / 2,
           left: orientRelativeToCorner
-            ? targetRect.right + spacingFrom
+            ? targetRect.right + offset
             : targetRect.centerX - childRect.width / 2,
         };
       case 2:
         return {
           top: orientRelativeToCorner
-            ? targetRect.bottom + spacingFrom
+            ? targetRect.bottom + offset
             : targetRect.centerY - childRect.height / 2,
           right: orientRelativeToCorner
-            ? targetRect.fromBottomRight.left + spacingFrom
+            ? targetRect.fromBottomRight.left + offset
             : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       case 3:
         return {
           bottom: orientRelativeToCorner
-            ? targetRect.fromBottomRight.top + spacingFrom
+            ? targetRect.fromBottomRight.top + offset
             : targetRect.fromBottomRight.centerY - childRect.height / 2,
           left: orientRelativeToCorner
-            ? targetRect.right + spacingFrom
+            ? targetRect.right + offset
             : targetRect.centerX - childRect.width / 2,
         };
       case 4:
         return {
           bottom: orientRelativeToCorner
-            ? targetRect.fromBottomRight.top + spacingFrom
+            ? targetRect.fromBottomRight.top + offset
             : targetRect.fromBottomRight.centerY - childRect.height / 2,
           right: orientRelativeToCorner
-            ? targetRect.fromBottomRight.left + spacingFrom
+            ? targetRect.fromBottomRight.left + offset
             : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       default:
@@ -518,7 +534,9 @@ class ChildTransporter extends Component<Props, State> {
     const shouldSpringScale = ['opening', 'closing', 'retracting'].includes(
       status
     );
-    const shouldSpringTransform = ['closing'].includes(status);
+    const shouldSpringTransform = ['opening', 'closing', 'retracting'].includes(
+      status
+    );
 
     const springHorizontal =
       status === 'closing' ? springCloseHorizontal : springOpenHorizontal;

@@ -134,9 +134,11 @@ const foldTopDown = keyframes`
 const fadeIn = keyframes`
   from {
     opacity: 0;
+    transform: scaleY(0);
   }
   to {
     opacity: 1;
+    transform: scaleY(1);
   }
 `;
 
@@ -189,8 +191,9 @@ const MiddleFoldDarken = styled.div`
   right: 0;
   bottom: 0;
   z-index: 2;
-  background: rgba(0, 0, 0, 0.5);
-  animation: ${fadeIn} ${props => props.speed}ms;
+  background: rgba(0, 0, 0, 0.05);
+  animation: ${fadeIn} ${props => props.speed}ms both 30ms;
+  transform-origin: bottom center;
 `;
 
 const TopFoldContents = styled.div`

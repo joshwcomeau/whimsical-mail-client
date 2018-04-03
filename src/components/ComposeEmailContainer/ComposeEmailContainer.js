@@ -206,7 +206,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           windowWidth={windowWidth}
           windowHeight={windowHeight}
           handleFinishTransportation={this.handleOpenOrClose}
-          spacingFrom={4}
+          spacingFrom={8}
         >
           <FoldableLetter
             isFolded={status === 'folding' || status === 'transporting'}
