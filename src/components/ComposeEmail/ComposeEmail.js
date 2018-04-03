@@ -93,8 +93,9 @@ const ModalContents = styled.div`
   z-index: 1;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 100%;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  margin: 6px;
   background: white;
 `;
 

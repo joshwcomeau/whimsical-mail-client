@@ -80,7 +80,6 @@ class FoldableLetter extends PureComponent<Props> {
               height={height}
               dangerouslySetInnerHTML={{ __html: node.outerHTML }}
             />
-            <MiddleFoldDarken speed={speed} />
           </HideOverflow>
         </MiddleFold>
 
@@ -131,17 +130,6 @@ const foldTopDown = keyframes`
   }
 `;
 
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: scaleY(0);
-  }
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-`;
-
 const Wrapper = styled.div`
   position: fixed;
   z-index: 10000;
@@ -182,18 +170,6 @@ const HideOverflow = styled.div`
   height: 100%;
   z-index: 2;
   overflow: hidden;
-`;
-
-const MiddleFoldDarken = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  background: rgba(0, 0, 0, 0.05);
-  animation: ${fadeIn} ${props => props.speed}ms both 30ms;
-  transform-origin: bottom center;
 `;
 
 const TopFoldContents = styled.div`
