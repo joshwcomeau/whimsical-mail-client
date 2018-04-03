@@ -1,5 +1,6 @@
 // @flow
 import React, { PureComponent, Fragment } from 'react';
+import produce from 'immer';
 import styled from 'styled-components';
 import Sound from 'react-sound';
 
@@ -103,34 +104,26 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   handleOpenOrClose = (status: 'open' | 'closed') => {
     const { actionBeingPerformed } = this.state;
 
-    // TODO: Can I refactor this so that the `actionBeingPerformed` check
-    // doesn't care about `status`? I think I can...
+    const isCreatingNewEmail =
+      actionBeingPerformed === 'send' || actionBeingPerformed === 'save';
 
-    if (status === 'open') {
-      this.setState({
-        actionBeingPerformed: null,
-        status: 'open',
-      });
-    } else {
-      if (actionBeingPerformed === 'send' || actionBeingPerformed === 'save') {
-        const boxId = actionBeingPerformed === 'send' ? 'outbox' : 'drafts';
+    const nextState = produce(this.state, draftState => {
+      draftState.actionBeingPerformed = null;
+      draftState.status = status === 'open' ? 'open' : 'idle';
 
-        this.props.addNewEmailToBox({ boxId, ...this.state.emailData });
+      if (isCreatingNewEmail) {
+        draftState.emailData.to = { email: '' };
+        draftState.emailData.subject = '';
+        draftState.emailData.body = '';
       }
+    });
 
-      this.setState({
-        actionBeingPerformed: null,
-        status: 'idle',
-        emailData: {
-          from: this.props.userData,
-          to: {
-            email: '',
-          },
-          subject: '',
-          body: '',
-        },
-      });
+    if (isCreatingNewEmail) {
+      const boxId = actionBeingPerformed === 'send' ? 'outbox' : 'drafts';
+      this.props.addNewEmailToBox({ boxId, ...this.state.emailData });
     }
+
+    this.setState(nextState);
   };
 
   sendEmail = () => {
@@ -213,6 +206,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           windowWidth={windowWidth}
           windowHeight={windowHeight}
           handleFinishTransportation={this.handleOpenOrClose}
+          spacingFrom={4}
         >
           <FoldableLetter
             isFolded={status === 'folding' || status === 'transporting'}

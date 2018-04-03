@@ -16,10 +16,21 @@ class FoldableLetter extends PureComponent<Props> {
   };
 
   node: ?HTMLElement;
+  finalFoldNode: ?HTMLElement;
 
   componentDidUpdate(prevProps: Props) {
-    if (!prevProps.isFolded && this.props.isFolded) {
-      window.setTimeout(this.props.onCompleteFolding, 1000);
+    const { onCompleteFolding } = this.props;
+
+    if (!prevProps.isFolded && this.props.isFolded && this.finalFoldNode) {
+      this.finalFoldNode.addEventListener('animationend', onCompleteFolding);
+    }
+  }
+
+  componentWillUnmount() {
+    const { onCompleteFolding } = this.props;
+
+    if (this.finalFoldNode) {
+      this.finalFoldNode.removeEventListener('animationend', onCompleteFolding);
     }
   }
 
@@ -46,22 +57,18 @@ class FoldableLetter extends PureComponent<Props> {
       return;
     }
 
-    if (!isFolded) {
-      return null;
-    }
-
     const { top, left, width, height } = node.getBoundingClientRect();
-
-    const topFoldNode = node;
-    const middleFoldNode = node.cloneNode(true);
-    const bottomFoldNode = node.cloneNode(true);
 
     return (
       <Wrapper style={{ top: 0, left: 0, width, height }}>
-        <TopFold speed={speed} height={height}>
+        <TopFold
+          innerRef={node => (this.finalFoldNode = node)}
+          speed={speed}
+          height={height}
+        >
           <HideOverflow>
             <TopFoldContents
-              dangerouslySetInnerHTML={{ __html: topFoldNode.outerHTML }}
+              dangerouslySetInnerHTML={{ __html: node.outerHTML }}
             />
           </HideOverflow>
           <TopFoldBack>{back}</TopFoldBack>
@@ -71,8 +78,9 @@ class FoldableLetter extends PureComponent<Props> {
           <HideOverflow>
             <MiddleFoldContents
               height={height}
-              dangerouslySetInnerHTML={{ __html: middleFoldNode.outerHTML }}
+              dangerouslySetInnerHTML={{ __html: node.outerHTML }}
             />
+            <MiddleFoldDarken speed={speed} />
           </HideOverflow>
         </MiddleFold>
 
@@ -80,7 +88,7 @@ class FoldableLetter extends PureComponent<Props> {
           <HideOverflow>
             <BottomFoldContents
               height={height}
-              dangerouslySetInnerHTML={{ __html: bottomFoldNode.outerHTML }}
+              dangerouslySetInnerHTML={{ __html: node.outerHTML }}
             />
           </HideOverflow>
           <BottomFoldBack />
@@ -95,7 +103,7 @@ class FoldableLetter extends PureComponent<Props> {
     return (
       <Fragment>
         {this.renderOriginal()}
-        {this.renderFoldedCopy()}
+        {isFolded && this.renderFoldedCopy()}
       </Fragment>
     );
   }
@@ -120,6 +128,15 @@ const foldTopDown = keyframes`
   to {
     transform-origin: bottom center;
     transform: perspective(1000px) rotateX(-180deg);
+  }
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 `;
 
@@ -163,6 +180,17 @@ const HideOverflow = styled.div`
   height: 100%;
   z-index: 2;
   overflow: hidden;
+`;
+
+const MiddleFoldDarken = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.5);
+  animation: ${fadeIn} ${props => props.speed}ms;
 `;
 
 const TopFoldContents = styled.div`

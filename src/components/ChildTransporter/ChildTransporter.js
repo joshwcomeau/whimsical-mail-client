@@ -46,6 +46,7 @@ type Props = {
   springCloseVertical: SpringSettings,
   windowWidth: number,
   windowHeight: number,
+  spacingFrom: number,
   handleFinishTransportation?: (status: EndStatus) => any,
 };
 
@@ -73,6 +74,7 @@ class ChildTransporter extends Component<Props, State> {
     springOpenVertical: { stiffness: 200, damping: 20 },
     springCloseHorizontal: { stiffness: 150, damping: 22 },
     springCloseVertical: { stiffness: 150, damping: 25 },
+    spacingFrom: 0,
   };
 
   childWrapperNode: HTMLElement;
@@ -337,6 +339,7 @@ class ChildTransporter extends Component<Props, State> {
      * This method calculates that by comparing the child rect held in state
      * with the "pending" childRect, which is about to be applied.
      */
+    const { spacingFrom } = this.props;
     const { childRect: currentChildRect } = this.state;
 
     if (!currentChildRect) {
@@ -346,10 +349,12 @@ class ChildTransporter extends Component<Props, State> {
     // We don't have any translation on-open.
     // Might change this later, if we add spacing support.
     if (startStatus === 'start-opening' || startStatus === 'start-retracting') {
-      return { translateX: 0, translateY: 0 };
+      return { translateX: spacingFrom, translateY: spacingFrom };
     }
 
     const [x, y] = getPositionDelta(currentChildRect, pendingChildRect);
+
+    console.log({ x, y });
     return { translateX: x, translateY: y };
   }
 
@@ -434,7 +439,7 @@ class ChildTransporter extends Component<Props, State> {
      *     This has to do with the intended effect: the child should grow from
      *     the target's corner, but it should shrink into the target's center.
      */
-    const { windowWidth, windowHeight } = this.props;
+    const { windowWidth, windowHeight, spacingFrom } = this.props;
     const { childRect } = this.state;
 
     if (!childRect) {
@@ -448,37 +453,37 @@ class ChildTransporter extends Component<Props, State> {
       case 1:
         return {
           top: orientRelativeToCorner
-            ? targetRect.bottom
+            ? targetRect.bottom + spacingFrom
             : targetRect.centerY - childRect.height / 2,
           left: orientRelativeToCorner
-            ? targetRect.right
+            ? targetRect.right + spacingFrom
             : targetRect.centerX - childRect.width / 2,
         };
       case 2:
         return {
           top: orientRelativeToCorner
-            ? targetRect.bottom
+            ? targetRect.bottom + spacingFrom
             : targetRect.centerY - childRect.height / 2,
           right: orientRelativeToCorner
-            ? targetRect.fromBottomRight.left
+            ? targetRect.fromBottomRight.left + spacingFrom
             : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       case 3:
         return {
           bottom: orientRelativeToCorner
-            ? targetRect.fromBottomRight.top
+            ? targetRect.fromBottomRight.top + spacingFrom
             : targetRect.fromBottomRight.centerY - childRect.height / 2,
           left: orientRelativeToCorner
-            ? targetRect.right
+            ? targetRect.right + spacingFrom
             : targetRect.centerX - childRect.width / 2,
         };
       case 4:
         return {
           bottom: orientRelativeToCorner
-            ? targetRect.fromBottomRight.top
+            ? targetRect.fromBottomRight.top + spacingFrom
             : targetRect.fromBottomRight.centerY - childRect.height / 2,
           right: orientRelativeToCorner
-            ? targetRect.fromBottomRight.left
+            ? targetRect.fromBottomRight.left + spacingFrom
             : targetRect.fromBottomRight.centerX - childRect.width / 2,
         };
       default:
