@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import Sound from 'react-sound';
 
 import { Z_INDICES } from '../../constants';
-import { debounce } from '../../utils';
+import { debounce, delay } from '../../utils';
 // Flow doesn't like MP3s. $FlowFixMe
 import wooshSoundSrc from '../../assets/woosh-2.mp3';
 
@@ -18,6 +18,7 @@ import ChildTransporter from '../ChildTransporter';
 import FoldableLetter from '../FoldableLetter';
 import ComposeEmail from '../ComposeEmail';
 import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
+import EtchASketchShaker from '../EtchASketchShaker';
 
 import type { UserData, EmailData } from '../../types';
 import type { Nodes } from '../NodeProvider/NodeProvider';
@@ -27,7 +28,8 @@ type ComposeEmailStep =
   | 'opening'
   | 'open'
   | 'folding'
-  | 'transporting';
+  | 'transporting'
+  | 'clearing';
 
 type Props = {
   /**
@@ -48,7 +50,7 @@ type Props = {
 
 type State = {
   status: ComposeEmailStep,
-  actionBeingPerformed: 'send' | 'save' | 'delete' | 'dismiss' | null,
+  actionBeingPerformed: 'send' | 'save' | 'clear' | 'dismiss' | null,
   // `EmailData` is the type for sent email: it includes an ID and timestamp.
   // For email we're composing, we just want a subset.
   emailData: $Shape<EmailData>,
@@ -83,6 +85,9 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       this.setState(initialState);
     }
   }
+
+  setStatePromise = (newState: $Shape<State>) =>
+    new Promise(resolve => this.setState(newState, resolve));
 
   updateField = (fieldName: string) => (ev: SyntheticInputEvent<*>) => {
     const newValue =
@@ -134,6 +139,33 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     this.setState({ actionBeingPerformed: 'save', status: 'folding' });
   };
 
+  clearEmail = async () => {
+    // When clearing the email, we do an etch-a-sketch-like shake, with the
+    // contents disappearing midway through.
+    // This sequence is not interruptible, and so we'll do it all inline here.
+    await this.setStatePromise({
+      actionBeingPerformed: 'clear',
+      status: 'clearing',
+    });
+
+    await delay(500);
+
+    await this.setStatePromise({
+      emailData: {
+        ...this.state.emailData,
+        subject: '',
+        body: '',
+      },
+    });
+
+    await delay(500);
+
+    this.setState({
+      actionBeingPerformed: null,
+      status: 'idle',
+    });
+  };
+
   finishAction = () => {
     // This is triggerd right after the letter is finished folding, for the
     // 'send' action.
@@ -151,12 +183,15 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
 
   renderFront() {
     return (
-      <ComposeEmail
-        emailData={this.state.emailData}
-        updateField={this.updateField}
-        handleSend={this.sendEmail}
-        handleSave={this.saveEmail}
-      />
+      <EtchASketchShaker shake={this.state.status === 'clearing'}>
+        <ComposeEmail
+          emailData={this.state.emailData}
+          updateField={this.updateField}
+          handleSend={this.sendEmail}
+          handleSave={this.saveEmail}
+          handleClear={this.clearEmail}
+        />
+      </EtchASketchShaker>
     );
   }
 

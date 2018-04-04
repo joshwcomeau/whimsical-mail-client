@@ -155,3 +155,6 @@ export const convertHexToRGBA = (hex, alpha = 1) => {
 };
 
 export const hyphenate = str => str.replace(/([A-Z])/g, '-$1').toLowerCase();
+
+export const delay = duration =>
+  new Promise(resolve => window.setTimeout(resolve, duration));

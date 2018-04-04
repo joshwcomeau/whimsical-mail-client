@@ -8,19 +8,17 @@ import NodeProvider from '../NodeProvider';
 
 type Props = { children: React$Node };
 
-const Providers = ({ children }: Props) => {
-  // prettier-ignore
-  return (
-    <AuthenticationProvider>
-      <EmailProvider>
-        <ModalProvider>
-          <NodeProvider>
-            {children}
-          </NodeProvider>
-        </ModalProvider>
-      </EmailProvider>
-    </AuthenticationProvider>
-  );
-};
+// prettier-ignore
+const Providers = ({ children }: Props) => (
+  <AuthenticationProvider>
+    <EmailProvider>
+      <ModalProvider>
+        <NodeProvider>
+          {children}
+        </NodeProvider>
+      </ModalProvider>
+    </EmailProvider>
+  </AuthenticationProvider>
+);
 
 export default Providers;

@@ -18,7 +18,7 @@ type Props = {
   updateField: (fieldName: string) => (val: string) => void,
   handleSend: () => void,
   handleSave: () => void,
-  handleDelete: () => void,
+  handleClear: () => void,
 };
 
 class ComposeEmail extends Component<Props> {
@@ -28,7 +28,7 @@ class ComposeEmail extends Component<Props> {
       updateField,
       handleSend,
       handleSave,
-      handleDelete,
+      handleClear,
     } = this.props;
 
     return (
@@ -63,8 +63,8 @@ class ComposeEmail extends Component<Props> {
 
           <Footer>
             <Side>
-              <Button secondary onClick={handleDelete}>
-                <DeleteIcon />
+              <Button secondary onClick={handleClear}>
+                <ClearCopy>Clear</ClearCopy>
               </Button>
             </Side>
             <Side>
@@ -130,10 +130,17 @@ const Side = styled.div`
   align-items: center;
 `;
 
-const DraftCopy = styled.div`
+const ButtonText = styled.span`
   font-size: 16px;
-  color: ${COLORS.purple[700]};
   font-weight: bold;
+`;
+
+const ClearCopy = styled(ButtonText)`
+  color: ${COLORS.red[400]};
+`;
+
+const DraftCopy = styled(ButtonText)`
+  color: ${COLORS.purple[700]};
 `;
 
 const InvisibleTextarea = styled.textarea`
