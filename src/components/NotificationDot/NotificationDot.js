@@ -71,13 +71,13 @@ class NotificationDot extends PureComponent<Props> {
               />
               <OtherDot
                 size={size * 0.5}
-                color={COLORS.red[400]}
+                color={COLORS.red[500]}
                 x={secondDotPositionX}
                 y={secondDotPositionY}
               />
               <OtherDot
                 size={size * (5 / 8)}
-                color={COLORS.blue[400]}
+                color={COLORS.blue[500]}
                 x={thirdDotPositionX}
                 y={thirdDotPositionY}
               />

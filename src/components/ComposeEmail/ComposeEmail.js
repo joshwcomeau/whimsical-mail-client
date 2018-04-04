@@ -130,7 +130,7 @@ const ButtonText = styled.span`
 `;
 
 const ClearCopy = styled(ButtonText)`
-  color: ${COLORS.red[400]};
+  color: ${COLORS.red[500]};
 `;
 
 const DraftCopy = styled(ButtonText)`
