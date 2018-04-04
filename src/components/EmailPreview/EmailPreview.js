@@ -37,6 +37,7 @@ const EmailPreview = ({
 
   return (
     <Wrapper height={height} isSelected={isSelected} onClick={handleClick}>
+      <UnreadDot size={6} visible={data.unread} />
       <Avatar size={50} src={user.avatarSrc} />
       <Spacer size={10} />
       <Summary>
@@ -45,7 +46,7 @@ const EmailPreview = ({
           <At>{formatTime(data.timestamp)}</At>
         </Header>
 
-        <Subject>{data.subject}</Subject>
+        <Subject unread={data.unread}>{data.subject}</Subject>
         <Preview>{data.body}</Preview>
       </Summary>
     </Wrapper>
@@ -53,6 +54,7 @@ const EmailPreview = ({
 };
 
 const Wrapper = styled.div`
+  position: relative;
   padding: 18px 24px;
   height: ${props => props.height + 'px'};
   background-color: ${props => props.isSelected && COLORS.blue[700]};
@@ -62,6 +64,20 @@ const Wrapper = styled.div`
   line-height: 1.6;
   transition: opacity 500ms;
   cursor: pointer;
+`;
+
+const UnreadDot = styled.div`
+  position: absolute;
+  top: 0;
+  left: ${props => 12 - props.size / 2}px;
+  bottom: 0;
+  width: ${props => props.size}px;
+  height: ${props => props.size}px;
+  margin-top: auto;
+  margin-bottom: auto;
+  background-color: ${COLORS.pink[500]};
+  border-radius: 100%;
+  opacity: ${props => (props.visible ? 1 : 0)};
 `;
 
 const Summary = styled.div`
@@ -82,14 +98,14 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   opacity: 0.9;
-  font-weight: 500;
+  font-weight: 400;
 `;
 
 const From = styled.div``;
 const At = styled.div``;
 
 const Subject = styled.h4`
-  font-weight: 700;
+  font-weight: ${props => (props.unread ? 700 : 500)};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

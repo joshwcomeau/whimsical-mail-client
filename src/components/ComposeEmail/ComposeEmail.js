@@ -21,67 +21,61 @@ type Props = {
   handleClear: () => void,
 };
 
-class ComposeEmail extends Component<Props> {
-  render() {
-    const {
-      emailData,
-      updateField,
-      handleSend,
-      handleSave,
-      handleClear,
-    } = this.props;
+const ComposeEmail = ({
+  emailData,
+  updateField,
+  handleSend,
+  handleSave,
+  handleClear,
+}: Props) => (
+  <Wrapper>
+    <ModalContents>
+      <Header>
+        <ComposeEmailAddressInput
+          disabled
+          value="Josh Comeau <joshua@khanacademy.org>"
+          label="from"
+        />
+        <ComposeEmailAddressInput
+          value={emailData.to.email}
+          onChange={updateField('to')}
+          label="to"
+          placeholder="jane@example.com"
+        />
+      </Header>
 
-    return (
-      <Wrapper>
-        <ModalContents>
-          <Header>
-            <ComposeEmailAddressInput
-              disabled
-              value="Josh Comeau <joshua@khanacademy.org>"
-              label="from"
-            />
-            <ComposeEmailAddressInput
-              value={emailData.to.email}
-              onChange={updateField('to')}
-              label="to"
-              placeholder="jane@example.com"
-            />
-          </Header>
+      <MainContent>
+        <Subject
+          placeholder="Subject"
+          value={emailData.subject}
+          onChange={updateField('subject')}
+        />
+        <Body
+          placeholder="Write something..."
+          value={emailData.body}
+          onChange={updateField('body')}
+        />
+      </MainContent>
 
-          <MainContent>
-            <Subject
-              placeholder="Subject"
-              value={emailData.subject}
-              onChange={updateField('subject')}
-            />
-            <Body
-              placeholder="Write something..."
-              value={emailData.body}
-              onChange={updateField('body')}
-            />
-          </MainContent>
-
-          <Footer>
-            <Side>
-              <Button secondary onClick={handleClear}>
-                <ClearCopy>Clear</ClearCopy>
-              </Button>
-            </Side>
-            <Side>
-              <Button secondary onClick={handleSave}>
-                <DraftCopy>Save</DraftCopy>
-              </Button>
-              <Spacer size={24} />
-              <Button onClick={handleSend}>
-                <SendIcon />
-              </Button>
-            </Side>
-          </Footer>
-        </ModalContents>
-      </Wrapper>
-    );
-  }
-}
+      <Footer>
+        <Side>
+          <Button secondary onClick={handleClear}>
+            <ClearCopy>Clear</ClearCopy>
+          </Button>
+        </Side>
+        <Side>
+          <Button secondary onClick={handleSave}>
+            <DraftCopy>Save</DraftCopy>
+          </Button>
+          <Spacer size={24} />
+          <Button onClick={handleSend}>
+            <SendIcon />
+          </Button>
+        </Side>
+      </Footer>
+    </ModalContents>
+  </Wrapper>
+);
 
 const Wrapper = styled.div`
   height: 80vh;

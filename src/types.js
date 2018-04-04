@@ -11,6 +11,7 @@ export type EmailData = {
   timestamp: number,
   subject: string,
   body: React$Node,
+  read: boolean,
 };
 
 export type ModalId = 'compose';

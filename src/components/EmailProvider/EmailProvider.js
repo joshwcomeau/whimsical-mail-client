@@ -36,7 +36,7 @@ class EmailProvider extends Component<Props, State> {
       // Selecting a letter automatically marks it as read.
       draftState.emails.set(id, {
         ...draftState.emails.get(id),
-        read: true,
+        unread: false,
       });
     });
 
@@ -55,6 +55,7 @@ class EmailProvider extends Component<Props, State> {
       from: this.props.userData,
       subject,
       body,
+      unread: true,
       timestamp: Date.now(),
     };
 

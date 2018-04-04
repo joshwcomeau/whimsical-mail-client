@@ -116,6 +116,7 @@ export const generateData = (
       timestamp: time,
       subject,
       body: data.body,
+      unread: false,
       ...overrides,
     };
   });
