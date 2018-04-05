@@ -1,5 +1,5 @@
 // @flow
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 
 import { debounce } from '../../utils';
 

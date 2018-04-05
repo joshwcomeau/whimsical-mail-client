@@ -7,8 +7,6 @@ import React, { Component } from 'react';
 import { Motion, spring } from 'react-motion';
 import styled from 'styled-components';
 
-import { isEmpty } from '../../utils';
-
 import {
   getPositionDelta,
   createAugmentedClientRect,
@@ -434,7 +432,6 @@ class ChildTransporter extends Component<Props, State> {
      *     This has to do with the intended effect: the child should grow from
      *     the target's corner, but it should shrink into the target's center.
      */
-    const { windowWidth, windowHeight } = this.props;
     const { childRect } = this.state;
 
     if (!childRect) {
@@ -488,8 +485,6 @@ class ChildTransporter extends Component<Props, State> {
 
   render() {
     const {
-      from,
-      to,
       children,
       springOpenHorizontal,
       springOpenVertical,
@@ -564,13 +559,6 @@ class ChildTransporter extends Component<Props, State> {
     );
   }
 }
-
-const OuterWrapper = styled.div`
-  display: inline-block;
-  position: absolute;
-  top: 0;
-  left: 0;
-`;
 
 const Wrapper = styled.div`
   position: fixed;

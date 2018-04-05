@@ -1,9 +1,7 @@
 // @flow
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import SendIcon from 'react-icons/lib/md/send';
-import SaveIcon from 'react-icons/lib/md/save';
-import DeleteIcon from 'react-icons/lib/md/delete';
 
 import { COLORS } from '../../constants';
 

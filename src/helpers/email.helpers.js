@@ -15,7 +15,7 @@ export const parseEmailString = (str: string): UserData => {
     throw new Error('Unrecognized email format :(');
   }
 
-  const [_, name, email] = match;
+  const [, name, email] = match;
 
   return { name, email };
 };

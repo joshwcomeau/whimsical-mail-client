@@ -35,7 +35,7 @@ class FoldableLetter extends PureComponent<Props> {
   }
 
   renderOriginal() {
-    const { front, speed, isFolded } = this.props;
+    const { front, isFolded } = this.props;
 
     return (
       <div
@@ -48,7 +48,7 @@ class FoldableLetter extends PureComponent<Props> {
   }
 
   renderFoldedCopy() {
-    const { front, back, speed, isFolded } = this.props;
+    const { back, speed } = this.props;
     const { node } = this;
 
     // If we weren't able to capture a ref to the node, we can't do any of this
@@ -57,7 +57,7 @@ class FoldableLetter extends PureComponent<Props> {
       return;
     }
 
-    const { top, left, width, height } = node.getBoundingClientRect();
+    const { width, height } = node.getBoundingClientRect();
 
     return (
       <Wrapper style={{ top: 0, left: 0, width, height }}>
@@ -97,12 +97,10 @@ class FoldableLetter extends PureComponent<Props> {
   }
 
   render() {
-    const { front, speed, isFolded } = this.props;
-
     return (
       <Fragment>
         {this.renderOriginal()}
-        {isFolded && this.renderFoldedCopy()}
+        {this.props.isFolded && this.renderFoldedCopy()}
       </Fragment>
     );
   }

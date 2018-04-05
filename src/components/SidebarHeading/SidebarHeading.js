@@ -2,7 +2,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { COLORS } from '../../constants';
 import { capitalize } from '../../utils';
 
 import { NodeConsumer } from '../NodeProvider';

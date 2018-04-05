@@ -1,9 +1,6 @@
 // @flow
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-
-import { COLORS } from '../../constants';
-import { pick } from '../../utils';
 
 import Scoocher from '../Scoocher';
 import SidebarHeading from '../SidebarHeading';
@@ -23,7 +20,7 @@ const boxIds: Array<BoxId> = ['inbox', 'outbox', 'drafts'];
 
 class SidebarHeader extends PureComponent<Props> {
   render() {
-    const { height, selectedBoxId, handleSelectBox } = this.props;
+    const { height } = this.props;
 
     return (
       <EmailConsumer>

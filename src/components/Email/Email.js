@@ -5,7 +5,7 @@ import format from 'date-fns/format';
 
 import { COLORS } from '../../constants';
 
-import type { UserData, EmailData } from '../../types';
+import type { EmailData } from '../../types';
 
 type Props = {
   data: EmailData,

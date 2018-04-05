@@ -1,6 +1,5 @@
 // @flow
 import React, { Component } from 'react';
-import produce from 'immer';
 
 import avatarMe from '../../assets/avatars/me.jpg';
 

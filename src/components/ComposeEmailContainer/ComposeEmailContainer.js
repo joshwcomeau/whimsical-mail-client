@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import Sound from 'react-sound';
 
 import { Z_INDICES } from '../../constants';
-import { debounce, delay } from '../../utils';
+import { delay } from '../../utils';
 // Flow doesn't like MP3s. $FlowFixMe
 import wooshSoundSrc from '../../assets/woosh-2.mp3';
 
@@ -21,7 +21,6 @@ import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
 import EtchASketchShaker from '../EtchASketchShaker';
 
 import type { UserData, EmailData, ComposingEmailData } from '../../types';
-import type { Nodes } from '../NodeProvider/NodeProvider';
 
 type ComposeEmailStep =
   | 'idle'
@@ -192,7 +191,6 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
 
   render() {
     const {
-      handleClose,
       isOpen,
       openFromNode,
       outboxNode,
@@ -200,7 +198,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       windowWidth,
       windowHeight,
     } = this.props;
-    const { status, actionBeingPerformed, emailData } = this.state;
+    const { status, actionBeingPerformed } = this.state;
 
     const toNode = actionBeingPerformed === 'send' ? outboxNode : draftsNode;
 

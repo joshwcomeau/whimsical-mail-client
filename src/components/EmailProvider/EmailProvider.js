@@ -4,7 +4,7 @@ import produce from 'immer';
 
 import { parseEmailString } from '../../helpers/email.helpers';
 
-import { generateData, generateUser } from './EmailProvider.data';
+import { generateData } from './EmailProvider.data';
 import { AuthenticationConsumer } from '../AuthenticationProvider';
 
 import type { UserData, EmailData, BoxId } from '../../types';
@@ -46,8 +46,6 @@ class EmailProvider extends Component<Props, State> {
   };
 
   addNewEmailToBox = ({ boxId, toEmail, subject, body }: any) => {
-    const { userData } = this.props;
-
     const id = this.state.emails.size + 1;
 
     const to = parseEmailString(toEmail);
@@ -95,10 +93,6 @@ class EmailProvider extends Component<Props, State> {
     const emailList = Array.from(emails.values())
       .filter(email => email.boxId === selectedBoxId)
       .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1));
-
-    const selectedEmailIndex = emailList.findIndex(
-      letter => letter.id === selectedEmailId
-    );
 
     return (
       <EmailContext.Provider

@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 
-import type { ModalId, Corner } from '../../types';
+import type { ModalId } from '../../types';
 
 // $FlowFixMe
 const ModalContext = React.createContext('modal');

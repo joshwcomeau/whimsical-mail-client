@@ -1,5 +1,4 @@
 // @flow
-import React, { Fragment } from 'react';
 import { generators, create, createMany } from 'sharkhorse';
 
 import { sample } from '../../utils';

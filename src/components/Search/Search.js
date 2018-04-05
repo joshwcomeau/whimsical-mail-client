@@ -2,7 +2,7 @@
 /**
  * NOTE: Doesn't do anything. Just for show :)
  */
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import SearchIcon from 'react-icons/lib/md/search';
 

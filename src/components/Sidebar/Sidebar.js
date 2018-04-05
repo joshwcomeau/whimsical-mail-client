@@ -1,5 +1,5 @@
 // @flow
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import styled from 'styled-components';
 
 import { COLORS } from '../../constants';
@@ -9,8 +9,6 @@ import Search from '../Search';
 import EmailList from '../EmailList';
 import Spacer from '../Spacer';
 import { EmailConsumer } from '../EmailProvider';
-
-import type { BoxId } from '../../types';
 
 type Props = {
   width: number,
