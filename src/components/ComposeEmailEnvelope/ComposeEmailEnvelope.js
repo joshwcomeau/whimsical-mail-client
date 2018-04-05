@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 
 import airMailSrc from '../../assets/air-mail.png';
+import { parseEmailString } from '../../helpers/email.helpers';
 
 import type { UserData } from '../../types';
 
@@ -15,12 +16,14 @@ class ComposeEmailEnvelope extends Component<Props> {
   render() {
     const { subject, toEmail } = this.props;
 
+    const { email } = parseEmailString(toEmail);
+
     return (
       <Wrapper aria-hidden="true">
         <AirMailBorder />
         <InnerContents>
           <Subject>{subject}</Subject>
-          <To>{toEmail}</To>
+          <To>{email}</To>
         </InnerContents>
       </Wrapper>
     );

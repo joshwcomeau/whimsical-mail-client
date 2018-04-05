@@ -115,7 +115,7 @@ export const generateData = (
       to: boxId === 'inbox' ? userData : generatedContact,
       timestamp: time,
       subject,
-      body: data.body,
+      body,
       unread: false,
       ...overrides,
     };

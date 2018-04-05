@@ -1,7 +1,7 @@
 // @flow
 import type { UserData } from '../types';
 
-export const parseEmailString = (str: string): ?UserData => {
+export const parseEmailString = (str: string): UserData => {
   // Emails are written as "First Last <email@domain.com>" in the compose
   // modal.
   // NOTE: In a real app, there would be some sort of tagging system with

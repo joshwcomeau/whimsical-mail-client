@@ -19,6 +19,7 @@ type Props = {
   handleSend: () => void,
   handleSave: () => void,
   handleClear: () => void,
+  isClearing: boolean,
 };
 
 const ComposeEmail = ({
@@ -27,6 +28,7 @@ const ComposeEmail = ({
   handleSend,
   handleSave,
   handleClear,
+  isClearing,
 }: Props) => (
   <Wrapper>
     <ModalContents>
@@ -49,11 +51,13 @@ const ComposeEmail = ({
           placeholder="Subject"
           value={emailData.subject}
           onChange={updateField('subject')}
+          isVisible={!isClearing}
         />
         <Body
           placeholder="Write something..."
           value={emailData.body}
           onChange={updateField('body')}
+          isVisible={!isClearing}
         />
       </MainContent>
 
@@ -143,6 +147,9 @@ const InvisibleTextarea = styled.textarea`
   border: none;
   resize: none;
   outline: none;
+  opacity: ${props => (props.isVisible ? 1 : 0)};
+  transition: ${props =>
+    props.isVisible ? 'opacity 200ms' : 'opacity 750ms ease-out 250ms'};
 
   &:focus::placeholder {
     color: ${COLORS.blue[700]};

@@ -143,21 +143,16 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       status: 'clearing',
     });
 
-    await delay(500);
+    await delay(1000);
 
-    await this.setStatePromise({
+    this.setState({
+      actionBeingPerformed: null,
+      status: 'idle',
       emailData: {
         ...this.state.emailData,
         subject: '',
         body: '',
       },
-    });
-
-    await delay(500);
-
-    this.setState({
-      actionBeingPerformed: null,
-      status: 'idle',
     });
   };
 
@@ -185,6 +180,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           handleSend={this.sendEmail}
           handleSave={this.saveEmail}
           handleClear={this.clearEmail}
+          isClearing={this.state.status === 'clearing'}
         />
       </EtchASketchShaker>
     );
