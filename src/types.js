@@ -14,6 +14,11 @@ export type EmailData = {
   read: boolean,
 };
 
+export type ComposingEmailData = {
+  ...$Shape<EmailData>,
+  toEmail: string,
+};
+
 export type ModalId = 'compose';
 
 export type BoxId = 'inbox' | 'outbox' | 'drafts';

@@ -20,7 +20,7 @@ import ComposeEmail from '../ComposeEmail';
 import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
 import EtchASketchShaker from '../EtchASketchShaker';
 
-import type { UserData, EmailData } from '../../types';
+import type { UserData, EmailData, ComposingEmailData } from '../../types';
 import type { Nodes } from '../NodeProvider/NodeProvider';
 
 type ComposeEmailStep =
@@ -53,7 +53,7 @@ type State = {
   actionBeingPerformed: 'send' | 'save' | 'clear' | 'dismiss' | null,
   // `EmailData` is the type for sent email: it includes an ID and timestamp.
   // For email we're composing, we just want a subset.
-  emailData: $Shape<EmailData>,
+  emailData: ComposingEmailData,
 };
 
 class ComposeEmailContainer extends PureComponent<Props, State> {
@@ -62,9 +62,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     actionBeingPerformed: null,
     emailData: {
       from: this.props.userData,
-      to: {
-        email: '',
-      },
+      toEmail: '',
       subject: '',
       body: '',
     },
@@ -90,13 +88,10 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     new Promise(resolve => this.setState(newState, resolve));
 
   updateField = (fieldName: string) => (ev: SyntheticInputEvent<*>) => {
-    const newValue =
-      fieldName === 'to' ? { email: ev.target.value } : ev.target.value;
-
     this.setState({
       emailData: {
         ...this.state.emailData,
-        [fieldName]: newValue,
+        [fieldName]: ev.target.value,
       },
     });
   };
@@ -117,7 +112,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       draftState.status = status === 'open' ? 'open' : 'idle';
 
       if (isCreatingNewEmail) {
-        draftState.emailData.to = { email: '' };
+        draftState.emailData.toEmail = '';
         draftState.emailData.subject = '';
         draftState.emailData.body = '';
       }

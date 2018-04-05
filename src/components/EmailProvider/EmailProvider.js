@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import produce from 'immer';
 
+import { parseEmailString } from '../../helpers/email.helpers';
+
 import { generateData, generateUser } from './EmailProvider.data';
 import { AuthenticationConsumer } from '../AuthenticationProvider';
 
@@ -43,15 +45,17 @@ class EmailProvider extends Component<Props, State> {
     this.setState(nextState);
   };
 
-  addNewEmailToBox = ({ boxId, to, subject, body }: any) => {
+  addNewEmailToBox = ({ boxId, toEmail, subject, body }: any) => {
     const { userData } = this.props;
 
     const id = this.state.emails.size + 1;
 
+    const to = parseEmailString(toEmail);
+
     const newEmail = {
       id,
       boxId,
-      to: generateUser(to),
+      to,
       from: this.props.userData,
       subject,
       body,

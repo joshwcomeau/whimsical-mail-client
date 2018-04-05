@@ -7,20 +7,20 @@ import airMailSrc from '../../assets/air-mail.png';
 import type { UserData } from '../../types';
 
 type Props = {
-  to: $Shape<UserData>,
+  toEmail: $Shape<UserData>,
   subject: string,
 };
 
 class ComposeEmailEnvelope extends Component<Props> {
   render() {
-    const { subject, to } = this.props;
+    const { subject, toEmail } = this.props;
 
     return (
       <Wrapper aria-hidden="true">
         <AirMailBorder />
         <InnerContents>
           <Subject>{subject}</Subject>
-          <To>{to.email}</To>
+          <To>{toEmail}</To>
         </InnerContents>
       </Wrapper>
     );
