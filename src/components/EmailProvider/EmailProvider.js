@@ -4,7 +4,7 @@ import produce from 'immer';
 
 import { parseEmailString } from '../../helpers/email.helpers';
 
-import { generateData } from './EmailProvider.data';
+import { generateData, getRandomAvatar } from './EmailProvider.data';
 import { AuthenticationConsumer } from '../AuthenticationProvider';
 
 import type { UserData, EmailData, BoxId } from '../../types';
@@ -49,6 +49,7 @@ class EmailProvider extends Component<Props, State> {
     const id = this.state.emails.size + 1;
 
     const to = parseEmailString(toEmail);
+    to.avatarSrc = getRandomAvatar();
 
     const newEmail = {
       id,
