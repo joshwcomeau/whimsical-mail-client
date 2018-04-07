@@ -6,13 +6,13 @@ type Props = {
   isFolded: boolean,
   front: React$Element<*>,
   back: React$Element<*>,
-  speed: number,
+  duration: number,
   onCompleteFolding: () => void,
 };
 
 class FoldableLetter extends PureComponent<Props> {
   static defaultProps = {
-    speed: 1000,
+    duration: 1000,
   };
 
   node: ?HTMLElement;
@@ -40,7 +40,7 @@ class FoldableLetter extends PureComponent<Props> {
     return (
       <div
         ref={node => (this.node = node)}
-        style={{ display: 'inline-block', opacity: isFolded ? 0 : 1 }}
+        style={{ opacity: isFolded ? 0 : 1 }}
       >
         {front}
       </div>
@@ -48,7 +48,7 @@ class FoldableLetter extends PureComponent<Props> {
   }
 
   renderFoldedCopy() {
-    const { back, speed } = this.props;
+    const { back, duration } = this.props;
     const { node } = this;
 
     // If we weren't able to capture a ref to the node, we can't do any of this
@@ -59,34 +59,45 @@ class FoldableLetter extends PureComponent<Props> {
 
     const { width, height } = node.getBoundingClientRect();
 
+    const foldHeights = [height * 0.35, height * 0.35, height * 0.3];
+
+    // HACK: using top: 0 and left: 0 because this is mounted within a
+    // transformed container, which means that position: fixed doesn't work
+    // properly. If you want to use this in an app, you'll likely wish to use
+    // the top/left from node.getBoundingClientRect.
     return (
       <Wrapper style={{ top: 0, left: 0, width, height }}>
         <TopFold
           innerRef={node => (this.finalFoldNode = node)}
-          speed={speed}
-          height={height}
+          duration={duration}
+          foldHeight={foldHeights[0]}
         >
           <HideOverflow>
             <TopFoldContents
+              foldHeight={foldHeights[0]}
               dangerouslySetInnerHTML={{ __html: node.outerHTML }}
             />
           </HideOverflow>
           <TopFoldBack>{back}</TopFoldBack>
         </TopFold>
 
-        <MiddleFold height={height}>
+        <MiddleFold foldHeight={foldHeights[1]} offsetTop={foldHeights[0]}>
           <HideOverflow>
             <MiddleFoldContents
-              height={height}
+              offsetTop={foldHeights[0]}
               dangerouslySetInnerHTML={{ __html: node.outerHTML }}
             />
           </HideOverflow>
         </MiddleFold>
 
-        <BottomFold speed={speed} height={height}>
+        <BottomFold
+          duration={duration}
+          foldHeight={foldHeights[2]}
+          offsetTop={foldHeights[0] + foldHeights[1]}
+        >
           <HideOverflow>
             <BottomFoldContents
-              height={height}
+              offsetTop={foldHeights[0] + foldHeights[1]}
               dangerouslySetInnerHTML={{ __html: node.outerHTML }}
             />
           </HideOverflow>
@@ -142,24 +153,23 @@ const FoldBase = styled.div`
 const TopFold = styled(FoldBase)`
   z-index: 3;
   top: 0;
-  height: ${props => Math.round(props.height * 0.35)}px;
-  animation: ${foldTopDown} ${props => props.speed * 0.8}ms forwards
-    ${props => props.speed * 0.33}ms;
+  height: ${props => Math.round(props.foldHeight)}px;
+  animation: ${foldTopDown} ${props => props.duration * 0.8}ms forwards
+    ${props => props.duration * 0.33}ms;
   transform-style: preserve-3d;
 `;
 
 const MiddleFold = styled(FoldBase)`
   z-index: 1;
-  top: ${props => Math.round(props.height * 0.35)}px;
-  height: ${props => Math.round(props.height * 0.35)}px;
-  backface-visibility: hidden;
+  top: ${props => Math.round(props.offsetTop)}px;
+  height: ${props => Math.round(props.foldHeight)}px;
 `;
 
 const BottomFold = styled(FoldBase)`
   z-index: 2;
-  top: ${props => Math.round(props.height * 0.7)}px;
-  height: ${props => Math.round(props.height * 0.3)}px;
-  animation: ${foldBottomUp} ${props => props.speed}ms forwards;
+  top: ${props => Math.round(props.offsetTop)}px;
+  height: ${props => Math.round(props.foldHeight)}px;
+  animation: ${foldBottomUp} ${props => props.duration}ms forwards;
   transform-style: preserve-3d;
 `;
 
@@ -177,13 +187,13 @@ const MiddleFoldContents = styled.div`
   position: relative;
   z-index: 2;
   height: ${props => props.height}px;
-  transform: translateY(-${props => Math.round(props.height * 0.35)}px);
+  transform: translateY(${props => Math.round(props.offsetTop) * -1}px);
 `;
 const BottomFoldContents = styled.div`
   position: relative;
   z-index: 2;
   height: ${props => props.height}px;
-  transform: translateY(-${props => Math.round(props.height * 0.7)}px);
+  transform: translateY(${props => Math.round(props.offsetTop) * -1}px);
   backface-visibility: hidden;
 `;
 
@@ -209,6 +219,7 @@ const BottomFoldBack = styled.div`
   transform: rotateX(180deg);
   background: rgba(255, 255, 255, 0.95);
   backface-visibility: hidden;
+  box-shadow: 0px -30px 50px -20px rgba(0, 0, 0, 0.2);
 `;
 
 export default FoldableLetter;
