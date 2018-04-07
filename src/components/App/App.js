@@ -18,8 +18,6 @@ class App extends Component<Props> {
   render() {
     const HEADER_HEIGHT = 60;
 
-    console.log('APP render');
-
     return (
       <Providers>
         <Wrapper>

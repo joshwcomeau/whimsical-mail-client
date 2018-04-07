@@ -12,7 +12,7 @@ export const parseEmailString = (str: string): UserData => {
   const match = str.match(matcher);
 
   if (!match) {
-    throw new Error('Unrecognized email format :(');
+    return { name: str.split('@')[0], email: str };
   }
 
   const [, name, email] = match;
