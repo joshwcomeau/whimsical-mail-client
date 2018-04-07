@@ -23,37 +23,31 @@ class NodeProvider extends Component<Props, State> {
   state = {
     nodes: {},
     boundingBoxes: {},
-  };
+    refCapturer: (id: string, node: HTMLElement) => {
+      if (!node) {
+        return;
+      }
 
-  refCapturer = (id: string, node: HTMLElement) => {
-    if (!node) {
-      return;
-    }
+      if (this.state.nodes[id]) {
+        return;
+      }
 
-    if (this.state.nodes[id]) {
-      return;
-    }
-
-    this.setState({
-      nodes: {
-        ...this.state.nodes,
-        [id]: node,
-      },
-      boundingBoxes: {
-        ...this.state.boundingBoxes,
-        [id]: node.getBoundingClientRect(),
-      },
-    });
+      this.setState({
+        nodes: {
+          ...this.state.nodes,
+          [id]: node,
+        },
+        boundingBoxes: {
+          ...this.state.boundingBoxes,
+          [id]: node.getBoundingClientRect(),
+        },
+      });
+    },
   };
 
   render() {
     return (
-      <NodeContext.Provider
-        value={{
-          ...this.state,
-          refCapturer: this.refCapturer,
-        }}
-      >
+      <NodeContext.Provider value={this.state}>
         {this.props.children}
       </NodeContext.Provider>
     );
