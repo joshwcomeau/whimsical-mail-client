@@ -74,9 +74,16 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
       if (nextProps.replyTo) {
         initialState.emailData = {
           ...initialState.emailData,
-          to: nextProps.replyTo.from,
+          toEmail: nextProps.replyTo.from.email,
           subject: `RE: ${nextProps.replyTo.subject}`,
         };
+      } else {
+        initialState.emailData = {
+          ...initialState.emailData,
+          toEmail: '',
+          subject: '',
+          body: '',
+        }
       }
 
       this.setState(initialState);
@@ -186,6 +193,9 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   }
 
   renderBack() {
+    if (this.state.actionBeingPerformed === 'save') {
+      return null;
+    }
     return <ComposeEmailEnvelope {...this.state.emailData} />;
   }
 
