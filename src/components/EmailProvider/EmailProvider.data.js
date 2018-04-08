@@ -38,23 +38,26 @@ const avatarSrcs = [
   avatar13,
   avatar14,
   avatar15,
-  avatar16,
 ];
 
 const subjects = [
   'RE: Plans next Saturday?',
-  'JS Fatigue Fatigue Fatigue',
-  'OMG did you hear what Trump said',
+  '"JS Fatigue Fatigue" Fatigue',
+  "OMG I'm going to be speaking at React Europe!!",
   'Eggcelent Egg Salad recipe, dont share...',
-  'FWD: forward this to at least 5 people or your house will burn to the ground',
+  'FWD: sick yoyo trick',
+  'Carbonated water: delicious or sinister?!',
+  'Going rogue: fixing bugs under-the-table',
 ];
 
 const previews = [
   "Hi Marcy, are we still on for that pool party on Saturday? I know John's already got his swimming trunks on.",
-  "I'm getting sick and tired about people saying that they're sick and tired of people talking about JS fatigue. JS fatigue³.",
-  'Lunatic tweeted some more horse shit.',
+  "Anyone else getting tired of hearing people talk about being tired of hearing people talk about JS fatigue?",
+  'Wooo so excited, will be talking about Whimsy at React Europe.',
   "Ok Tom, I'm warning you: This Egg Salad recipe will BLOW. YOUR. MIND!! It's a family secret so please NO SOCIAL MEDIA",
-  'so most chain letters are nonsense but this one is the REAL DEAL. FORWARD or BAD FIRE will happen to your HOME.',
+  'Check out this SICK yoyo trick. Wow!',
+  "What's the deal with carbonated water, eh? Is it actually just carbon in water or are those bubbles up to something",
+  "Hey peeps, keep this underground but I'm GOING ROGUE and fixing bugs outside the sprint!?!!!!",
 ];
 
 const UserFactory = {
@@ -72,7 +75,7 @@ const EmailFactory = {
 
 const BOX_IDS: Array<BoxId> = ['inbox', 'outbox', 'drafts'];
 
-export const getRandomAvatar = () => sample(avatarSrcs);
+export const getRandomAvatar = () => avatar16;
 
 export const generateUser = (overrides: any = {}) => {
   const factoryUser = create(UserFactory);
