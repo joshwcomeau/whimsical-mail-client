@@ -9,6 +9,10 @@ export const parseEmailString = (str: string): UserData => {
   // user writes is valid.
   const matcher = /(.+)\s*<(.+)>/i;
 
+  if (!str) {
+    return { name: '', email: ''};
+  }
+
   const match = str.match(matcher);
 
   if (!match) {
