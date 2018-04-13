@@ -19,13 +19,9 @@ import type {
 
 type Quadrant = 1 | 2 | 3 | 4;
 
-export type StartStatus =
-  | 'start-opening'
-  | 'start-closing'
-  | 'start-retracting';
 export type TransitionStatus = 'opening' | 'closing' | 'retracting';
-export type EndStatus = 'open' | 'closed' | 'retracted';
-export type Status = StartStatus | TransitionStatus | EndStatus;
+export type RestingStatus = 'open' | 'closed' | 'retracted';
+export type Status = TransitionStatus | RestingStatus;
 
 type SpringSettings = {
   stiffness?: number,
@@ -37,14 +33,14 @@ type Props = {
   children: React$Node,
   from: HTMLElement,
   to: HTMLElement,
-  status: EndStatus,
+  status: RestingStatus,
   springOpenHorizontal: SpringSettings,
   springOpenVertical: SpringSettings,
   springCloseHorizontal: SpringSettings,
   springCloseVertical: SpringSettings,
   windowWidth: number,
   windowHeight: number,
-  handleFinishTransportation?: (status: EndStatus) => any,
+  handleFinishTransportation?: (status: RestingStatus) => any,
 };
 
 type State = {
@@ -94,6 +90,8 @@ class ChildTransporter extends Component<Props, State> {
   };
 
   componentWillReceiveProps(nextProps: Props) {
+    const { from, to, windowWidth, windowHeight } = nextProps;
+
     if (!nextProps.from || !nextProps.to || !this.childWrapperNode) {
       return;
     }
@@ -101,54 +99,23 @@ class ChildTransporter extends Component<Props, State> {
     const wasJustToggled = this.props.status !== nextProps.status;
 
     if (wasJustToggled) {
-      const { fromRect, toRect, childRect } = this.getAugmentedClientRects(
-        nextProps
+      this.fromRect = createAugmentedClientRect(from, windowWidth, windowHeight);
+      this.toRect = createAugmentedClientRect(to, windowWidth, windowHeight);
+      this.childRect = createAugmentedClientRect(
+        this.childWrapperNode,
+        windowWidth,
+        windowHeight
       );
 
-      this.fromRect = fromRect;
-      this.toRect = toRect;
-      this.childRect = childRect;
-
-      let startStatus;
-      if (nextProps.status === 'open') {
-        startStatus = 'start-opening';
-      } else if (nextProps.status === 'closed') {
-        startStatus = 'start-closing';
-      } else {
-        startStatus = 'start-retracting';
-      }
-
-      const initialPositionState = this.getInitialPositionState(startStatus);
+      const initialPositionState = this.getInitialPositionState(nextProps.status);
 
       this.setState({
         position: initialPositionState,
-        status: startStatus,
-      }, () => {
-        this.playAnimation();
-      });
+      }, this.playAnimation);
     }
   }
 
-  // componentDidUpdate(prevProps: Props, prevState: State) {
-  //   if (!this.props.from || !this.props.to || !this.childWrapperNode) {
-  //     return;
-  //   }
-  //   const { status } = this.state;
-
-  //   // There are two "interim" statuses, that should only exist for a single
-  //   // update cycle: 'shrunk' and 'teleported'. These are the "Inverted" part
-  //   // of FLIP, and the one chosen will depend on whether the child is opening
-  //   // or closing.
-  //   if (
-  //     status === 'start-opening' ||
-  //     status === 'start-closing' ||
-  //     status === 'start-retracting'
-  //   ) {
-  //     this.playAnimation();
-  //   }
-  // }
-
-  getInitialPositionState(startStatus: StartStatus) {
+  getInitialPositionState(status: Status) {
     const { fromRect, toRect, childRect } = this;
 
     if (!fromRect || !toRect || !childRect) {
@@ -157,14 +124,14 @@ class ChildTransporter extends Component<Props, State> {
 
     // We want to position the element relative to the relevant node.
     // For opening, this is the "from" node. For closing, this is the "to" node.
-    const relativeRect = startStatus === 'start-closing' ? toRect : fromRect;
+    const relativeRect = status === 'closed' ? toRect : fromRect;
 
     // Figure out which of the 4 quarters of the screen our child is moving
     // to or from.
     const quadrant: Quadrant = this.getQuadrant(relativeRect);
 
     // The `transform-origin` of our child during transit.
-    const transformOrigin = this.getTransformOrigin(quadrant, startStatus);
+    const transformOrigin = this.getTransformOrigin(quadrant, status);
 
     // The "minimum position" is what we need to know for our child's new home.
     // Consists of either a `top` or a `down`, and a `left` or a `right`.
@@ -174,7 +141,7 @@ class ChildTransporter extends Component<Props, State> {
     const minimumPositionData = this.getChildPosition(
       quadrant,
       relativeRect,
-      startStatus
+      status
     );
 
     // Because our animations use CSS transforms, we need to convert our
@@ -188,7 +155,7 @@ class ChildTransporter extends Component<Props, State> {
     );
 
     const { translateX, translateY } = this.getTranslate(
-      startStatus,
+      status,
       pendingChildRect
     );
 
@@ -203,14 +170,14 @@ class ChildTransporter extends Component<Props, State> {
   }
 
   playAnimation = () => {
-    const { status } = this.state;
+    const { status } = this.props;
 
     let nextStatus;
-    if (status === 'start-opening') {
+    if (status === 'open') {
       nextStatus = 'opening';
-    } else if (status === 'start-closing') {
+    } else if (status === 'closed') {
       nextStatus = 'closing';
-    } else if (status === 'start-retracting') {
+    } else if (status === 'retracted') {
       nextStatus = 'retracting';
     } else {
       throw new Error('`playAnimation` called at an invalid moment in time');
@@ -251,32 +218,6 @@ class ChildTransporter extends Component<Props, State> {
       this.props.handleFinishTransportation(restingStatus);
     }
   };
-
-  getAugmentedClientRects(props: Props = this.props) {
-    /**
-     * For our calculations, we care about 3 on-screen positions:
-     *  - The `from` node
-     *  - The `to` node
-     *  - The child node (which will be positioned _near_ one of the above 2
-     *    nodes, but which has its own coordinates).
-     *
-     * This method creates "augmented" client rects for them.
-     * An AugmentedClientRect is similar to the ClientRect produced by
-     * getBoundingClientRect, but features a couple extra data points.
-     * For more info, see ChildTransporter.types.js
-     */
-    const { from, to, windowWidth, windowHeight } = props;
-
-    return {
-      fromRect: createAugmentedClientRect(from, windowWidth, windowHeight),
-      toRect: createAugmentedClientRect(to, windowWidth, windowHeight),
-      childRect: createAugmentedClientRect(
-        this.childWrapperNode,
-        windowWidth,
-        windowHeight
-      ),
-    };
-  }
 
   getQuadrant(targetRect: ?AugmentedClientRect): Quadrant {
     const { windowWidth, windowHeight } = this.props;
@@ -320,7 +261,7 @@ class ChildTransporter extends Component<Props, State> {
   }
 
   getTranslate(
-    startStatus: StartStatus,
+    status: Status,
     pendingChildRect: AugmentedClientRect
   ) {
     /**
@@ -341,7 +282,7 @@ class ChildTransporter extends Component<Props, State> {
 
     // We don't have any translation on-open.
     // Might change this later, if we add spacing support.
-    if (startStatus === 'start-opening' || startStatus === 'start-retracting') {
+    if (status === 'open' || status === 'retracted') {
       return { translateX: 0, translateY: 0 };
     }
 
@@ -349,10 +290,10 @@ class ChildTransporter extends Component<Props, State> {
     return { translateX: x, translateY: y };
   }
 
-  getTransformOrigin(quadrant: Quadrant, startStatus: Status) {
+  getTransformOrigin(quadrant: Quadrant, status: Status) {
     // If we're going "to" the target, we want to disappear into its center.
     // For this reason, the transform-origin will always be the middle.
-    if (startStatus === 'start-closing') {
+    if (status === 'closed') {
       return 'center center';
     }
 
@@ -375,7 +316,7 @@ class ChildTransporter extends Component<Props, State> {
   getChildPosition(
     quadrant: Quadrant,
     targetRect: AugmentedClientRect,
-    startStatus: StartStatus
+    status: Status
   ): MinimumFixedPosition {
     /**
      * Get the fixed position for the child, calculated using the target rect
@@ -437,7 +378,7 @@ class ChildTransporter extends Component<Props, State> {
     }
 
     const orientRelativeToCorner =
-      startStatus === 'start-opening' || startStatus === 'start-retracting';
+      status === 'open' || status === 'retracted';
 
     switch (quadrant) {
       case 1:
@@ -534,9 +475,7 @@ class ChildTransporter extends Component<Props, State> {
         {({ scaleX, scaleY, translateX, translateY }) => (
           <Wrapper
             innerRef={node => {
-              if (!this.childWrapperNode) {
-                this.childWrapperNode = node;
-              }
+              this.childWrapperNode = node
             }}
             style={{
               top,
