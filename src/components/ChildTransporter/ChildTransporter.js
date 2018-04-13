@@ -98,32 +98,21 @@ class ChildTransporter extends Component<Props, State> {
       return;
     }
 
-    if (this.props.status !== nextProps.status) {
+    const wasJustToggled = this.props.status !== nextProps.status;
+
+    if (wasJustToggled) {
       const { fromRect, toRect, childRect } = this.getAugmentedClientRects(
         nextProps
       );
 
-      this.setState({ fromRect, toRect, childRect });
-    }
-  }
+      this.fromRect = fromRect;
+      this.toRect = toRect;
+      this.childRect = childRect;
 
-  componentDidUpdate(prevProps: Props, prevState: State) {
-    if (!this.props.from || !this.props.to || !this.childWrapperNode) {
-      return;
-    }
-    const { status } = this.state;
-
-    // We care about changes to the modal's "open" status (if the user has
-    // toggled it open or closed)
-    const wasJustToggled = prevProps.status !== this.props.status;
-
-    // TODO: This should probably move to cWRP, so that the whole cycle isn't
-    // required right?
-    if (wasJustToggled) {
       let startStatus;
-      if (this.props.status === 'open') {
+      if (nextProps.status === 'open') {
         startStatus = 'start-opening';
-      } else if (this.props.status === 'closed') {
+      } else if (nextProps.status === 'closed') {
         startStatus = 'start-closing';
       } else {
         startStatus = 'start-retracting';
@@ -134,24 +123,33 @@ class ChildTransporter extends Component<Props, State> {
       this.setState({
         position: initialPositionState,
         status: startStatus,
+      }, () => {
+        this.playAnimation();
       });
-    }
-
-    // There are two "interim" statuses, that should only exist for a single
-    // update cycle: 'shrunk' and 'teleported'. These are the "Inverted" part
-    // of FLIP, and the one chosen will depend on whether the child is opening
-    // or closing.
-    if (
-      status === 'start-opening' ||
-      status === 'start-closing' ||
-      status === 'start-retracting'
-    ) {
-      this.playAnimation();
     }
   }
 
+  // componentDidUpdate(prevProps: Props, prevState: State) {
+  //   if (!this.props.from || !this.props.to || !this.childWrapperNode) {
+  //     return;
+  //   }
+  //   const { status } = this.state;
+
+  //   // There are two "interim" statuses, that should only exist for a single
+  //   // update cycle: 'shrunk' and 'teleported'. These are the "Inverted" part
+  //   // of FLIP, and the one chosen will depend on whether the child is opening
+  //   // or closing.
+  //   if (
+  //     status === 'start-opening' ||
+  //     status === 'start-closing' ||
+  //     status === 'start-retracting'
+  //   ) {
+  //     this.playAnimation();
+  //   }
+  // }
+
   getInitialPositionState(startStatus: StartStatus) {
-    const { fromRect, toRect, childRect } = this.state;
+    const { fromRect, toRect, childRect } = this;
 
     if (!fromRect || !toRect || !childRect) {
       throw new Error('Tried to get position without necessary rects!');
@@ -335,7 +333,7 @@ class ChildTransporter extends Component<Props, State> {
      * This method calculates that by comparing the child rect held in state
      * with the "pending" childRect, which is about to be applied.
      */
-    const { childRect: currentChildRect } = this.state;
+    const { childRect: currentChildRect } = this;
 
     if (!currentChildRect) {
       throw new Error('Animation started without necessary childRect!');
@@ -432,7 +430,7 @@ class ChildTransporter extends Component<Props, State> {
      *     This has to do with the intended effect: the child should grow from
      *     the target's corner, but it should shrink into the target's center.
      */
-    const { childRect } = this.state;
+    const { childRect } = this;
 
     if (!childRect) {
       throw new Error("childRect doesn't exist");
