@@ -47,7 +47,7 @@ type State = {
   fromRect: ?AugmentedClientRect,
   toRect: ?AugmentedClientRect,
   childRect: ?AugmentedClientRect,
-  status: Status,
+  inTransit: boolean,
   position: {
     top: ?number,
     left: ?number,
@@ -75,7 +75,7 @@ class ChildTransporter extends Component<Props, State> {
     fromRect: null,
     toRect: null,
     childRect: null,
-    status: this.props.status,
+    inTransit: false,
     position: {
       top: null,
       left: null,
@@ -172,50 +172,23 @@ class ChildTransporter extends Component<Props, State> {
   playAnimation = () => {
     const { status } = this.props;
 
-    let nextStatus;
-    if (status === 'open') {
-      nextStatus = 'opening';
-    } else if (status === 'closed') {
-      nextStatus = 'closing';
-    } else if (status === 'retracted') {
-      nextStatus = 'retracting';
-    } else {
-      throw new Error('`playAnimation` called at an invalid moment in time');
-    }
-
     this.setState({
-      status: nextStatus,
+      inTransit: true,
       position: {
         ...this.state.position,
         translateX: 0,
         translateY: 0,
-        scaleX: nextStatus === 'opening' ? 1 : 0,
-        scaleY: nextStatus === 'opening' ? 1 : 0,
+        scaleX: status === 'open' ? 1 : 0,
+        scaleY: status === 'open' ? 1 : 0,
       },
     });
   };
 
   finishPlaying = () => {
-    const { status } = this.state;
-
-    let restingStatus;
-    if (status === 'opening') {
-      restingStatus = 'open';
-    } else if (status === 'closing') {
-      restingStatus = 'closed';
-    } else if (status === 'retracting') {
-      restingStatus = 'retracted';
-    } else {
-      // ReactMotion is in charge of calling this method, and it appears that
-      // it calls it on mount, when the status is `closed`. Just ignore this
-      // case.
-      return;
-    }
-
-    this.setState({ status: restingStatus });
+    this.setState({ inTransit: false });
 
     if (typeof this.props.handleFinishTransportation === 'function') {
-      this.props.handleFinishTransportation(restingStatus);
+      this.props.handleFinishTransportation();
     }
   };
 
@@ -424,13 +397,14 @@ class ChildTransporter extends Component<Props, State> {
 
   render() {
     const {
+      status,
       children,
       springOpenHorizontal,
       springOpenVertical,
       springCloseHorizontal,
       springCloseVertical,
     } = this.props;
-    const { status, position } = this.state;
+    const { position } = this.state;
 
     const {
       top,
@@ -444,15 +418,17 @@ class ChildTransporter extends Component<Props, State> {
       transformOrigin,
     } = position;
 
-    const shouldSpringScale = ['opening', 'closing', 'retracting'].includes(
+    console.log(status);
+
+    const shouldSpringScale = ['open', 'closed', 'retracted'].includes(
       status
     );
-    const shouldSpringTransform = ['closing'].includes(status);
+    const shouldSpringTransform = ['closed'].includes(status);
 
     const springHorizontal =
-      status === 'closing' ? springCloseHorizontal : springOpenHorizontal;
+      status === 'closed' ? springCloseHorizontal : springOpenHorizontal;
     const springVertical =
-      status === 'closing' ? springCloseVertical : springOpenVertical;
+      status === 'closed' ? springCloseVertical : springOpenVertical;
 
     return (
       <Motion
