@@ -98,8 +98,22 @@ class ChildTransporter extends Component<Props, State> {
 
     const wasJustToggled = this.props.status !== nextProps.status;
 
+    // HACK: So, it's currently possible for the parent to have the status
+    // change from 'retracted' to 'closed'. While this is technically a new
+    // state, it should not affect the ChildTransporter.
+    // A PROPER fix would be to add some sort of FSM to control the changes
+    // allowed between statuses, but for now I'm tackling it here, by just
+    // ignoring any updates where neither status is `open`.
+    if (this.props.status !== 'open' && nextProps.status !== 'open') {
+      return;
+    }
+
     if (wasJustToggled) {
-      this.fromRect = createAugmentedClientRect(from, windowWidth, windowHeight);
+      this.fromRect = createAugmentedClientRect(
+        from,
+        windowWidth,
+        windowHeight
+      );
       this.toRect = createAugmentedClientRect(to, windowWidth, windowHeight);
       this.childRect = createAugmentedClientRect(
         this.childWrapperNode,
@@ -107,11 +121,16 @@ class ChildTransporter extends Component<Props, State> {
         windowHeight
       );
 
-      const initialPositionState = this.getInitialPositionState(nextProps.status);
+      const initialPositionState = this.getInitialPositionState(
+        nextProps.status
+      );
 
-      this.setState({
-        position: initialPositionState,
-      }, this.playAnimation);
+      this.setState(
+        {
+          position: initialPositionState,
+        },
+        this.playAnimation
+      );
     }
   }
 
@@ -233,10 +252,7 @@ class ChildTransporter extends Component<Props, State> {
     }
   }
 
-  getTranslate(
-    status: Status,
-    pendingChildRect: AugmentedClientRect
-  ) {
+  getTranslate(status: Status, pendingChildRect: AugmentedClientRect) {
     /**
      * This component uses the FLIP technique.
      *
@@ -350,8 +366,7 @@ class ChildTransporter extends Component<Props, State> {
       throw new Error("childRect doesn't exist");
     }
 
-    const orientRelativeToCorner =
-      status === 'open' || status === 'retracted';
+    const orientRelativeToCorner = status === 'open' || status === 'retracted';
 
     switch (quadrant) {
       case 1:
@@ -404,7 +419,7 @@ class ChildTransporter extends Component<Props, State> {
       springCloseHorizontal,
       springCloseVertical,
     } = this.props;
-    const { position } = this.state;
+    const { position, inTransit } = this.state;
 
     const {
       top,
@@ -418,13 +433,6 @@ class ChildTransporter extends Component<Props, State> {
       transformOrigin,
     } = position;
 
-    console.log(status);
-
-    const shouldSpringScale = ['open', 'closed', 'retracted'].includes(
-      status
-    );
-    const shouldSpringTransform = ['closed'].includes(status);
-
     const springHorizontal =
       status === 'closed' ? springCloseHorizontal : springOpenHorizontal;
     const springVertical =
@@ -437,12 +445,12 @@ class ChildTransporter extends Component<Props, State> {
           scaleY: 1,
         }}
         style={{
-          scaleX: shouldSpringScale ? spring(scaleX, springHorizontal) : scaleX,
-          scaleY: shouldSpringScale ? spring(scaleY, springVertical) : scaleY,
-          translateX: shouldSpringTransform
+          scaleX: inTransit ? spring(scaleX, springHorizontal) : scaleX,
+          scaleY: inTransit ? spring(scaleY, springVertical) : scaleY,
+          translateX: inTransit
             ? spring(translateX, springHorizontal)
             : translateX,
-          translateY: shouldSpringTransform
+          translateY: inTransit
             ? spring(translateY, springVertical)
             : translateY,
         }}
@@ -451,7 +459,7 @@ class ChildTransporter extends Component<Props, State> {
         {({ scaleX, scaleY, translateX, translateY }) => (
           <Wrapper
             innerRef={node => {
-              this.childWrapperNode = node
+              this.childWrapperNode = node;
             }}
             style={{
               top,

@@ -69,7 +69,10 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
 
   componentWillReceiveProps(nextProps: Props) {
     if (!this.props.isOpen && nextProps.isOpen) {
-      const initialState: any = { status: 'opening' };
+      const initialState: $Shape<State> = {
+        actionBeingPerformed: null,
+        status: 'opening',
+      };
 
       if (nextProps.replyTo) {
         initialState.emailData = {
@@ -83,7 +86,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           toEmail: '',
           subject: '',
           body: '',
-        }
+        };
       }
 
       this.setState(initialState);
@@ -108,7 +111,6 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
   };
 
   handleOpenOrClose = (status: 'open' | 'closed') => {
-    console.log('handle', status)
     const { actionBeingPerformed } = this.state;
 
     const isCreatingNewEmail =
