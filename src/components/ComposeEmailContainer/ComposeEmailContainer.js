@@ -110,15 +110,15 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
     this.props.handleClose();
   };
 
-  handleOpenOrClose = (status: 'open' | 'closed') => {
+  handleOpenOrClose = () => {
     const { actionBeingPerformed } = this.state;
 
     const isCreatingNewEmail =
       actionBeingPerformed === 'send' || actionBeingPerformed === 'save';
 
     const nextState = produce(this.state, draftState => {
+      draftState.status = 'idle';
       draftState.actionBeingPerformed = null;
-      draftState.status = status === 'open' ? 'open' : 'idle';
 
       if (isCreatingNewEmail) {
         draftState.emailData.toEmail = '';

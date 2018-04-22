@@ -19,9 +19,7 @@ import type {
 
 type Quadrant = 1 | 2 | 3 | 4;
 
-export type TransitionStatus = 'opening' | 'closing' | 'retracting';
-export type RestingStatus = 'open' | 'closed' | 'retracted';
-export type Status = TransitionStatus | RestingStatus;
+export type Status = 'open' | 'closed' | 'retracted';
 
 type SpringSettings = {
   stiffness?: number,
@@ -33,20 +31,17 @@ type Props = {
   children: React$Node,
   from: HTMLElement,
   to: HTMLElement,
-  status: RestingStatus,
+  status: Status,
   springOpenHorizontal: SpringSettings,
   springOpenVertical: SpringSettings,
   springCloseHorizontal: SpringSettings,
   springCloseVertical: SpringSettings,
   windowWidth: number,
   windowHeight: number,
-  handleFinishTransportation?: (status: RestingStatus) => any,
+  handleFinishTransportation?: () => any,
 };
 
 type State = {
-  fromRect: ?AugmentedClientRect,
-  toRect: ?AugmentedClientRect,
-  childRect: ?AugmentedClientRect,
   inTransit: boolean,
   position: {
     top: ?number,
@@ -70,11 +65,11 @@ class ChildTransporter extends Component<Props, State> {
   };
 
   childWrapperNode: HTMLElement;
+  fromRect: ?AugmentedClientRect;
+  toRect: ?AugmentedClientRect;
+  childRect: ?AugmentedClientRect;
 
   state = {
-    fromRect: null,
-    toRect: null,
-    childRect: null,
     inTransit: false,
     position: {
       top: null,

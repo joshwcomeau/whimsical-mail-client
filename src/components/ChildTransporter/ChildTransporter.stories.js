@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import ChildTransporter from './ChildTransporter';
 import WindowDimensions from '../WindowDimensions';
 
-import type { EndStatus } from './ChildTransporter';
+import type { Status } from './ChildTransporter';
 
 type Quadrant = 1 | 2 | 3 | 4;
 
@@ -17,7 +17,7 @@ type Props = {};
 type State = {
   from: ?HTMLElement,
   to: ?HTMLElement,
-  status: EndStatus,
+  status: Status,
 };
 
 class Wrapper extends Component<Props, State> {
