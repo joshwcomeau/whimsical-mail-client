@@ -91,13 +91,58 @@ export const generateUser = (overrides: any = {}) => {
 
 export const generateData = (
   userData: UserData,
-  num: number,
-  overrides: any = {}
+  num: number
 ): Map<number, EmailData> => {
   let time = new Date();
 
-  let data = createMany(EmailFactory, num).map((data, i) => {
-    const boxId = BOX_IDS[i % 3];
+  const inboxEmails = [
+    {
+      id: 'a',
+      boxId: 'inbox',
+      to: userData,
+      from: {
+        name: 'Ken Wheeler',
+        email: 'sexibabikitten9@aim.com',
+        avatarSrc: avatarWheeler,
+      },
+      timestamp: time - 1000000,
+      subject: 'Re: Laptop',
+      body:
+        'Bro did you see where I put my laptop? I woke up this morning nude with a panda drawn on my chest in crayon and I have to give a talk in 20 minutes.\n\nLast time I remember having it was when I show you guys that video of me putting Jay Phelps in a headlock.',
+      unread: false,
+    },
+    {
+      id: 'b',
+      boxId: 'inbox',
+      to: userData,
+      from: {
+        name: 'Gary Samsonite',
+        email: 'gary@samsoniteagricultural.com',
+        avatarSrc: avatar1,
+      },
+      timestamp: time - 2000000,
+      subject: 'Goat-taming kit MIA',
+      body:
+        "Greetings, I ordered one of your goat taming kits last week, and I notice it hasn't been shipped yet. I don't have time for this kind of behavior, please let me know when the transaction will be complete.\n\nThanks,\nGary Sampsonite",
+    },
+    {
+      id: 'c',
+      boxId: 'inbox',
+      to: userData,
+      from: {
+        name: 'Helen George',
+        email: 'helen@gmail.com',
+        avatarSrc: avatar2,
+      },
+      timestamp: time - 4000000,
+      subject: '12 MILLION USD TO HUMANITARIAN MISSION HELP NEEDED',
+      body:
+        'GOOD DAY.\n\nURGENT - HELP ME DISTRIBUTE MY $12 MILLION TO HUMANITARIAN.\n\nTHIS MAIL MIGHT COME TO YOU AS A SURPRISE AND THE TEMPTATION TO IGNORE IT AS UNSERIOUS COULD COME INTO YOUR MIND BUT PLEASE CONSIDER IT A DIVINE WISH AND ACCEPT IT WITH A DEEP SENSE OF HUMILITY. I AM MRS HELEN GEORGE AND I AM A 61 YEARS OLD WOMAN. I AM A SOUTH AFRICAN MARRIED TO A SIERRA LEONIA.\n\nI WAS THE PRESIDENT/CEO OF OIL COMPANY INTERNATIONAL-AN OIL SERVICING COMPANY IN JOHANNESBURG. I WAS ALSO MARRIED WITH NO CHILD.\n\nMY HUSBAND DIED 3 YEARS AGO. BEFORE THIS HAPPENED MY BUSINESS AND CONCERN FOR MAKING MONEY WAS ALL I WAS LIVING FOR AND I NEVER REALLY CARED ABOUT OTHER PEOPLE. BUT SINCE THE LOSS OF MY HUSBAND AND ALSO BECAUSE I HAD HAVE NO CHILD TO CALL MY OWN, I HAVE FOUND A NEW DESIRE TO ASSIST THE HELPLESS, I HAVE BEEN HELPING ORPHANS IN ORPHANAGES/MOTHERLESS OMES/HUMANITARIANS. I HAVE DONATED SOME MONEY TO ORPHANS IN SUDAN,ETHIOPIA, CAMEROON, SPAIN, AUSTRIA, GERMANY AND SOME ASIAN COUNTRIES.\n\nIN SUMMARY:- I HAVE 12,000,000.00 (TWELVE MILLION) U. S. DOLLARS WHICH I DEPOSITED IN A SECURITY COMPANY IN COTONOU BENIN REPUBLIC AS A FAMILY TREASURE & ARTEFACTS, PLEASE I WANT YOU TO NOTE THAT THE SECURITY COMPANY DOES NOT KNOW THE REAL CONTENT TO BE MONEY AND I WANT YOU TO ASSIST ME IN CLAIMING THE CONSIGNMENT & DISTRIBUTING THE MONEY TO CHARITY ORGANIZATIONS, I AGREE TO REWARD YOU WITH PART OF THE MONEY FOR YOUR ASSISTANCE, KINDNESS AND PARTICIPATION IN THIS GODLY PROJECT. BEFORE I BECAME ILL, I KEPT $12 MILLION IN A LONG-TERM DEPOSIT IN A SECURITY COMPANY WHICH I DECLARED AS A FAMILY TREASURE ARTIFIARTS.I AM IN THE HOSPITAL WHERE I HAVE BEEN UNDERGOING TREATMENT FOR OESOPHAGEAL CANCER AND MY DOCTORS HAVE TOLD ME THAT I HAVE ONLY A FEW MONTHS TO LIVE. IT IS MY LAST WISH TO SEE THIS MONEY DISTRIBUTED TO CHARITY ORGANIZATIONS.',
+    },
+  ];
+
+  let otherBoxEmails = createMany(EmailFactory, 20).map((data, i) => {
+    const boxId = i % 2 === 0 ? 'outbox' : 'drafts';
 
     const subject = subjects[i % subjects.length];
     const body = previews[i % previews.length] + '\n' + data.body;
@@ -120,31 +165,13 @@ export const generateData = (
       subject,
       body,
       unread: false,
-      ...overrides,
     };
   });
 
-  // First email is a hardcoded one from Ken Wheeler
-  // TODO: I should either make them all hardcoded, or clean this up.
-  data = [
-    {
-      ...data[0],
-      boxId: 'inbox',
-      from: {
-        name: 'Ken Wheeler',
-        email: 'ken@millerlite.com',
-        avatarSrc: avatarWheeler,
-      },
-      to: userData,
-      subject: 'Re: Laptop',
-      body:
-        'Bro did you see where I put my laptop? I woke up this morning nude with a panda drawn on my chest in crayon and I have to give a talk in 20 minutes. Last time I remember having it was when I show you guys that video of me putting Jay Phelps in a headlock.',
-    },
-    ...data.slice(1),
-  ];
+  const emails = [...inboxEmails, ...otherBoxEmails];
 
   // Sharkhorse's factories return an array, but I'd like to keep my data in a
   // map, to simulate a database. Map constructors take an array of tuples,
   // with the ID and the item: [ [1, email1], [2, email2], ...]
-  return new Map(data.map(item => [item.id, item]));
+  return new Map(emails.map(item => [item.id, item]));
 };

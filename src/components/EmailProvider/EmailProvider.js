@@ -95,6 +95,8 @@ class EmailProvider extends Component<Props, State> {
       .filter(email => email.boxId === selectedBoxId)
       .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1));
 
+    console.log(emails, emailList);
+
     return (
       <EmailContext.Provider
         value={{
