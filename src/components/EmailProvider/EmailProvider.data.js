@@ -19,6 +19,7 @@ import avatar13 from '../../assets/avatars/avatar-13.jpg';
 import avatar14 from '../../assets/avatars/avatar-14.jpg';
 import avatar15 from '../../assets/avatars/avatar-15.jpg';
 import avatar16 from '../../assets/avatars/avatar-16.jpg';
+import avatarWheeler from '../../assets/avatars/wheeler.jpg';
 
 import type { UserData, EmailData, BoxId } from '../../types';
 
@@ -52,7 +53,7 @@ const subjects = [
 
 const previews = [
   "Hi Marcy, are we still on for that pool party on Saturday? I know John's already got his swimming trunks on.",
-  "Anyone else getting tired of hearing people talk about being tired of hearing people talk about JS fatigue?",
+  'Anyone else getting tired of hearing people talk about being tired of hearing people talk about JS fatigue?',
   'Wooo so excited, will be talking about Whimsy at React Europe.',
   "Ok Tom, I'm warning you: This Egg Salad recipe will BLOW. YOUR. MIND!! It's a family secret so please NO SOCIAL MEDIA",
   'Check out this SICK yoyo trick. Wow!',
@@ -95,7 +96,7 @@ export const generateData = (
 ): Map<number, EmailData> => {
   let time = new Date();
 
-  const data = createMany(EmailFactory, num).map((data, i) => {
+  let data = createMany(EmailFactory, num).map((data, i) => {
     const boxId = BOX_IDS[i % 3];
 
     const subject = subjects[i % subjects.length];
@@ -122,6 +123,25 @@ export const generateData = (
       ...overrides,
     };
   });
+
+  // First email is a hardcoded one from Ken Wheeler
+  // TODO: I should either make them all hardcoded, or clean this up.
+  data = [
+    {
+      ...data[0],
+      boxId: 'inbox',
+      from: {
+        name: 'Ken Wheeler',
+        email: 'ken@millerlite.com',
+        avatarSrc: avatarWheeler,
+      },
+      to: userData,
+      subject: 'Re: Laptop',
+      body:
+        'Bro did you see where I put my laptop? I woke up this morning nude with a panda drawn on my chest in crayon and I have to give a talk in 20 minutes. Last time I remember having it was when I show you guys that video of me putting Jay Phelps in a headlock.',
+    },
+    ...data.slice(1),
+  ];
 
   // Sharkhorse's factories return an array, but I'd like to keep my data in a
   // map, to simulate a database. Map constructors take an array of tuples,
