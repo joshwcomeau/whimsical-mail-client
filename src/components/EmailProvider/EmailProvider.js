@@ -27,7 +27,7 @@ class EmailProvider extends Component<Props, State> {
   state = {
     emails: generateData(this.props.userData, 30),
     selectedBoxId: 'inbox',
-    selectedEmailId: 1,
+    selectedEmailId: 'a',
     notificationOnBoxes: [],
   };
 
