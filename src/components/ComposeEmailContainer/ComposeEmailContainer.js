@@ -15,7 +15,7 @@ import { NodeConsumer } from '../NodeProvider';
 import { EmailConsumer } from '../EmailProvider';
 import WindowDimensions from '../WindowDimensions';
 import ChildTransporter from '../ChildTransporter';
-import FoldableLetter from '../FoldableLetter';
+import Foldable from '../Foldable';
 import ComposeEmail from '../ComposeEmail';
 import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
 import EtchASketchShaker from '../EtchASketchShaker';
@@ -244,7 +244,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           windowHeight={windowHeight}
           handleFinishTransportation={this.handleOpenOrClose}
         >
-          <FoldableLetter
+          <Foldable
             isFolded={status === 'folding' || status === 'transporting'}
             onCompleteFolding={this.finishAction}
             front={this.renderFront()}

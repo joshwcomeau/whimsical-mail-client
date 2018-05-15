@@ -10,7 +10,7 @@ type Props = {
   onCompleteFolding: () => void,
 };
 
-class FoldableLetter extends PureComponent<Props> {
+class Foldable extends PureComponent<Props> {
   static defaultProps = {
     duration: 1000,
   };
@@ -222,4 +222,4 @@ const BottomFoldBack = styled.div`
   box-shadow: 0px -30px 50px -20px rgba(0, 0, 0, 0.2);
 `;
 
-export default FoldableLetter;
+export default Foldable;
