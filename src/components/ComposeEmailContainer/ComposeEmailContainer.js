@@ -14,7 +14,7 @@ import { ModalConsumer } from '../ModalProvider';
 import { NodeConsumer } from '../NodeProvider';
 import { EmailConsumer } from '../EmailProvider';
 import WindowDimensions from '../WindowDimensions';
-import ChildTransporter from '../ChildTransporter';
+import Transport from '../Transport';
 import Foldable from '../Foldable';
 import ComposeEmail from '../ComposeEmail';
 import ComposeEmailEnvelope from '../ComposeEmailEnvelope';
@@ -215,9 +215,9 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
 
     const toNode = actionBeingPerformed === 'send' ? outboxNode : draftsNode;
 
-    let childTransporterStatus = isOpen ? 'open' : 'closed';
+    let TransporterStatus = isOpen ? 'open' : 'closed';
     if (actionBeingPerformed === 'dismiss') {
-      childTransporterStatus = 'retracted';
+      TransporterStatus = 'retracted';
     }
 
     return (
@@ -236,10 +236,10 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
           }
         />
 
-        <ChildTransporter
+        <Transport
           from={openFromNode}
           to={toNode}
-          status={childTransporterStatus}
+          status={TransporterStatus}
           windowWidth={windowWidth}
           windowHeight={windowHeight}
           handleFinishTransportation={this.handleOpenOrClose}
@@ -250,7 +250,7 @@ class ComposeEmailContainer extends PureComponent<Props, State> {
             front={this.renderFront()}
             back={this.renderBack()}
           />
-        </ChildTransporter>
+        </Transport>
       </Fragment>
     );
   }

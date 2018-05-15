@@ -11,11 +11,11 @@ import {
   getPositionDelta,
   createAugmentedClientRect,
   createAugmentedClientRectFromMinimumData,
-} from './ChildTransporter.helpers';
+} from './Transport.helpers';
 import type {
   AugmentedClientRect,
   MinimumFixedPosition,
-} from './ChildTransporter.types';
+} from './Transport.types';
 
 type Quadrant = 1 | 2 | 3 | 4;
 
@@ -56,7 +56,7 @@ type State = {
   },
 };
 
-class ChildTransporter extends Component<Props, State> {
+class Transport extends Component<Props, State> {
   static defaultProps = {
     springOpenHorizontal: { stiffness: 150, damping: 20 },
     springOpenVertical: { stiffness: 200, damping: 20 },
@@ -95,7 +95,7 @@ class ChildTransporter extends Component<Props, State> {
 
     // HACK: So, it's currently possible for the parent to have the status
     // change from 'retracted' to 'closed'. While this is technically a new
-    // state, it should not affect the ChildTransporter.
+    // state, it should not affect the Transport.
     // A PROPER fix would be to add some sort of FSM to control the changes
     // allowed between statuses, but for now I'm tackling it here, by just
     // ignoring any updates where neither status is `open`.
@@ -481,4 +481,4 @@ const Wrapper = styled.div`
   z-index: 10000;
 `;
 
-export default ChildTransporter;
+export default Transport;

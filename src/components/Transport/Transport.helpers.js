@@ -2,7 +2,7 @@
 import type {
   AugmentedClientRect,
   MinimumFixedPosition,
-} from './ChildTransporter.types';
+} from './Transport.types';
 
 // Calculate the distance in pixels between two ClientRects
 // prettier-ignore
@@ -10,7 +10,7 @@ export const getPositionDelta = (
   oldRect: AugmentedClientRect,
   newRect: AugmentedClientRect
 ) => [
-  oldRect.left - newRect.left, 
+  oldRect.left - newRect.left,
   oldRect.top - newRect.top
 ];
 
@@ -23,8 +23,8 @@ export const createAugmentedClientRect = (
   // We support either an HTMLElement or a ClientRect as input.
   // This is easy since a ClientRect can easily be derived from an HTML
   // element:
-  const rect = input instanceof HTMLElement 
-    ? input.getBoundingClientRect() 
+  const rect = input instanceof HTMLElement
+    ? input.getBoundingClientRect()
     : input;
 
   return {

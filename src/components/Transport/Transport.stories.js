@@ -3,10 +3,10 @@ import React, { Component, Fragment } from 'react';
 import { storiesOf } from '@storybook/react';
 import styled from 'styled-components';
 
-import ChildTransporter from './ChildTransporter';
+import Transport from './Transport';
 import WindowDimensions from '../WindowDimensions';
 
-import type { Status } from './ChildTransporter';
+import type { Status } from './Transport';
 
 type Quadrant = 1 | 2 | 3 | 4;
 
@@ -95,7 +95,7 @@ class Wrapper extends Component<Props, State> {
 
             {this.state.from &&
               this.state.to && (
-                <ChildTransporter
+                <Transport
                   status={this.state.status}
                   from={this.state.from}
                   to={this.state.to}
@@ -109,7 +109,7 @@ class Wrapper extends Component<Props, State> {
                       background: 'red',
                     }}
                   />
-                </ChildTransporter>
+                </Transport>
               )}
           </Fragment>
         )}
@@ -123,7 +123,7 @@ const Button = styled.button`
   padding: 20px;
 `;
 
-storiesOf('ChildTransporter', module)
+storiesOf('Transport', module)
   .add('default (top to bottom)', () => (
     <Wrapper fromQuadrants={[1, 2]} toQuadrants={[3, 4]} />
   ))
