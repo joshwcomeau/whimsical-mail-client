@@ -101,21 +101,6 @@ export const generateData = (
 
   const inboxEmails = [
     {
-      id: 'a',
-      boxId: 'inbox',
-      to: userData,
-      from: {
-        name: 'Ken Wheeler',
-        email: 'sexibabikitten9@aim.com',
-        avatarSrc: avatarWheeler,
-      },
-      timestamp: time - 1000000,
-      subject: 'Re: Laptop',
-      body:
-        'Bro did you see where I put my laptop? I woke up this morning nude with a panda drawn on my chest in crayon and I have to give a talk in 20 minutes.\n\nLast time I remember having it was when I show you guys that video of me putting Jay Phelps in a headlock.',
-      unread: false,
-    },
-    {
       id: 'b',
       boxId: 'inbox',
       to: userData,
@@ -233,5 +218,5 @@ export const generateData = (
   // Sharkhorse's factories return an array, but I'd like to keep my data in a
   // map, to simulate a database. Map constructors take an array of tuples,
   // with the ID and the item: [ [1, email1], [2, email2], ...]
-  return new Map(emails.map(item => [item.id, item]));
+  return new Map(emails.map((item) => [item.id, item]));
 };
